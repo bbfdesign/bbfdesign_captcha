@@ -131,7 +131,7 @@ if (!$result->isValid()) {
 
 <script>
 {literal}
-document.addEventListener('alpine:init', function() {
+if (typeof Alpine !== 'undefined' && Alpine.data) {
     Alpine.data('bbfApiManagement', function() {
         return {
             tab: 'keys',
@@ -178,6 +178,6 @@ document.addEventListener('alpine:init', function() {
             }
         };
     });
-});
+}
 {/literal}
 </script>

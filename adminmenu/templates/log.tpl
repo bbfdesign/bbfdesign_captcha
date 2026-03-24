@@ -131,7 +131,7 @@
 
 <script>
 {literal}
-document.addEventListener('alpine:init', function() {
+if (typeof Alpine !== 'undefined' && Alpine.data) {
     Alpine.data('bbfSpamLog', function() {
         return {
             logEntries: [],
@@ -211,6 +211,6 @@ document.addEventListener('alpine:init', function() {
             }
         };
     });
-});
+}
 {/literal}
 </script>

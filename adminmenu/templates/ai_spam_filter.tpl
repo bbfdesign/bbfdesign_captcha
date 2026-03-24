@@ -149,7 +149,7 @@ var bbfServerSettings = {$settingsJson nofilter};
 </script>
 <script>
 {literal}
-document.addEventListener('alpine:init', function() {
+if (typeof Alpine !== 'undefined' && Alpine.data) {
     Alpine.data('bbfAiFilter', function() {
         var sv = window.bbfServerSettings || {};
         return {
@@ -220,6 +220,6 @@ document.addEventListener('alpine:init', function() {
             }
         };
     });
-});
+}
 {/literal}
 </script>

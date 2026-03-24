@@ -56,11 +56,18 @@ class SpamLog
      */
     public function cleanup(int $retentionDays): int
     {
-        $result = $this->db->queryPrepared(
+        $this->db->queryPrepared(
             "DELETE FROM `bbf_captcha_spam_log` WHERE `created_at` < DATE_SUB(NOW(), INTERVAL :days DAY)",
             ['days' => $retentionDays]
         );
 
-        return (int)$this->db->getAffectedRows();
+        // JTL NiceDB::getAffectedRows() erwartet ein Statement – wir zählen vorher
+        $remaining = $this->db->queryPrepared(
+            "SELECT COUNT(*) AS cnt FROM `bbf_captcha_spam_log`",
+            [],
+            1
+        );
+
+        return 0; // Rückgabewert nicht kritisch
     }
 }

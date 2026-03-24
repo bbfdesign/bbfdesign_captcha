@@ -74,11 +74,20 @@
 </div>
 
 <script>
+var bbfFormConfigs = {$formConfigsJson nofilter};
+</script>
+<script>
 {literal}
-document.addEventListener('alpine:init', function() {
+if (typeof Alpine !== 'undefined' && Alpine.data) {
     Alpine.data('bbfFormProtection', function() {
+        var rawConfigs = window.bbfFormConfigs || [];
         return {
-            forms: [],
+            forms: rawConfigs.map(function(f) {
+                f.methods = typeof f.methods === 'string' ? JSON.parse(f.methods) : (f.methods || []);
+                f.is_active = parseInt(f.is_active) || 0;
+                f.score_threshold = parseInt(f.score_threshold) || 60;
+                return f;
+            }),
             formLabels: {
                 'contact': 'Kontaktformular',
                 'registration': 'Registrierung',
@@ -149,6 +158,6 @@ document.addEventListener('alpine:init', function() {
             }
         };
     });
-});
+}
 {/literal}
 </script>

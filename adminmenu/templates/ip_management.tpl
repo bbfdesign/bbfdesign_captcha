@@ -104,7 +104,7 @@ var bbfServerSettings = {$settingsJson nofilter};
 </script>
 <script>
 {literal}
-document.addEventListener('alpine:init', function() {
+if (typeof Alpine !== 'undefined' && Alpine.data) {
     Alpine.data('bbfIpManagement', function() {
         var sv = window.bbfServerSettings || {};
         return {
@@ -170,6 +170,6 @@ document.addEventListener('alpine:init', function() {
             }
         };
     });
-});
+}
 {/literal}
 </script>
