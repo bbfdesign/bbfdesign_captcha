@@ -28,9 +28,10 @@ class Bootstrap extends Bootstrapper
             $db     = Shop::Container()->getDB();
             $this->settingsModel = new Setting($db);
 
-            // Nur im Frontend Hooks registrieren
+            // Frontend: Hooks + API-Routen registrieren
             if (Shop::isFrontend()) {
                 $this->registerFrontendHooks($dispatcher);
+                $this->registerApiRoutes($dispatcher);
             }
         } catch (\Throwable $e) {
             Shop::Container()->getLogService()->error(
@@ -246,5 +247,84 @@ class Bootstrap extends Bootstrapper
         }
 
         $this->formProtection->handleFormHook($formType, $args);
+    }
+
+    /**
+     * REST-API Routen registrieren
+     */
+    private function registerApiRoutes(Dispatcher $dispatcher): void
+    {
+        $plugin = $this->getPlugin();
+
+        $dispatcher->listen('shop.hook.' . \HOOK_ROUTER_PRE_DISPATCH, function (array $args) use ($plugin) {
+            $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+            $basePath   = '/bbfdesign-captcha/api/';
+
+            // Prüfe ob die URL zum API-Prefix passt
+            $pos = strpos($requestUri, $basePath);
+            if ($pos === false) {
+                return;
+            }
+
+            $pathAfterBase = substr($requestUri, $pos + strlen($basePath));
+            // Query-String entfernen
+            $pathAfterBase = explode('?', $pathAfterBase, 2)[0];
+            $pathAfterBase = trim($pathAfterBase, '/');
+
+            // Challenge-Endpoint (kein v1-Prefix nötig)
+            if ($pathAfterBase === 'challenge') {
+                $endpoint = 'challenge';
+            } elseif (str_starts_with($pathAfterBase, 'v1/')) {
+                $endpoint = substr($pathAfterBase, 3);
+            } else {
+                return;
+            }
+
+            // Session freigeben
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+
+            $db       = Shop::Container()->getDB();
+            $settings = new Setting($db);
+            $method   = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+            $controller = new \Plugin\bbfdesign_captcha\src\Controllers\API\CaptchaAPIController(
+                $plugin, $db, $settings
+            );
+            $controller->handleRequest($endpoint, $method);
+            exit;
+        });
+
+        // Smarty-Funktion {bbfdesign_captcha} registrieren
+        $dispatcher->listen('shop.hook.' . \HOOK_SMARTY_OUTPUTFILTER, function (array $args) use ($plugin) {
+            // Smarty-Plugin wird nur einmal registriert
+            static $registered = false;
+            if ($registered) {
+                return;
+            }
+            $registered = true;
+
+            if (isset($args['smarty']) && $args['smarty'] instanceof \JTL\Smarty\JTLSmarty) {
+                $settingsModel = $this->settingsModel;
+                $captchaPlugin = $plugin;
+
+                $args['smarty']->registerPlugin(
+                    'function',
+                    'bbfdesign_captcha',
+                    function (array $params, $smarty) use ($captchaPlugin, $settingsModel) {
+                        $formType = $params['form'] ?? 'generic';
+                        $db       = Shop::Container()->getDB();
+                        $settings = $settingsModel ?? new Setting($db);
+
+                        $captchaService = new \Plugin\bbfdesign_captcha\src\Services\CaptchaService(
+                            $captchaPlugin, $db, $settings
+                        );
+
+                        return $captchaService->renderWidget($formType);
+                    }
+                );
+            }
+        });
     }
 }
