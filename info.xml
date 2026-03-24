@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <jtlshopplugin>
-    <Name>BBF Captcha &amp; Spam-Schutz</Name>
+    <Name>BBF Captcha</Name>
     <Description>Umfassendes Anti-Spam &amp; Bot-Schutz System: Honeypot, Timing, ALTCHA PoW, Turnstile, reCAPTCHA, Friendly Captcha, hCaptcha, KI-Spamfilter, IP-Management, Rate Limiting. DSGVO-konform mit Consent Manager Integration.</Description>
     <Author>bbfdesign.de</Author>
     <URL>https://www.bbfdesign.de</URL>
