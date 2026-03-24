@@ -214,18 +214,18 @@ class Bootstrap extends Bootstrapper
             $this->handleFormHook('contact', $args, $plugin, $db);
         });
 
-        // Registrierung
-        $dispatcher->listen('shop.hook.' . \HOOK_REGISTRIERUNG_PAGE, function (array $args) use ($plugin, $db) {
+        // Registrierung (HOOK_REGISTRIEREN_PAGE = 40)
+        $dispatcher->listen('shop.hook.' . \HOOK_REGISTRIEREN_PAGE, function (array $args) use ($plugin, $db) {
             $this->handleFormHook('registration', $args, $plugin, $db);
         });
 
-        // Newsletter
+        // Newsletter (HOOK_NEWSLETTER_PAGE = 36)
         $dispatcher->listen('shop.hook.' . \HOOK_NEWSLETTER_PAGE, function (array $args) use ($plugin, $db) {
             $this->handleFormHook('newsletter', $args, $plugin, $db);
         });
 
-        // Produktbewertungen
-        $dispatcher->listen('shop.hook.' . \HOOK_BEWERTUNG_CLASS_METHOD, function (array $args) use ($plugin, $db) {
+        // Produktbewertungen (HOOK_BEWERTUNG_INC_SPEICHERBEWERTUNG = 78)
+        $dispatcher->listen('shop.hook.' . \HOOK_BEWERTUNG_INC_SPEICHERBEWERTUNG, function (array $args) use ($plugin, $db) {
             $this->handleFormHook('review', $args, $plugin, $db);
         });
 
