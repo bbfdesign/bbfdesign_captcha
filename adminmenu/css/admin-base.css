@@ -1,0 +1,125 @@
+/**
+ * BBF Design System – CSS Custom Properties
+ * Plugin: bbfdesign_captcha (Captcha & Spam-Schutz)
+ * Primärfarbe: Blau (#2563eb) — Sicherheit/Trust
+ */
+
+@font-face {
+    font-family: 'Manrope';
+    src: url('../fonts/Manrope-VariableFont.woff2') format('woff2-variations');
+    font-weight: 200 800;
+    font-display: swap;
+}
+
+:root {
+    /* Farben – Primary (Blau für Security) */
+    --bbf-primary: #2563eb;
+    --bbf-primary-hover: #1d4ed8;
+    --bbf-primary-light: rgba(37, 99, 235, 0.08);
+    --bbf-primary-dark: #1e40af;
+    --bbf-primary-shadow: rgba(37, 99, 235, 0.3);
+    --bbf-primary-badge: #93c5fd;
+
+    /* Farben – Neutral */
+    --bbf-text-dark: #29343d;
+    --bbf-text-medium: #454545;
+    --bbf-text-light: #737385;
+    --bbf-text-white: #ffffff;
+    --bbf-body-text: #1f2937;
+    --bbf-muted: #6b7280;
+
+    /* Farben – Background */
+    --bbf-bg-page: #f0f2f5;
+    --bbf-bg-card: #ffffff;
+    --bbf-bg-input: #f5f5f5;
+    --bbf-bg-table-header: #f8f9fa;
+    --bbf-bg-sidebar: #ffffff;
+    --bbf-bg-hover: #f0f0f5;
+    --bbf-row-stripe: #fafbfc;
+    --bbf-row-hover: rgba(37, 99, 235, 0.04);
+
+    /* Farben – Border */
+    --bbf-border: #e5e7eb;
+    --bbf-border-light: #f7f7f7;
+    --bbf-border-input: #f5f5f5;
+
+    /* Farben – Status */
+    --bbf-success: #16a34a;
+    --bbf-success-light: #dcfce7;
+    --bbf-success-dark: #155724;
+    --bbf-warning: #f59e0b;
+    --bbf-warning-light: #fef3c7;
+    --bbf-warning-dark: #856404;
+    --bbf-danger: #dc2626;
+    --bbf-danger-light: #fee2e2;
+    --bbf-danger-dark: #721c24;
+    --bbf-info: #0ea5e9;
+    --bbf-info-light: #e0f2fe;
+    --bbf-info-dark: #0c5460;
+
+    /* Typografie */
+    --bbf-font-family: "Manrope", Helvetica, Arial, Lucida, sans-serif;
+    --bbf-font-size-xs: 12px;
+    --bbf-font-size-sm: 13px;
+    --bbf-font-size-base: 14px;
+    --bbf-font-size-md: 15px;
+    --bbf-font-size-lg: 16px;
+    --bbf-font-size-xl: 20px;
+    --bbf-font-size-xxl: 27px;
+    --bbf-font-weight-light: 300;
+    --bbf-font-weight-normal: 400;
+    --bbf-font-weight-medium: 500;
+    --bbf-font-weight-bold: 700;
+
+    /* Abstände */
+    --bbf-spacing-xs: 4px;
+    --bbf-spacing-sm: 8px;
+    --bbf-spacing-md: 16px;
+    --bbf-spacing-lg: 24px;
+    --bbf-spacing-xl: 32px;
+    --bbf-spacing-xxl: 48px;
+
+    /* Border Radius */
+    --bbf-radius-none: 0px;
+    --bbf-radius-sm: 4px;
+    --bbf-radius-md: 8px;
+    --bbf-radius-lg: 10px;
+    --bbf-radius-xl: 12px;
+    --bbf-radius-pill: 50px;
+    --bbf-radius: 8px;
+    --bbf-card-radius: 8px;
+    --bbf-card-padding: 24px;
+
+    /* Schatten */
+    --bbf-shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --bbf-shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+    --bbf-shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+    --bbf-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+    /* Form Controls */
+    --bbf-input-height: 48px;
+    --bbf-input-padding: 0.59rem 1rem;
+    --bbf-input-border: 1px solid var(--bbf-border-input);
+    --bbf-input-radius: var(--bbf-radius-lg);
+    --bbf-input-bg: var(--bbf-bg-input);
+
+    /* Sidebar */
+    --bbf-sidebar-width: 260px;
+    --bbf-sidebar-item-height: 45px;
+    --bbf-sidebar-item-radius: var(--bbf-radius-xl);
+
+    /* Buttons */
+    --bbf-btn-height: 36px;
+    --bbf-btn-height-sm: 32px;
+
+    /* Table */
+    --bbf-th-bg: #f8f9fa;
+    --bbf-th-text: #6b7280;
+
+    /* Transitions */
+    --bbf-transition: 0.2s ease;
+    --bbf-transition-slow: 0.3s ease;
+
+    /* Font alias */
+    --bbf-font: var(--bbf-font-family);
+}

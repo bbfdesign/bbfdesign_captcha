@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jtlshopplugin>
+    <Name>BBF Captcha &amp; Spam-Schutz</Name>
+    <Description>Umfassendes Anti-Spam &amp; Bot-Schutz System: Honeypot, Timing, ALTCHA PoW, Turnstile, reCAPTCHA, Friendly Captcha, hCaptcha, KI-Spamfilter, IP-Management, Rate Limiting. DSGVO-konform mit Consent Manager Integration.</Description>
+    <Author>bbfdesign.de</Author>
+    <URL>https://www.bbfdesign.de</URL>
+    <PluginID>bbfdesign_captcha</PluginID>
+    <XMLVersion>100</XMLVersion>
+    <MinShopVersion>5.2.0</MinShopVersion>
+    <Icon>fa-shield-alt</Icon>
+    <Version>1.0.0</Version>
+    <CreateDate>2026-03-24</CreateDate>
+    <Install>
+        <Adminmenu>
+            <Customlink sort="1">
+                <Name>Dashboard</Name>
+                <Filename>index.tpl</Filename>
+            </Customlink>
+        </Adminmenu>
+        <Locales>
+            <!-- Allgemein -->
+            <Variable>
+                <Name>plugin_name</Name>
+                <VariableLocalized iso="GER">BBF Captcha &amp; Spam-Schutz</VariableLocalized>
+                <VariableLocalized iso="ENG">BBF Captcha &amp; Spam Protection</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>active</Name>
+                <VariableLocalized iso="GER">Aktiv</VariableLocalized>
+                <VariableLocalized iso="ENG">Active</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>inactive</Name>
+                <VariableLocalized iso="GER">Inaktiv</VariableLocalized>
+                <VariableLocalized iso="ENG">Inactive</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>save</Name>
+                <VariableLocalized iso="GER">Speichern</VariableLocalized>
+                <VariableLocalized iso="ENG">Save</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>cancel</Name>
+                <VariableLocalized iso="GER">Abbrechen</VariableLocalized>
+                <VariableLocalized iso="ENG">Cancel</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>delete</Name>
+                <VariableLocalized iso="GER">Löschen</VariableLocalized>
+                <VariableLocalized iso="ENG">Delete</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>edit</Name>
+                <VariableLocalized iso="GER">Bearbeiten</VariableLocalized>
+                <VariableLocalized iso="ENG">Edit</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>error</Name>
+                <VariableLocalized iso="GER">Fehler</VariableLocalized>
+                <VariableLocalized iso="ENG">Error</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>success</Name>
+                <VariableLocalized iso="GER">Erfolg</VariableLocalized>
+                <VariableLocalized iso="ENG">Success</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>loading</Name>
+                <VariableLocalized iso="GER">Laden...</VariableLocalized>
+                <VariableLocalized iso="ENG">Loading...</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>settings_saved</Name>
+                <VariableLocalized iso="GER">Einstellungen gespeichert</VariableLocalized>
+                <VariableLocalized iso="ENG">Settings saved</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>something_went_wrong</Name>
+                <VariableLocalized iso="GER">Etwas ist schiefgelaufen</VariableLocalized>
+                <VariableLocalized iso="ENG">Something went wrong</VariableLocalized>
+            </Variable>
+
+            <!-- Navigation -->
+            <Variable>
+                <Name>nav_dashboard</Name>
+                <VariableLocalized iso="GER">Dashboard</VariableLocalized>
+                <VariableLocalized iso="ENG">Dashboard</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>nav_protection_methods</Name>
+                <VariableLocalized iso="GER">Schutzmethoden</VariableLocalized>
+                <VariableLocalized iso="ENG">Protection Methods</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>nav_form_protection</Name>
+                <VariableLocalized iso="GER">Formulare</VariableLocalized>
+                <VariableLocalized iso="ENG">Forms</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>nav_ai_filter</Name>
+                <VariableLocalized iso="GER">KI-Spamfilter</VariableLocalized>
+                <VariableLocalized iso="ENG">AI Spam Filter</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>nav_ip_management</Name>
+                <VariableLocalized iso="GER">IP-Verwaltung</VariableLocalized>
+                <VariableLocalized iso="ENG">IP Management</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>nav_spam_log</Name>
+                <VariableLocalized iso="GER">Spam-Log</VariableLocalized>
+                <VariableLocalized iso="ENG">Spam Log</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>nav_api</Name>
+                <VariableLocalized iso="GER">API</VariableLocalized>
+                <VariableLocalized iso="ENG">API</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>nav_settings</Name>
+                <VariableLocalized iso="GER">Einstellungen</VariableLocalized>
+                <VariableLocalized iso="ENG">Settings</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>nav_css_editor</Name>
+                <VariableLocalized iso="GER">Custom CSS</VariableLocalized>
+                <VariableLocalized iso="ENG">Custom CSS</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>nav_documentation</Name>
+                <VariableLocalized iso="GER">Dokumentation</VariableLocalized>
+                <VariableLocalized iso="ENG">Documentation</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>nav_changelog</Name>
+                <VariableLocalized iso="GER">Changelog</VariableLocalized>
+                <VariableLocalized iso="ENG">Changelog</VariableLocalized>
+            </Variable>
+
+            <!-- Dashboard -->
+            <Variable>
+                <Name>blocked_today</Name>
+                <VariableLocalized iso="GER">Geblockt heute</VariableLocalized>
+                <VariableLocalized iso="ENG">Blocked today</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>blocked_total</Name>
+                <VariableLocalized iso="GER">Geblockt gesamt</VariableLocalized>
+                <VariableLocalized iso="ENG">Blocked total</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>detection_rate</Name>
+                <VariableLocalized iso="GER">Erkennungsrate</VariableLocalized>
+                <VariableLocalized iso="ENG">Detection rate</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>active_methods</Name>
+                <VariableLocalized iso="GER">Aktive Methoden</VariableLocalized>
+                <VariableLocalized iso="ENG">Active methods</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>spam_history</Name>
+                <VariableLocalized iso="GER">Spam-Verlauf</VariableLocalized>
+                <VariableLocalized iso="ENG">Spam history</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>distribution_by_method</Name>
+                <VariableLocalized iso="GER">Verteilung nach Methode</VariableLocalized>
+                <VariableLocalized iso="ENG">Distribution by method</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>top_forms</Name>
+                <VariableLocalized iso="GER">Top-Formulare</VariableLocalized>
+                <VariableLocalized iso="ENG">Top forms</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>recent_spam_attempts</Name>
+                <VariableLocalized iso="GER">Letzte Spam-Versuche</VariableLocalized>
+                <VariableLocalized iso="ENG">Recent spam attempts</VariableLocalized>
+            </Variable>
+
+            <!-- Schutzmethoden -->
+            <Variable>
+                <Name>method_honeypot</Name>
+                <VariableLocalized iso="GER">Honeypot</VariableLocalized>
+                <VariableLocalized iso="ENG">Honeypot</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method_honeypot_desc</Name>
+                <VariableLocalized iso="GER">Unsichtbare Felder, die nur Bots ausfüllen. DSGVO-konform, kein Consent nötig.</VariableLocalized>
+                <VariableLocalized iso="ENG">Invisible fields that only bots fill in. GDPR compliant, no consent needed.</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method_timing</Name>
+                <VariableLocalized iso="GER">Timing-Schutz</VariableLocalized>
+                <VariableLocalized iso="ENG">Timing Protection</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method_timing_desc</Name>
+                <VariableLocalized iso="GER">Misst die Zeit zwischen Laden und Absenden. DSGVO-konform, kein Consent nötig.</VariableLocalized>
+                <VariableLocalized iso="ENG">Measures time between load and submit. GDPR compliant, no consent needed.</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method_altcha</Name>
+                <VariableLocalized iso="GER">ALTCHA (Proof-of-Work)</VariableLocalized>
+                <VariableLocalized iso="ENG">ALTCHA (Proof-of-Work)</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method_altcha_desc</Name>
+                <VariableLocalized iso="GER">Self-hosted Proof-of-Work Challenge. 100% DSGVO-konform, kein Consent nötig.</VariableLocalized>
+                <VariableLocalized iso="ENG">Self-hosted Proof-of-Work challenge. 100% GDPR compliant, no consent needed.</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method_turnstile</Name>
+                <VariableLocalized iso="GER">Cloudflare Turnstile</VariableLocalized>
+                <VariableLocalized iso="ENG">Cloudflare Turnstile</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method_turnstile_desc</Name>
+                <VariableLocalized iso="GER">Privacy-freundliche Alternative zu reCAPTCHA. Consent erforderlich.</VariableLocalized>
+                <VariableLocalized iso="ENG">Privacy-friendly alternative to reCAPTCHA. Consent required.</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method_recaptcha</Name>
+                <VariableLocalized iso="GER">Google reCAPTCHA</VariableLocalized>
+                <VariableLocalized iso="ENG">Google reCAPTCHA</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method_recaptcha_desc</Name>
+                <VariableLocalized iso="GER">Google reCAPTCHA v2/v3. Consent zwingend erforderlich!</VariableLocalized>
+                <VariableLocalized iso="ENG">Google reCAPTCHA v2/v3. Consent mandatory!</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method_friendly_captcha</Name>
+                <VariableLocalized iso="GER">Friendly Captcha</VariableLocalized>
+                <VariableLocalized iso="ENG">Friendly Captcha</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method_friendly_captcha_desc</Name>
+                <VariableLocalized iso="GER">Europäischer Anbieter, DSGVO-freundlich. Proof-of-Work basiert.</VariableLocalized>
+                <VariableLocalized iso="ENG">European provider, GDPR friendly. Proof-of-Work based.</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method_hcaptcha</Name>
+                <VariableLocalized iso="GER">hCaptcha</VariableLocalized>
+                <VariableLocalized iso="ENG">hCaptcha</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method_hcaptcha_desc</Name>
+                <VariableLocalized iso="GER">Privacy-fokussierte Alternative. Consent erforderlich.</VariableLocalized>
+                <VariableLocalized iso="ENG">Privacy-focused alternative. Consent required.</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method_ai_filter</Name>
+                <VariableLocalized iso="GER">KI-Spamfilter</VariableLocalized>
+                <VariableLocalized iso="ENG">AI Spam Filter</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method_ai_filter_desc</Name>
+                <VariableLocalized iso="GER">Lokale Textanalyse mit Punktesystem. DSGVO-konform, kein Consent nötig.</VariableLocalized>
+                <VariableLocalized iso="ENG">Local text analysis with scoring system. GDPR compliant, no consent needed.</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>no_consent_required</Name>
+                <VariableLocalized iso="GER">Kein Consent nötig</VariableLocalized>
+                <VariableLocalized iso="ENG">No consent required</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>consent_required</Name>
+                <VariableLocalized iso="GER">Consent erforderlich</VariableLocalized>
+                <VariableLocalized iso="ENG">Consent required</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>recommended</Name>
+                <VariableLocalized iso="GER">Empfohlen</VariableLocalized>
+                <VariableLocalized iso="ENG">Recommended</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>configure</Name>
+                <VariableLocalized iso="GER">Konfigurieren</VariableLocalized>
+                <VariableLocalized iso="ENG">Configure</VariableLocalized>
+            </Variable>
+
+            <!-- Formulare -->
+            <Variable>
+                <Name>form_contact</Name>
+                <VariableLocalized iso="GER">Kontaktformular</VariableLocalized>
+                <VariableLocalized iso="ENG">Contact Form</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>form_registration</Name>
+                <VariableLocalized iso="GER">Registrierung</VariableLocalized>
+                <VariableLocalized iso="ENG">Registration</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>form_newsletter</Name>
+                <VariableLocalized iso="GER">Newsletter</VariableLocalized>
+                <VariableLocalized iso="ENG">Newsletter</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>form_review</Name>
+                <VariableLocalized iso="GER">Produktbewertungen</VariableLocalized>
+                <VariableLocalized iso="ENG">Product Reviews</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>form_checkout</Name>
+                <VariableLocalized iso="GER">Checkout</VariableLocalized>
+                <VariableLocalized iso="ENG">Checkout</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>form_password_reset</Name>
+                <VariableLocalized iso="GER">Passwort vergessen</VariableLocalized>
+                <VariableLocalized iso="ENG">Forgot Password</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>form_wishlist</Name>
+                <VariableLocalized iso="GER">Wunschzettel</VariableLocalized>
+                <VariableLocalized iso="ENG">Wishlist</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>form_login</Name>
+                <VariableLocalized iso="GER">Login</VariableLocalized>
+                <VariableLocalized iso="ENG">Login</VariableLocalized>
+            </Variable>
+
+            <!-- IP-Verwaltung -->
+            <Variable>
+                <Name>blacklist</Name>
+                <VariableLocalized iso="GER">Blacklist</VariableLocalized>
+                <VariableLocalized iso="ENG">Blacklist</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>whitelist</Name>
+                <VariableLocalized iso="GER">Whitelist</VariableLocalized>
+                <VariableLocalized iso="ENG">Whitelist</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>ip_address</Name>
+                <VariableLocalized iso="GER">IP-Adresse</VariableLocalized>
+                <VariableLocalized iso="ENG">IP Address</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>block_ip</Name>
+                <VariableLocalized iso="GER">IP sperren</VariableLocalized>
+                <VariableLocalized iso="ENG">Block IP</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>unblock_ip</Name>
+                <VariableLocalized iso="GER">IP entsperren</VariableLocalized>
+                <VariableLocalized iso="ENG">Unblock IP</VariableLocalized>
+            </Variable>
+
+            <!-- Spam-Log -->
+            <Variable>
+                <Name>timestamp</Name>
+                <VariableLocalized iso="GER">Zeitpunkt</VariableLocalized>
+                <VariableLocalized iso="ENG">Timestamp</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>form</Name>
+                <VariableLocalized iso="GER">Formular</VariableLocalized>
+                <VariableLocalized iso="ENG">Form</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>method</Name>
+                <VariableLocalized iso="GER">Methode</VariableLocalized>
+                <VariableLocalized iso="ENG">Method</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>score</Name>
+                <VariableLocalized iso="GER">Score</VariableLocalized>
+                <VariableLocalized iso="ENG">Score</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>action</Name>
+                <VariableLocalized iso="GER">Aktion</VariableLocalized>
+                <VariableLocalized iso="ENG">Action</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>blocked</Name>
+                <VariableLocalized iso="GER">Geblockt</VariableLocalized>
+                <VariableLocalized iso="ENG">Blocked</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>logged</Name>
+                <VariableLocalized iso="GER">Geloggt</VariableLocalized>
+                <VariableLocalized iso="ENG">Logged</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>allowed</Name>
+                <VariableLocalized iso="GER">Erlaubt</VariableLocalized>
+                <VariableLocalized iso="ENG">Allowed</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>not_spam</Name>
+                <VariableLocalized iso="GER">Kein Spam</VariableLocalized>
+                <VariableLocalized iso="ENG">Not spam</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>is_spam</Name>
+                <VariableLocalized iso="GER">Ist Spam</VariableLocalized>
+                <VariableLocalized iso="ENG">Is spam</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>export_csv</Name>
+                <VariableLocalized iso="GER">Als CSV exportieren</VariableLocalized>
+                <VariableLocalized iso="ENG">Export as CSV</VariableLocalized>
+            </Variable>
+
+            <!-- Einstellungen -->
+            <Variable>
+                <Name>global_protection</Name>
+                <VariableLocalized iso="GER">Globaler Schutz</VariableLocalized>
+                <VariableLocalized iso="ENG">Global Protection</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>kill_switch</Name>
+                <VariableLocalized iso="GER">Notfall-Deaktivierung</VariableLocalized>
+                <VariableLocalized iso="ENG">Emergency Kill Switch</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>default_action</Name>
+                <VariableLocalized iso="GER">Standard-Aktion bei Spam</VariableLocalized>
+                <VariableLocalized iso="ENG">Default action on spam</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>log_retention_days</Name>
+                <VariableLocalized iso="GER">Log-Aufbewahrung (Tage)</VariableLocalized>
+                <VariableLocalized iso="ENG">Log retention (days)</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>debug_mode</Name>
+                <VariableLocalized iso="GER">Debug-Modus</VariableLocalized>
+                <VariableLocalized iso="ENG">Debug Mode</VariableLocalized>
+            </Variable>
+
+            <!-- Frontend-Texte -->
+            <Variable>
+                <Name>captcha_failed</Name>
+                <VariableLocalized iso="GER">Sicherheitsprüfung fehlgeschlagen. Bitte versuchen Sie es erneut.</VariableLocalized>
+                <VariableLocalized iso="ENG">Security check failed. Please try again.</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>confirm_not_robot</Name>
+                <VariableLocalized iso="GER">Bitte bestätigen Sie, dass Sie kein Roboter sind.</VariableLocalized>
+                <VariableLocalized iso="ENG">Please confirm that you are not a robot.</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>too_many_attempts</Name>
+                <VariableLocalized iso="GER">Zu viele Versuche. Bitte warten Sie einen Moment.</VariableLocalized>
+                <VariableLocalized iso="ENG">Too many attempts. Please wait a moment.</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>ip_blocked</Name>
+                <VariableLocalized iso="GER">Ihre IP-Adresse wurde vorübergehend gesperrt.</VariableLocalized>
+                <VariableLocalized iso="ENG">Your IP address has been temporarily blocked.</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>form_too_fast</Name>
+                <VariableLocalized iso="GER">Formular wurde zu schnell abgesendet. Bitte füllen Sie es erneut aus.</VariableLocalized>
+                <VariableLocalized iso="ENG">Form was submitted too quickly. Please fill it out again.</VariableLocalized>
+            </Variable>
+
+            <!-- API -->
+            <Variable>
+                <Name>api_key</Name>
+                <VariableLocalized iso="GER">API-Key</VariableLocalized>
+                <VariableLocalized iso="ENG">API Key</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>create_api_key</Name>
+                <VariableLocalized iso="GER">Neuen API-Key erstellen</VariableLocalized>
+                <VariableLocalized iso="ENG">Create new API key</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>api_key_created</Name>
+                <VariableLocalized iso="GER">API-Key erstellt. Bitte kopieren Sie den Key jetzt – er wird nicht erneut angezeigt!</VariableLocalized>
+                <VariableLocalized iso="ENG">API key created. Please copy the key now – it will not be shown again!</VariableLocalized>
+            </Variable>
+
+            <!-- Consent -->
+            <Variable>
+                <Name>consent_recaptcha_name</Name>
+                <VariableLocalized iso="GER">Google reCAPTCHA</VariableLocalized>
+                <VariableLocalized iso="ENG">Google reCAPTCHA</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>consent_recaptcha_desc</Name>
+                <VariableLocalized iso="GER">Schützt Formulare vor Spam und Bots. Es werden Daten an Google übertragen.</VariableLocalized>
+                <VariableLocalized iso="ENG">Protects forms from spam and bots. Data is transmitted to Google.</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>consent_turnstile_name</Name>
+                <VariableLocalized iso="GER">Cloudflare Turnstile</VariableLocalized>
+                <VariableLocalized iso="ENG">Cloudflare Turnstile</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>consent_turnstile_desc</Name>
+                <VariableLocalized iso="GER">Schützt Formulare vor Spam und Bots. Es werden Daten an Cloudflare übertragen.</VariableLocalized>
+                <VariableLocalized iso="ENG">Protects forms from spam and bots. Data is transmitted to Cloudflare.</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>consent_hcaptcha_name</Name>
+                <VariableLocalized iso="GER">hCaptcha</VariableLocalized>
+                <VariableLocalized iso="ENG">hCaptcha</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>consent_hcaptcha_desc</Name>
+                <VariableLocalized iso="GER">Schützt Formulare vor Spam und Bots. Es werden Daten an hCaptcha übertragen.</VariableLocalized>
+                <VariableLocalized iso="ENG">Protects forms from spam and bots. Data is transmitted to hCaptcha.</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>consent_purpose</Name>
+                <VariableLocalized iso="GER">Spam-Schutz</VariableLocalized>
+                <VariableLocalized iso="ENG">Spam protection</VariableLocalized>
+            </Variable>
+        </Locales>
+    </Install>
+</jtlshopplugin>

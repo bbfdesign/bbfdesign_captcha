@@ -1,0 +1,46 @@
+/**
+ * BBF Captcha & Spam-Schutz – Frontend Styles
+ * Minimal CSS für Captcha-Widgets
+ */
+
+/* ── Captcha Widget Container ── */
+.bbf-captcha-widget {
+    margin: 12px 0;
+}
+
+/* ── Honeypot Fields (Off-Screen, nicht display:none!) ── */
+.bbf-captcha-hp {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* ── Error Message ── */
+.bbf-captcha-error {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+}
+
+/* ── Success State ── */
+.bbf-captcha-success {
+    color: #16a34a;
+    font-size: 0.875rem;
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+    .bbf-captcha-widget * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
