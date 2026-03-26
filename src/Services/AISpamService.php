@@ -286,6 +286,9 @@ class AISpamService
         return ['score' => $score, 'details' => $details];
     }
 
+    /** In-Memory Cache für Disposable Domains */
+    private static ?array $disposableDomainsCache = null;
+
     private function checkDisposableEmail(?string $email): array
     {
         if (empty($email) || !str_contains($email, '@')) {
@@ -294,7 +297,7 @@ class AISpamService
 
         $domain = strtolower(substr($email, strrpos($email, '@') + 1));
 
-        // DB-Lookup
+        // 1. DB-Lookup
         $result = $this->db->queryPrepared(
             "SELECT COUNT(*) AS cnt FROM `bbf_captcha_disposable_domains` WHERE `domain` = :domain",
             ['domain' => $domain],
@@ -308,10 +311,29 @@ class AISpamService
             ];
         }
 
-        // Regex-Muster für bekannte Wegwerf-Prefixes
+        // 2. PHP-Datei Fallback (In-Memory Cache)
+        if (self::$disposableDomainsCache === null) {
+            $filePath = dirname(__DIR__, 2) . '/src/Data/disposable_domains.php';
+            if (file_exists($filePath)) {
+                $list = require $filePath;
+                self::$disposableDomainsCache = is_array($list) ? array_flip($list) : [];
+            } else {
+                self::$disposableDomainsCache = [];
+            }
+        }
+
+        if (isset(self::$disposableDomainsCache[$domain])) {
+            return [
+                'score'   => 30,
+                'details' => ['Wegwerf-Email-Domain: ' . $domain . ' (+30)'],
+            ];
+        }
+
+        // 3. Regex-Muster für bekannte Wegwerf-Prefixes
         $patterns = [
             '/^temp/i', '/^trash/i', '/^guerrilla/i', '/^mailinator/i',
             '/^throwaway/i', '/^fake/i', '/^disposable/i', '/^10minute/i',
+            '/^yopmail/i', '/^sharklasers/i', '/^grr\./i', '/^maildrop/i',
         ];
 
         foreach ($patterns as $pattern) {

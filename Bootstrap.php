@@ -187,16 +187,17 @@ class Bootstrap extends Bootstrapper
         $db     = Shop::Container()->getDB();
 
         // Smarty Output Filter – Honeypot/Timing injizieren + Assets einbinden
-        $dispatcher->listen('shop.hook.' . \HOOK_SMARTY_OUTPUTFILTER, function (array $args) use ($plugin) {
+        // WICHTIG: $args['output'] ist eine Referenz auf den Smarty-Output (nicht 'original'!)
+        $dispatcher->listen('shop.hook.' . \HOOK_SMARTY_OUTPUTFILTER, function (array &$args) use ($plugin) {
             if ($this->settingsModel === null || !$this->settingsModel->getBool('global_enabled')) {
                 return;
             }
 
-            if (!isset($args['original'])) {
+            if (!isset($args['output'])) {
                 return;
             }
 
-            $html = $args['original'];
+            $html = &$args['output'];
 
             // Assets einbinden (nur wenn Formular auf der Seite)
             $assetHook = new IncludeAssets($plugin, $this->settingsModel);
@@ -205,8 +206,6 @@ class Bootstrap extends Bootstrapper
             // Honeypot + Timing in Formulare injizieren
             $outputFilter = new SmartyOutputFilter($this->settingsModel);
             $html = $outputFilter->filter($html);
-
-            $args['original'] = $html;
         });
 
         // Kontaktformular
@@ -229,9 +228,19 @@ class Bootstrap extends Bootstrapper
             $this->handleFormHook('review', $args, $plugin, $db);
         });
 
-        // Checkout
+        // Checkout (HOOK_BESTELLVORGANG_PAGE = 19)
         $dispatcher->listen('shop.hook.' . \HOOK_BESTELLVORGANG_PAGE, function (array $args) use ($plugin, $db) {
             $this->handleFormHook('checkout', $args, $plugin, $db);
+        });
+
+        // Login (HOOK_KUNDE_CLASS_HOLLOGINKUNDE = 145)
+        $dispatcher->listen('shop.hook.' . \HOOK_KUNDE_CLASS_HOLLOGINKUNDE, function (array $args) use ($plugin, $db) {
+            $this->handleFormHook('login', $args, $plugin, $db);
+        });
+
+        // Wunschliste (HOOK_WUNSCHLISTE_CLASS_FUEGEEIN = 127)
+        $dispatcher->listen('shop.hook.' . \HOOK_WUNSCHLISTE_CLASS_FUEGEEIN, function (array $args) use ($plugin, $db) {
+            $this->handleFormHook('wishlist', $args, $plugin, $db);
         });
 
         // Consent Manager Integration
@@ -307,35 +316,9 @@ class Bootstrap extends Bootstrapper
             exit;
         });
 
-        // Smarty-Funktion {bbfdesign_captcha} registrieren
-        $dispatcher->listen('shop.hook.' . \HOOK_SMARTY_OUTPUTFILTER, function (array $args) use ($plugin) {
-            // Smarty-Plugin wird nur einmal registriert
-            static $registered = false;
-            if ($registered) {
-                return;
-            }
-            $registered = true;
-
-            if (isset($args['smarty']) && $args['smarty'] instanceof \JTL\Smarty\JTLSmarty) {
-                $settingsModel = $this->settingsModel;
-                $captchaPlugin = $plugin;
-
-                $args['smarty']->registerPlugin(
-                    'function',
-                    'bbfdesign_captcha',
-                    function (array $params, $smarty) use ($captchaPlugin, $settingsModel) {
-                        $formType = $params['form'] ?? 'generic';
-                        $db       = Shop::Container()->getDB();
-                        $settings = $settingsModel ?? new Setting($db);
-
-                        $captchaService = new \Plugin\bbfdesign_captcha\src\Services\CaptchaService(
-                            $captchaPlugin, $db, $settings
-                        );
-
-                        return $captchaService->renderWidget($formType);
-                    }
-                );
-            }
-        });
+        // Smarty-Pseudo-Funktion {bbfdesign_captcha form='...'} via Output-Replacement
+        // JTL erlaubt keine Smarty-Plugin-Registrierung in Hooks, daher ersetzen
+        // wir den Platzhalter direkt im HTML-Output.
+        // Template-Entwickler können <!-- bbfdesign_captcha form="contact" --> nutzen.
     }
 }
