@@ -16,10 +16,16 @@ class ApiKey
     }
 
     /**
-     * API-Key anhand des Raw-Keys validieren
+     * API-Key anhand des Raw-Keys validieren.
+     *
+     * Defense in Depth: DB-Lookup via SHA256 + zusätzlich timing-safe hash_equals,
+     * um einen einheitlichen Codepfad für "Treffer" und "kein Treffer" zu haben.
      */
     public function validateKey(string $rawKey): ?object
     {
+        if ($rawKey === '') {
+            return null;
+        }
         $hash = hash('sha256', $rawKey);
 
         $key = $this->db->queryPrepared(
@@ -29,11 +35,15 @@ class ApiKey
             1
         );
 
-        if ($key === null || !isset($key->id)) {
+        if ($key === null || !isset($key->id, $key->key_hash)) {
             return null;
         }
 
-        // Letzte Nutzung aktualisieren
+        // Timing-safe Vergleich – schützt gegen hypothetische DB-Vergleichs-Leaks
+        if (!hash_equals((string)$key->key_hash, $hash)) {
+            return null;
+        }
+
         $this->db->queryPrepared(
             "UPDATE `bbf_captcha_api_keys` SET `last_used_at` = NOW() WHERE `id` = :id",
             ['id' => $key->id]

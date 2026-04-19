@@ -10,6 +10,7 @@ use Plugin\bbfdesign_captcha\src\Models\Setting;
 use Plugin\bbfdesign_captcha\src\Models\SpamLog;
 use Plugin\bbfdesign_captcha\src\Models\IPEntry;
 use Plugin\bbfdesign_captcha\src\Helpers\PluginHelper;
+use Plugin\bbfdesign_captcha\src\Services\ConsentService;
 
 /**
  * Zentrale Captcha-Orchestrierung

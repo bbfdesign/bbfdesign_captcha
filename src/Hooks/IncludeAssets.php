@@ -49,10 +49,12 @@ class IncludeAssets
                  . htmlspecialchars($frontendUrl . 'css/bbfdesign-captcha.css', ENT_QUOTES, 'UTF-8')
                  . '" media="all">' . "\n";
 
-        // Custom CSS (aus Admin-Einstellungen)
-        $customCss = $this->settings->get('custom_css');
-        if (!empty(trim($customCss))) {
-            $assets .= '<style>' . strip_tags($customCss) . '</style>' . "\n";
+        // Custom CSS (aus Admin-Einstellungen) – gegen Style-Context-Escape härten
+        $customCss = (string)$this->settings->get('custom_css');
+        if (trim($customCss) !== '') {
+            $safeCss = preg_replace('#</\s*style#i', '', $customCss);
+            $safeCss = str_replace(['<!--', '-->'], '', (string)$safeCss);
+            $assets .= '<style>' . $safeCss . '</style>' . "\n";
         }
 
         // JS (async/defer, blockiert nicht!)
@@ -78,20 +80,22 @@ class IncludeAssets
                 'script'  => 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit',
             ];
         }
+        $shopLang = $_SESSION['cISOSprache'] ?? 'ger';
+        $hl       = $shopLang === 'eng' ? 'en' : 'de';
         if ($this->settings->getBool('recaptcha_enabled') && !empty($this->settings->get('recaptcha_site_key'))) {
             $version = $this->settings->get('recaptcha_version', 'v3');
-            $siteKey = $this->settings->get('recaptcha_site_key');
+            $siteKey = rawurlencode((string)$this->settings->get('recaptcha_site_key'));
             $consentConfig['recaptcha'] = [
                 'consent' => 'bbfdesign_captcha_recaptcha',
                 'script'  => $version === 'v3'
                     ? 'https://www.google.com/recaptcha/api.js?render=' . $siteKey
-                    : 'https://www.google.com/recaptcha/api.js?hl=de',
+                    : 'https://www.google.com/recaptcha/api.js?hl=' . $hl,
             ];
         }
         if ($this->settings->getBool('hcaptcha_enabled') && !empty($this->settings->get('hcaptcha_site_key'))) {
             $consentConfig['hcaptcha'] = [
                 'consent' => 'bbfdesign_captcha_hcaptcha',
-                'script'  => 'https://js.hcaptcha.com/1/api.js?hl=de',
+                'script'  => 'https://js.hcaptcha.com/1/api.js?hl=' . $hl,
             ];
         }
         if ($this->settings->getBool('friendly_captcha_enabled') && !empty($this->settings->get('friendly_captcha_site_key'))) {
@@ -101,9 +105,19 @@ class IncludeAssets
             ];
         }
 
-        if (!empty($consentConfig)) {
-            $assets .= '<script>window.bbfCaptchaConsent=' . json_encode($consentConfig, JSON_HEX_TAG) . ';</script>' . "\n";
-        }
+        // Lokalisierte Labels für das Frontend-JS
+        $langVars = $this->plugin->getLocalization();
+        $consentConfig['labels'] = [
+            'captcha_success' => $langVars->getTranslation('captcha_success', $shopLang)
+                ?: 'Security check successful',
+            'captcha_failed'  => $langVars->getTranslation('captcha_failed', $shopLang)
+                ?: 'Security check failed',
+        ];
+
+        $assets .= '<script>window.bbfCaptchaConsent=' . json_encode(
+            $consentConfig,
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES
+        ) . ';</script>' . "\n";
 
         // Assets vor </head> einfügen
         $pos = strripos($html, '</head>');

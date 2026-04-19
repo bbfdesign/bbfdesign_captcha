@@ -1200,3 +1200,57 @@ html.theme-dark .bbf-btn-outline {
         grid-template-columns: 1fr;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Accessibility: sichtbarer Fokus + Skip-Link + reduced motion
+   ═══════════════════════════════════════════════════════════ */
+
+.bbf-plugin-page a:focus-visible,
+.bbf-plugin-page button:focus-visible,
+.bbf-plugin-page [role="menuitem"]:focus-visible,
+.bbf-plugin-page input:focus-visible,
+.bbf-plugin-page select:focus-visible,
+.bbf-plugin-page textarea:focus-visible,
+.bbf-plugin-page .bbf-btn:focus-visible,
+.bbf-plugin-page .bbf-toggle input:focus-visible + .bbf-toggle-slider {
+    outline: 2px solid var(--bbf-primary);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+.bbf-sidebar-nav a:focus-visible {
+    background-color: var(--bbf-bg-hover, #f3f4f6);
+}
+
+.bbf-skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--bbf-primary);
+    color: #fff;
+    padding: 8px 14px;
+    text-decoration: none;
+    border-radius: 0 0 var(--bbf-radius, 6px) 0;
+    z-index: 100000;
+    transition: top 0.15s ease;
+}
+.bbf-skip-link:focus {
+    top: 0;
+}
+
+.bbf-sr-only {
+    position: absolute !important;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bbf-plugin-page *,
+    .bbf-plugin-page *::before,
+    .bbf-plugin-page *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}

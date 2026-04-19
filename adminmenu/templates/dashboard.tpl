@@ -1,33 +1,33 @@
-<h2 class="bbf-page-title">Dashboard</h2>
+<h2 class="bbf-page-title">{$langVars->getTranslation('nav_dashboard', $adminLang)|default:'Dashboard'|escape:'html'}</h2>
 
 {* ── KPI Cards ── *}
 <div class="bbf-stats-grid">
     <div class="bbf-stat-card">
-        <div class="bbf-stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <div class="bbf-stat-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
-        <div class="bbf-stat-label">Geblockt heute</div>
+        <div class="bbf-stat-label">{$langVars->getTranslation('blocked_today', $adminLang)|default:'Blocked today'|escape:'html'}</div>
         <div class="bbf-stat-value" id="bbf-kpi-blocked-today">{$dashboardData.blocked_today|default:0}</div>
     </div>
     <div class="bbf-stat-card">
-        <div class="bbf-stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <div class="bbf-stat-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
-        <div class="bbf-stat-label">Geblockt gesamt</div>
+        <div class="bbf-stat-label">{$langVars->getTranslation('blocked_total', $adminLang)|default:'Blocked total'|escape:'html'}</div>
         <div class="bbf-stat-value" id="bbf-kpi-blocked-total">{$dashboardData.blocked_total|default:0}</div>
     </div>
     <div class="bbf-stat-card">
-        <div class="bbf-stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <div class="bbf-stat-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
         </div>
-        <div class="bbf-stat-label">Erkennungsrate</div>
+        <div class="bbf-stat-label">{$langVars->getTranslation('detection_rate', $adminLang)|default:'Detection rate'|escape:'html'}</div>
         <div class="bbf-stat-value" id="bbf-kpi-detection-rate">{$dashboardData.detection_rate|default:0}%</div>
     </div>
     <div class="bbf-stat-card">
-        <div class="bbf-stat-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <div class="bbf-stat-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         </div>
-        <div class="bbf-stat-label">Aktive Methoden</div>
+        <div class="bbf-stat-label">{$langVars->getTranslation('active_methods', $adminLang)|default:'Active methods'|escape:'html'}</div>
         <div class="bbf-stat-value" id="bbf-kpi-active-methods">{$dashboardData.active_methods|default:0}</div>
     </div>
 </div>
@@ -65,35 +65,35 @@
     {* Spam-Verlauf *}
     <div class="bbf-card">
         <div class="bbf-card-header">
-            <h3 class="bbf-card-title">Spam-Verlauf</h3>
-            <div class="bbf-range-selector">
-                <button type="button" class="bbf-range-btn" onclick="bbfDashboard.setRange(7)">7 Tage</button>
-                <button type="button" class="bbf-range-btn active" onclick="bbfDashboard.setRange(30)">30 Tage</button>
-                <button type="button" class="bbf-range-btn" onclick="bbfDashboard.setRange(90)">90 Tage</button>
+            <h3 class="bbf-card-title">{$langVars->getTranslation('spam_history', $adminLang)|default:'Spam history'|escape:'html'}</h3>
+            <div class="bbf-range-selector" role="group" aria-label="Range">
+                <button type="button" class="bbf-range-btn" onclick="bbfDashboard.setRange(7, event)">7</button>
+                <button type="button" class="bbf-range-btn active" onclick="bbfDashboard.setRange(30, event)" aria-pressed="true">30</button>
+                <button type="button" class="bbf-range-btn" onclick="bbfDashboard.setRange(90, event)">90</button>
             </div>
         </div>
         <div class="bbf-chart-container" style="height: 280px;">
-            <canvas id="bbf-chart-history"></canvas>
+            <canvas id="bbf-chart-history" aria-label="{$langVars->getTranslation('spam_history', $adminLang)|default:'Spam history'|escape:'html'}" role="img"></canvas>
         </div>
     </div>
 
     {* Verteilung nach Methode *}
     <div class="bbf-card">
         <div class="bbf-card-header">
-            <h3 class="bbf-card-title">Nach Methode</h3>
+            <h3 class="bbf-card-title">{$langVars->getTranslation('distribution_by_method', $adminLang)|default:'Distribution by method'|escape:'html'}</h3>
         </div>
         <div class="bbf-chart-container" style="height: 280px;">
-            <canvas id="bbf-chart-methods"></canvas>
+            <canvas id="bbf-chart-methods" aria-label="{$langVars->getTranslation('distribution_by_method', $adminLang)|default:'Distribution by method'|escape:'html'}" role="img"></canvas>
         </div>
     </div>
 
     {* Top-Formulare *}
     <div class="bbf-card">
         <div class="bbf-card-header">
-            <h3 class="bbf-card-title">Top-Formulare</h3>
+            <h3 class="bbf-card-title">{$langVars->getTranslation('top_forms', $adminLang)|default:'Top forms'|escape:'html'}</h3>
         </div>
         <div class="bbf-chart-container" style="height: 280px;">
-            <canvas id="bbf-chart-forms"></canvas>
+            <canvas id="bbf-chart-forms" aria-label="{$langVars->getTranslation('top_forms', $adminLang)|default:'Top forms'|escape:'html'}" role="img"></canvas>
         </div>
     </div>
 </div>
@@ -101,18 +101,18 @@
 {* ── Letzte Spam-Versuche ── *}
 <div class="bbf-card">
     <div class="bbf-card-header">
-        <h3 class="bbf-card-title">Letzte Spam-Versuche</h3>
+        <h3 class="bbf-card-title">{$langVars->getTranslation('recent_spam_attempts', $adminLang)|default:'Recent spam attempts'|escape:'html'}</h3>
     </div>
     <div style="overflow-x: auto;">
         <table class="bbf-table" id="bbf-recent-spam-table">
             <thead>
                 <tr>
-                    <th>Zeitpunkt</th>
-                    <th>IP</th>
-                    <th>Formular</th>
-                    <th>Methode</th>
-                    <th>Score</th>
-                    <th>Aktion</th>
+                    <th scope="col">{$langVars->getTranslation('timestamp', $adminLang)|default:'Timestamp'|escape:'html'}</th>
+                    <th scope="col">{$langVars->getTranslation('ip_address', $adminLang)|default:'IP'|escape:'html'}</th>
+                    <th scope="col">{$langVars->getTranslation('form', $adminLang)|default:'Form'|escape:'html'}</th>
+                    <th scope="col">{$langVars->getTranslation('method', $adminLang)|default:'Method'|escape:'html'}</th>
+                    <th scope="col">{$langVars->getTranslation('score', $adminLang)|default:'Score'|escape:'html'}</th>
+                    <th scope="col">{$langVars->getTranslation('action', $adminLang)|default:'Action'|escape:'html'}</th>
                 </tr>
             </thead>
             <tbody>
@@ -129,11 +129,11 @@
                         <td>{$entry->spam_score|escape:'html'}</td>
                         <td>
                             {if $entry->action_taken === 'blocked'}
-                                <span class="bbf-badge bbf-badge-danger">Geblockt</span>
+                                <span class="bbf-badge bbf-badge-danger">{$langVars->getTranslation('blocked', $adminLang)|default:'Blocked'|escape:'html'}</span>
                             {elseif $entry->action_taken === 'logged'}
-                                <span class="bbf-badge bbf-badge-warning">Geloggt</span>
+                                <span class="bbf-badge bbf-badge-warning">{$langVars->getTranslation('logged', $adminLang)|default:'Logged'|escape:'html'}</span>
                             {else}
-                                <span class="bbf-badge bbf-badge-success">Erlaubt</span>
+                                <span class="bbf-badge bbf-badge-success">{$langVars->getTranslation('allowed', $adminLang)|default:'Allowed'|escape:'html'}</span>
                             {/if}
                         </td>
                     </tr>
@@ -176,30 +176,23 @@ var bbfDashboardData = {$dashboardDataJson nofilter};
 (function() {
     'use strict';
 
-    // Chart.js wird lokal geladen (kein CDN, kein Consent-Problem im Admin)
-    if (typeof Chart === 'undefined') {
-        var script = document.createElement('script');
-        script.src = adminUrl + 'js/vendor/chart.umd.min.js';
-        script.onload = function() { initDashboardCharts(); };
-        document.head.appendChild(script);
-    } else {
-        initDashboardCharts();
-    }
-
     var bbfDashboard = {
         historyChart: null,
         methodsChart: null,
         formsChart: null,
         currentRange: 30,
 
-        setRange: function(days) {
+        setRange: function(days, evt) {
             this.currentRange = days;
-            // Update active button
             document.querySelectorAll('.bbf-range-btn').forEach(function(btn) {
                 btn.classList.remove('active');
+                btn.setAttribute('aria-pressed', 'false');
             });
-            event.target.classList.add('active');
-            // Reload data for range
+            var target = (evt && evt.target) ? evt.target : null;
+            if (target) {
+                target.classList.add('active');
+                target.setAttribute('aria-pressed', 'true');
+            }
             this.loadDashboardData(days);
         },
 
@@ -217,6 +210,16 @@ var bbfDashboardData = {$dashboardDataJson nofilter};
     };
 
     window.bbfDashboard = bbfDashboard;
+
+    // Chart.js wird lokal geladen (kein CDN, kein Consent-Problem im Admin)
+    if (typeof Chart === 'undefined') {
+        var script = document.createElement('script');
+        script.src = adminUrl + 'js/vendor/chart.umd.min.js';
+        script.onload = function() { initDashboardCharts(); };
+        document.head.appendChild(script);
+    } else {
+        initDashboardCharts();
+    }
 
     function initDashboardCharts() {
         if (typeof Chart === 'undefined') return;
@@ -237,37 +240,39 @@ var bbfDashboardData = {$dashboardDataJson nofilter};
             'hcaptcha': '#84cc16',
             'bot': '#6366f1'
         };
+        var L = window.bbfLang || {};
         var methodLabels = {
-            'honeypot': 'Honeypot',
-            'timing': 'Timing',
-            'altcha': 'ALTCHA',
-            'ai': 'KI-Filter',
-            'ai_filter': 'KI-Filter',
-            'ip': 'IP-Block',
-            'rate': 'Rate Limit',
+            'honeypot':  L.method_honeypot  || 'Honeypot',
+            'timing':    L.method_timing    || 'Timing',
+            'altcha':    L.method_altcha    || 'ALTCHA',
+            'ai':        L.method_ai        || 'AI filter',
+            'ai_filter': L.method_ai        || 'AI filter',
+            'ip':        'IP',
+            'rate':      'Rate limit',
             'recaptcha': 'reCAPTCHA',
             'turnstile': 'Turnstile',
-            'hcaptcha': 'hCaptcha',
-            'bot': 'Bot-Erkennung'
+            'hcaptcha':  'hCaptcha',
+            'bot':       'Bot detection'
         };
         var formLabels = {
-            'contact': 'Kontakt',
-            'registration': 'Registrierung',
-            'newsletter': 'Newsletter',
-            'review': 'Bewertungen',
-            'checkout': 'Checkout',
-            'login': 'Login',
-            'password_reset': 'Passwort',
-            'wishlist': 'Wunschliste'
+            'contact':        L.form_contact        || 'Contact',
+            'registration':   L.form_registration   || 'Registration',
+            'newsletter':     L.form_newsletter     || 'Newsletter',
+            'review':         L.form_review         || 'Reviews',
+            'checkout':       L.form_checkout       || 'Checkout',
+            'login':          L.form_login          || 'Login',
+            'password_reset': L.form_password_reset || 'Password',
+            'wishlist':       L.form_wishlist       || 'Wishlist'
         };
 
         // Build history data from server data
         var historyLabels = getDatesForRange(30);
         var historyData = generateEmptyData(30);
+        var dateLocale = (window.adminLang === 'eng') ? 'en-GB' : 'de-DE';
         if (data.spam_history && data.spam_history.length > 0) {
             var dateMap = {};
             data.spam_history.forEach(function(row) {
-                var dateKey = new Date(row.date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+                var dateKey = new Date(row.date).toLocaleDateString(dateLocale, { day: '2-digit', month: '2-digit' });
                 dateMap[dateKey] = (dateMap[dateKey] || 0) + parseInt(row.cnt);
             });
             historyData = historyLabels.map(function(label) {
@@ -409,10 +414,11 @@ var bbfDashboardData = {$dashboardDataJson nofilter};
 
     function getDatesForRange(days) {
         var dates = [];
+        var loc = (window.adminLang === 'eng') ? 'en-GB' : 'de-DE';
         for (var i = days - 1; i >= 0; i--) {
             var d = new Date();
             d.setDate(d.getDate() - i);
-            dates.push(d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }));
+            dates.push(d.toLocaleDateString(loc, { day: '2-digit', month: '2-digit' }));
         }
         return dates;
     }

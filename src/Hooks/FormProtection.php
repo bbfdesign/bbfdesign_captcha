@@ -43,6 +43,9 @@ class FormProtection
             return;
         }
 
+        // Widget-HTML für Templates bereitstellen (GET + POST)
+        $this->assignWidget($formType, $args);
+
         // Nur bei POST-Requests validieren
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             return;
@@ -64,16 +67,35 @@ class FormProtection
     }
 
     /**
+     * Captcha-Widget-HTML in Smarty verfügbar machen.
+     *
+     * Templates können {$bbfCaptchaWidget nofilter} einbinden.
+     */
+    private function assignWidget(string $formType, array $args): void
+    {
+        if (!isset($args['smarty']) || !($args['smarty'] instanceof \JTL\Smarty\JTLSmarty)) {
+            return;
+        }
+        try {
+            $html = $this->captcha->renderWidget($formType);
+        } catch (\Throwable $e) {
+            $html = '';
+        }
+        $args['smarty']->assign('bbfCaptchaWidget', $html);
+    }
+
+    /**
      * Fehlermeldung im Shop-Frontend setzen
      *
      * Nutzt das JTL-Standard-Alerting über Smarty-Variablen.
      */
     private function setFormError(string $formType, array $args): void
     {
-        $langVars   = $this->plugin->getLocalization();
-        $adminLang  = $_SESSION['cISOSprache'] ?? 'ger';
-        $errorMsg   = $langVars->getTranslation('captcha_failed', $adminLang)
-                   ?: 'Sicherheitsprüfung fehlgeschlagen. Bitte versuchen Sie es erneut.';
+        $langVars = $this->plugin->getLocalization();
+        // Shop-Frontend-Sprache (cISOSprache setzt JTL auf Frontend-ISO, z.B. 'ger'/'eng')
+        $shopLang = $_SESSION['cISOSprache'] ?? 'ger';
+        $errorMsg = $langVars->getTranslation('captcha_failed', $shopLang)
+                 ?: 'Sicherheitsprüfung fehlgeschlagen. Bitte versuchen Sie es erneut.';
 
         // JTL-Standard: Fehler über die globale Alertbox
         if (isset($args['smarty']) && $args['smarty'] instanceof \JTL\Smarty\JTLSmarty) {

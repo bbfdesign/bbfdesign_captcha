@@ -514,6 +514,123 @@
                 <VariableLocalized iso="GER">Spam-Schutz</VariableLocalized>
                 <VariableLocalized iso="ENG">Spam protection</VariableLocalized>
             </Variable>
+
+            <!-- AdminController Messages -->
+            <Variable>
+                <Name>msg_missing_key</Name>
+                <VariableLocalized iso="GER">Schlüssel fehlt</VariableLocalized>
+                <VariableLocalized iso="ENG">Key missing</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>msg_missing_id</Name>
+                <VariableLocalized iso="GER">ID fehlt</VariableLocalized>
+                <VariableLocalized iso="ENG">ID missing</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>msg_missing_name</Name>
+                <VariableLocalized iso="GER">Name fehlt</VariableLocalized>
+                <VariableLocalized iso="ENG">Name missing</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>msg_missing_word</Name>
+                <VariableLocalized iso="GER">Wort fehlt</VariableLocalized>
+                <VariableLocalized iso="ENG">Word missing</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>msg_missing_text</Name>
+                <VariableLocalized iso="GER">Text fehlt</VariableLocalized>
+                <VariableLocalized iso="ENG">Text missing</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>msg_missing_form_type</Name>
+                <VariableLocalized iso="GER">Formular-Typ fehlt</VariableLocalized>
+                <VariableLocalized iso="ENG">Form type missing</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>invalid_ip</Name>
+                <VariableLocalized iso="GER">Ungültige IP-Adresse</VariableLocalized>
+                <VariableLocalized iso="ENG">Invalid IP address</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>invalid_type</Name>
+                <VariableLocalized iso="GER">Ungültiger Typ</VariableLocalized>
+                <VariableLocalized iso="ENG">Invalid type</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>invalid_cidr</Name>
+                <VariableLocalized iso="GER">Ungültiger CIDR-Bereich</VariableLocalized>
+                <VariableLocalized iso="ENG">Invalid CIDR range</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>invalid_email</Name>
+                <VariableLocalized iso="GER">Ungültige E-Mail-Adresse</VariableLocalized>
+                <VariableLocalized iso="ENG">Invalid email address</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>ip_blocked</Name>
+                <VariableLocalized iso="GER">IP gesperrt</VariableLocalized>
+                <VariableLocalized iso="ENG">IP blocked</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>ip_unblocked</Name>
+                <VariableLocalized iso="GER">IP entsperrt</VariableLocalized>
+                <VariableLocalized iso="ENG">IP unblocked</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>ip_entry_added</Name>
+                <VariableLocalized iso="GER">IP-Eintrag hinzugefügt</VariableLocalized>
+                <VariableLocalized iso="ENG">IP entry added</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>form_config_saved</Name>
+                <VariableLocalized iso="GER">Formular-Konfiguration gespeichert</VariableLocalized>
+                <VariableLocalized iso="ENG">Form configuration saved</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>spam_log_cleared</Name>
+                <VariableLocalized iso="GER">Spam-Log bereinigt</VariableLocalized>
+                <VariableLocalized iso="ENG">Spam log cleared</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>spam_log_emptied</Name>
+                <VariableLocalized iso="GER">Spam-Log komplett geleert</VariableLocalized>
+                <VariableLocalized iso="ENG">Spam log completely emptied</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>hmac_regenerated</Name>
+                <VariableLocalized iso="GER">HMAC-Key neu generiert</VariableLocalized>
+                <VariableLocalized iso="ENG">HMAC key regenerated</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>unknown_action</Name>
+                <VariableLocalized iso="GER">Unbekannte Aktion</VariableLocalized>
+                <VariableLocalized iso="ENG">Unknown action</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>copied_to_clipboard</Name>
+                <VariableLocalized iso="GER">In die Zwischenablage kopiert</VariableLocalized>
+                <VariableLocalized iso="ENG">Copied to clipboard</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>captcha_success</Name>
+                <VariableLocalized iso="GER">Sicherheitsprüfung erfolgreich</VariableLocalized>
+                <VariableLocalized iso="ENG">Security check successful</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>page_load_error</Name>
+                <VariableLocalized iso="GER">Fehler beim Laden der Seite</VariableLocalized>
+                <VariableLocalized iso="ENG">Error loading page</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>connection_error</Name>
+                <VariableLocalized iso="GER">Verbindungsfehler</VariableLocalized>
+                <VariableLocalized iso="ENG">Connection error</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>loading_page</Name>
+                <VariableLocalized iso="GER">Seite wird geladen</VariableLocalized>
+                <VariableLocalized iso="ENG">Loading page</VariableLocalized>
+            </Variable>
         </Locales>
     </Install>
 </jtlshopplugin>

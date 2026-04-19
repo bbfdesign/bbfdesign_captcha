@@ -56,13 +56,24 @@
     },
 
     /**
+     * Translation lookup with fallback.
+     */
+    t: function(key, fallback) {
+      if (window.bbfLang && typeof window.bbfLang[key] === 'string' && window.bbfLang[key].length > 0) {
+        return window.bbfLang[key];
+      }
+      return fallback;
+    },
+
+    /**
      * Copy text to clipboard.
      */
     copyToClipboard: function(text) {
       var self = this;
+      var msg = self.t('copied_to_clipboard', 'Copied to clipboard');
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(function() {
-          self.showNotification('In die Zwischenablage kopiert', 'success');
+          self.showNotification(msg, 'success');
         });
       } else {
         var ta = document.createElement('textarea');
@@ -72,17 +83,18 @@
         ta.select();
         document.execCommand('copy');
         ta.remove();
-        self.showNotification('In die Zwischenablage kopiert', 'success');
+        self.showNotification(msg, 'success');
       }
     },
 
     /**
-     * Format a date string to German locale.
+     * Format a date string to the current admin locale.
      */
     formatDate: function(dateStr) {
       var d = new Date(dateStr);
       if (isNaN(d.getTime())) return dateStr;
-      return d.toLocaleString('de-DE', {
+      var locale = (window.adminLang === 'eng') ? 'en-GB' : 'de-DE';
+      return d.toLocaleString(locale, {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -113,10 +125,31 @@
     },
 
     /**
-     * Number formatting (German locale).
+     * Number formatting (admin locale).
      */
     formatNumber: function(num) {
-      return new Intl.NumberFormat('de-DE').format(num);
+      var locale = (window.adminLang === 'eng') ? 'en-GB' : 'de-DE';
+      return new Intl.NumberFormat(locale).format(num);
+    },
+
+    /**
+     * Show/hide a button loading state (for async admin actions).
+     */
+    setButtonLoading: function(btn, loading) {
+      if (!btn) return;
+      if (loading) {
+        btn.setAttribute('aria-busy', 'true');
+        btn.disabled = true;
+        btn.dataset.bbfOriginalText = btn.innerHTML;
+        btn.innerHTML = '<span class="bbf-spinner" aria-hidden="true"></span>';
+      } else {
+        btn.removeAttribute('aria-busy');
+        btn.disabled = false;
+        if (btn.dataset.bbfOriginalText) {
+          btn.innerHTML = btn.dataset.bbfOriginalText;
+          delete btn.dataset.bbfOriginalText;
+        }
+      }
     }
   };
 

@@ -170,7 +170,10 @@
             var el = document.createElement('div');
             el.className = 'bbf-captcha-success';
             el.setAttribute('aria-live', 'polite');
-            el.textContent = 'Sicherheitsprüfung erfolgreich';
+            var config = window.bbfCaptchaConsent || {};
+            el.textContent = (config.labels && config.labels.captcha_success)
+                ? config.labels.captcha_success
+                : 'Security check successful';
 
             var widget = form.querySelector('.bbf-captcha-widget');
             if (widget) {

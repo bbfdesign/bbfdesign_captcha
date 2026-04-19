@@ -49,11 +49,31 @@ class Bootstrap extends Bootstrapper
 
         // AJAX-Request: direkt ausgeben und beenden
         if (isset($_REQUEST['action']) && !empty($_REQUEST['action'])) {
+            header('Content-Type: application/json; charset=utf-8');
+
+            // Admin-Auth: nur eingeloggte Admins mit aktivem Backend-Account
+            if (!$this->isAdminAuthenticated()) {
+                http_response_code(401);
+                echo json_encode(
+                    ['success' => false, 'message' => 'Unauthorized'],
+                    JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+                );
+                exit;
+            }
+
+            // CSRF-Token prüfen (JTL-Standard: jtl_token)
+            if (!$this->isValidCsrfToken()) {
+                http_response_code(403);
+                echo json_encode(
+                    ['success' => false, 'message' => 'Invalid CSRF token'],
+                    JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+                );
+                exit;
+            }
+
             if (session_status() === PHP_SESSION_ACTIVE) {
                 session_write_close();
             }
-
-            header('Content-Type: application/json; charset=utf-8');
 
             if ($_REQUEST['action'] === 'getPage') {
                 echo $this->handleGetPage(
@@ -243,6 +263,21 @@ class Bootstrap extends Bootstrapper
             $this->handleFormHook('wishlist', $args, $plugin, $db);
         });
 
+        // Passwort vergessen läuft über jtl.php (HOOK_JTL_PAGE = 23).
+        // Wir erkennen das Formular anhand typischer POST-Felder.
+        $dispatcher->listen('shop.hook.' . \HOOK_JTL_PAGE, function (array $args) use ($plugin, $db) {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                return;
+            }
+            $uri = $_SERVER['REQUEST_URI'] ?? '';
+            $isPasswordReset = isset($_POST['pw_vergessen_triggered'])
+                || isset($_POST['pass_retry'])
+                || (isset($_POST['email']) && stripos($uri, 'passwortvergessen') !== false);
+            if ($isPasswordReset) {
+                $this->handleFormHook('password_reset', $args, $plugin, $db);
+            }
+        });
+
         // Consent Manager Integration
         $dispatcher->listen('shop.hook.' . \CONSENT_MANAGER_GET_ACTIVE_ITEMS, function (array $args) use ($plugin) {
             if ($this->settingsModel === null) {
@@ -278,17 +313,16 @@ class Bootstrap extends Bootstrapper
 
         $dispatcher->listen('shop.hook.' . \HOOK_ROUTER_PRE_DISPATCH, function (array $args) use ($plugin) {
             $requestUri = $_SERVER['REQUEST_URI'] ?? '';
-            $basePath   = '/bbfdesign-captcha/api/';
+            // Nur Pfad (ohne Query/Host) für den Präfix-Vergleich
+            $requestPath = parse_url($requestUri, PHP_URL_PATH) ?? $requestUri;
+            $basePath    = '/bbfdesign-captcha/api/';
 
-            // Prüfe ob die URL zum API-Prefix passt
-            $pos = strpos($requestUri, $basePath);
-            if ($pos === false) {
+            // Strikter Präfix-Match am Anfang des Pfades (verhindert URL-Hijack via Subpfad)
+            if (!str_starts_with($requestPath, $basePath)) {
                 return;
             }
 
-            $pathAfterBase = substr($requestUri, $pos + strlen($basePath));
-            // Query-String entfernen
-            $pathAfterBase = explode('?', $pathAfterBase, 2)[0];
+            $pathAfterBase = substr($requestPath, strlen($basePath));
             $pathAfterBase = trim($pathAfterBase, '/');
 
             // Challenge-Endpoint (kein v1-Prefix nötig)
@@ -320,5 +354,35 @@ class Bootstrap extends Bootstrapper
         // JTL erlaubt keine Smarty-Plugin-Registrierung in Hooks, daher ersetzen
         // wir den Platzhalter direkt im HTML-Output.
         // Template-Entwickler können <!-- bbfdesign_captcha form="contact" --> nutzen.
+    }
+
+    /**
+     * Prüft, ob ein Admin angemeldet ist.
+     * JTL-Backend setzt $_SESSION['AdminAccount']; kAdminlogin > 0 ist das Gültigkeitskriterium.
+     */
+    private function isAdminAuthenticated(): bool
+    {
+        if (!isset($_SESSION['AdminAccount'])) {
+            return false;
+        }
+        $account = $_SESSION['AdminAccount'];
+        $id = $account->kAdminlogin ?? ($account->id ?? 0);
+        return (int)$id > 0;
+    }
+
+    /**
+     * Timing-safe CSRF-Token-Validierung gegen JTL-Session-Token.
+     */
+    private function isValidCsrfToken(): bool
+    {
+        $provided = $_REQUEST['jtl_token'] ?? '';
+        if (!is_string($provided) || $provided === '') {
+            return false;
+        }
+        $expected = $_SESSION['jtl_token'] ?? '';
+        if (!is_string($expected) || $expected === '') {
+            return false;
+        }
+        return hash_equals($expected, $provided);
     }
 }

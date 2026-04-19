@@ -226,8 +226,8 @@ class CaptchaAPIController
         $input = $this->getJsonInput();
         $ip    = $input['ip'] ?? $_GET['ip'] ?? '';
 
-        if (empty($ip)) {
-            $this->sendError('IP address required', 400);
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+            $this->sendError('Invalid IP address', 400);
             return;
         }
 
@@ -318,27 +318,28 @@ class CaptchaAPIController
     private function checkRateLimit(object $apiKey): bool
     {
         $limit = (int)($apiKey->rate_limit ?? 60);
-        $hash  = $apiKey->key_hash ?? '';
+        $hash  = (string)($apiKey->key_hash ?? '');
 
-        // Einfaches Rate Limiting über die Rate-Limit-Tabelle
+        // Bucket-Key: Kurzhash(API-Key) + ClientIP -> pro Key UND IP limitieren
+        $ip     = PluginHelper::getClientIp();
+        $bucket = substr('apk_' . substr($hash, 0, 16) . '_' . $ip, 0, 45);
         $windowStart = date('Y-m-d H:i:00');
 
         $count = $this->db->queryPrepared(
             "SELECT SUM(`request_count`) AS total FROM `bbf_captcha_rate_limits`
-             WHERE `ip_address` = :hash AND `form_type` = 'api'
+             WHERE `ip_address` = :bucket AND `form_type` = 'api'
              AND `window_start` >= DATE_SUB(NOW(), INTERVAL 1 MINUTE)",
-            ['hash' => substr($hash, 0, 45)],
+            ['bucket' => $bucket],
             1
         );
 
         $current = (int)($count->total ?? 0);
 
-        // Counter erhöhen
         $this->db->queryPrepared(
             "INSERT INTO `bbf_captcha_rate_limits` (`ip_address`, `form_type`, `window_start`, `request_count`)
-             VALUES (:hash, 'api', :start, 1)
+             VALUES (:bucket, 'api', :start, 1)
              ON DUPLICATE KEY UPDATE `request_count` = `request_count` + 1",
-            ['hash' => substr($hash, 0, 45), 'start' => $windowStart]
+            ['bucket' => $bucket, 'start' => $windowStart]
         );
 
         return $current < $limit;
@@ -358,7 +359,11 @@ class CaptchaAPIController
     private function sendJson(array $data, int $statusCode = 200): void
     {
         http_response_code($statusCode);
-        echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        echo json_encode(
+            $data,
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+        );
     }
 
     private function sendError(string $message, int $statusCode = 400): void
