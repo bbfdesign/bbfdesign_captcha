@@ -284,29 +284,58 @@ class AISpamService
         return ['score' => 0, 'details' => []];
     }
 
-    private function checkSpamWords(string $text): array
-    {
-        $score   = 0;
-        $details = [];
+    /**
+     * Prozess-weiter Cache der Spam-Wortliste. Wird bei Writes via
+     * invalidateSpamWordsCache() zurueckgesetzt.
+     * Struktur: array<int, array{word:string, lower:string, weight:int}>
+     */
+    private static ?array $spamWordsCache = null;
 
+    public static function invalidateSpamWordsCache(): void
+    {
+        self::$spamWordsCache = null;
+    }
+
+    private function loadSpamWords(): array
+    {
+        if (self::$spamWordsCache !== null) {
+            return self::$spamWordsCache;
+        }
         $rows = $this->db->queryPrepared(
             "SELECT `word`, `weight` FROM `bbf_captcha_spam_words` WHERE `category` = 'spam'",
             [],
             2
         );
+        $out = [];
+        if (is_array($rows)) {
+            foreach ($rows as $row) {
+                $w = (string)$row->word;
+                $out[] = [
+                    'word'   => $w,
+                    'lower'  => mb_strtolower($w),
+                    'weight' => (int)$row->weight,
+                ];
+            }
+        }
+        self::$spamWordsCache = $out;
+        return $out;
+    }
 
-        if (!is_array($rows)) {
+    private function checkSpamWords(string $text): array
+    {
+        $words = $this->loadSpamWords();
+        if ($words === []) {
             return ['score' => 0, 'details' => []];
         }
 
+        $score     = 0;
+        $details   = [];
         $lowerText = mb_strtolower($text);
 
-        foreach ($rows as $row) {
-            $word = mb_strtolower($row->word);
-            if (mb_strpos($lowerText, $word) !== false) {
-                $weight    = (int)$row->weight;
-                $score    += $weight;
-                $details[] = 'Spam-Wort "' . $row->word . '" (+' . $weight . ')';
+        foreach ($words as $row) {
+            if (mb_strpos($lowerText, $row['lower']) !== false) {
+                $score    += $row['weight'];
+                $details[] = 'Spam-Wort "' . $row['word'] . '" (+' . $row['weight'] . ')';
             }
         }
 
@@ -579,5 +608,7 @@ class AISpamService
                 );
             }
         }
+
+        self::invalidateSpamWordsCache();
     }
 }

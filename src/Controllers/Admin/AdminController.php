@@ -354,6 +354,7 @@ class AdminController
             ['ip' => $ip, 'reason' => mb_substr($reason, 0, 255)]
         );
 
+        \Plugin\bbfdesign_captcha\src\Services\IPService::invalidateCache();
         return $this->jsonResponse(['success' => true, 'message' => $this->t('ip_blocked', 'IP gesperrt')]);
     }
 
@@ -370,6 +371,7 @@ class AdminController
             ['ip' => $ip]
         );
 
+        \Plugin\bbfdesign_captcha\src\Services\IPService::invalidateCache();
         return $this->jsonResponse(['success' => true, 'message' => $this->t('ip_unblocked', 'IP entsperrt')]);
     }
 
@@ -396,6 +398,7 @@ class AdminController
             ['ip' => $ip, 'range' => $range ?: null, 'type' => $type, 'reason' => mb_substr($reason, 0, 255)]
         );
 
+        \Plugin\bbfdesign_captcha\src\Services\IPService::invalidateCache();
         return $this->jsonResponse(['success' => true, 'message' => $this->t('ip_entry_added', 'IP-Eintrag hinzugefügt')]);
     }
 
@@ -428,6 +431,7 @@ class AdminController
             ['id' => $id]
         );
 
+        \Plugin\bbfdesign_captcha\src\Services\IPService::invalidateCache();
         return $this->jsonResponse(['success' => true]);
     }
 
@@ -593,6 +597,7 @@ class AdminController
             ['word' => mb_strtolower($word), 'cat' => $category, 'weight' => $weight]
         );
 
+        \Plugin\bbfdesign_captcha\src\Services\AISpamService::invalidateSpamWordsCache();
         return $this->jsonResponse(['success' => true]);
     }
 
@@ -609,6 +614,7 @@ class AdminController
             ['id' => $id]
         );
 
+        \Plugin\bbfdesign_captcha\src\Services\AISpamService::invalidateSpamWordsCache();
         return $this->jsonResponse(['success' => true]);
     }
 

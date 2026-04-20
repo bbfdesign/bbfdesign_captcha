@@ -26,9 +26,16 @@ class IPService
     private Setting $settings;
     private IPEntry $ipEntry;
 
-    /** In-Memory Cache */
-    private ?array $blacklistCache = null;
-    private ?array $whitelistCache = null;
+    /**
+     * Prozess-weiter In-Memory-Cache fuer Lookups.
+     * Struktur:
+     *   ['blacklist_exact'  => array<string, true>,   // ip_address => true
+     *    'blacklist_cidr'   => array<int, string>,     // cidr-strings
+     *    'whitelist_exact'  => array<string, true>,
+     *    'whitelist_cidr'   => array<int, string>,
+     *    'loaded_at'        => int (unix-ts)]
+     */
+    private static ?array $cache = null;
 
     public function __construct(DbInterface $db, Setting $settings)
     {
@@ -62,19 +69,96 @@ class IPService
     }
 
     /**
-     * IP gegen Blacklist prüfen (mit Cache)
+     * IP gegen Blacklist prüfen (mit In-Memory-Cache)
      */
     public function isBlacklisted(string $ip): bool
     {
-        return $this->ipEntry->isBlacklisted($ip);
+        $cache = $this->loadCache();
+        if (isset($cache['blacklist_exact'][$ip])) {
+            return true;
+        }
+        foreach ($cache['blacklist_cidr'] as $cidr) {
+            if (PluginHelper::ipInCidr($ip, $cidr)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-     * IP gegen Whitelist prüfen (mit Cache)
+     * IP gegen Whitelist prüfen (mit In-Memory-Cache)
      */
     public function isWhitelisted(string $ip): bool
     {
-        return $this->ipEntry->isWhitelisted($ip);
+        $cache = $this->loadCache();
+        if (isset($cache['whitelist_exact'][$ip])) {
+            return true;
+        }
+        foreach ($cache['whitelist_cidr'] as $cidr) {
+            if (PluginHelper::ipInCidr($ip, $cidr)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Einmalig alle nicht-abgelaufenen IP-Eintraege laden.
+     * Ergebnis wird prozess-weit (Static) gecacht — passt fuer kurzlebige
+     * PHP-Requests. Invalidierung bei jedem Write via invalidateCache().
+     *
+     * @return array{blacklist_exact:array<string,bool>,blacklist_cidr:array<int,string>,whitelist_exact:array<string,bool>,whitelist_cidr:array<int,string>,loaded_at:int}
+     */
+    private function loadCache(): array
+    {
+        if (self::$cache !== null) {
+            return self::$cache;
+        }
+
+        $rows = $this->db->queryPrepared(
+            "SELECT `ip_address`, `ip_range`, `entry_type`
+               FROM `bbf_captcha_ip_entries`
+              WHERE `expires_at` IS NULL OR `expires_at` > NOW()",
+            [],
+            2
+        );
+
+        $blExact = [];
+        $blCidr  = [];
+        $wlExact = [];
+        $wlCidr  = [];
+
+        if (is_array($rows)) {
+            foreach ($rows as $row) {
+                $ip   = (string)$row->ip_address;
+                $rng  = (string)($row->ip_range ?? '');
+                $type = (string)$row->entry_type;
+
+                $isCidr = $rng !== '';
+                if ($type === 'blacklist') {
+                    if ($isCidr) {
+                        $blCidr[] = $ip . $rng;
+                    } else {
+                        $blExact[$ip] = true;
+                    }
+                } elseif ($type === 'whitelist') {
+                    if ($isCidr) {
+                        $wlCidr[] = $ip . $rng;
+                    } else {
+                        $wlExact[$ip] = true;
+                    }
+                }
+            }
+        }
+
+        self::$cache = [
+            'blacklist_exact' => $blExact,
+            'blacklist_cidr'  => $blCidr,
+            'whitelist_exact' => $wlExact,
+            'whitelist_cidr'  => $wlCidr,
+            'loaded_at'       => time(),
+        ];
+        return self::$cache;
     }
 
     /**
@@ -84,7 +168,7 @@ class IPService
     {
         $duration = $durationMinutes ?? $this->settings->getInt('ip_auto_block_duration', 1440);
         $this->ipEntry->autoBlock($ip, $duration, $reason ?: 'Manual block');
-        $this->invalidateCache();
+        self::invalidateCache();
     }
 
     /**
@@ -96,7 +180,7 @@ class IPService
             "DELETE FROM `bbf_captcha_ip_entries` WHERE `ip_address` = :ip AND `entry_type` = 'blacklist'",
             ['ip' => $ip]
         );
-        $this->invalidateCache();
+        self::invalidateCache();
     }
 
     /**
@@ -109,7 +193,7 @@ class IPService
              VALUES (:ip, 'whitelist', :reason, 0)",
             ['ip' => $ip, 'reason' => $reason]
         );
-        $this->invalidateCache();
+        self::invalidateCache();
     }
 
     /**
@@ -140,7 +224,7 @@ class IPService
                 $duration,
                 'Auto-Block: ' . $attempts . '+ Versuche in ' . $window . 'min'
             );
-            $this->invalidateCache();
+            self::invalidateCache();
             return true;
         }
 
@@ -153,7 +237,7 @@ class IPService
     public function cleanupExpired(): int
     {
         $this->ipEntry->cleanupExpired();
-        $this->invalidateCache();
+        self::invalidateCache();
         return 0;
     }
 
@@ -180,9 +264,12 @@ class IPService
         ];
     }
 
-    private function invalidateCache(): void
+    /**
+     * Cache zuruecksetzen. Wird nach jedem Write (block/unblock/whitelist) aufgerufen.
+     * Static, damit parallele IPService-Instanzen denselben Zustand sehen.
+     */
+    public static function invalidateCache(): void
     {
-        $this->blacklistCache = null;
-        $this->whitelistCache = null;
+        self::$cache = null;
     }
 }
