@@ -34,7 +34,26 @@
     },
 
     /**
-     * Show a floating toast notification.
+     * Liefert (oder erstellt) den Toast-Container mit Live-Region.
+     * Verhindert, dass jeder Toast eine eigene role="status"-Region bekommt —
+     * Screenreader springen sonst chaotisch oder verlieren Ansagen.
+     */
+    _getToastContainer: function() {
+      var el = document.getElementById('bbf-toast-live');
+      if (el) return el;
+      el = document.createElement('div');
+      el.id = 'bbf-toast-live';
+      el.setAttribute('role', 'status');
+      el.setAttribute('aria-live', 'polite');
+      el.setAttribute('aria-atomic', 'true');
+      el.style.cssText = 'position:fixed;top:1rem;right:1rem;z-index:99999;display:flex;flex-direction:column;gap:0.5rem;pointer-events:none;';
+      document.body.appendChild(el);
+      return el;
+    },
+
+    /**
+     * Show a floating toast notification (mit aria-live-Region).
+     * type 'error' nutzt role="alert" fuer hoehere SR-Prioritaet.
      */
     showNotification: function(message, type) {
       type = type || 'info';
@@ -44,10 +63,14 @@
         warning: '#d97706',
         info: '#2563eb'
       };
+      var container = this._getToastContainer();
       var el = document.createElement('div');
-      el.style.cssText = 'position:fixed;top:1rem;right:1rem;padding:0.75rem 1.25rem;border-radius:0.375rem;color:#fff;background-color:' + (colours[type] || colours.info) + ';box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:99999;font-size:0.875rem;transition:opacity .3s ease;opacity:0;font-family:var(--bbf-font-family);';
+      if (type === 'error') {
+        el.setAttribute('role', 'alert');
+      }
+      el.style.cssText = 'padding:0.75rem 1.25rem;border-radius:0.375rem;color:#fff;background-color:' + (colours[type] || colours.info) + ';box-shadow:0 4px 12px rgba(0,0,0,.15);font-size:0.875rem;transition:opacity .3s ease;opacity:0;font-family:var(--bbf-font-family);pointer-events:auto;';
       el.textContent = message;
-      document.body.appendChild(el);
+      container.appendChild(el);
       requestAnimationFrame(function() { el.style.opacity = '1'; });
       setTimeout(function() {
         el.style.opacity = '0';

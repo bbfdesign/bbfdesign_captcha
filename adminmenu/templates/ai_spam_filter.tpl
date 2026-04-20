@@ -5,15 +5,15 @@
 
 <div {literal}x-data="bbfAiFilter()"{/literal}>
     {* ── Tabs ── *}
-    <div class="bbf-tabs">
-        <button type="button" class="bbf-tab" {literal}:class="{ active: tab === 'settings' }" @click="tab = 'settings'"{/literal}>Einstellungen</button>
-        <button type="button" class="bbf-tab" {literal}:class="{ active: tab === 'words' }" @click="tab = 'words'"{/literal}>Spam-W&ouml;rter</button>
-        <button type="button" class="bbf-tab" {literal}:class="{ active: tab === 'domains' }" @click="tab = 'domains'"{/literal}>Disposable Domains</button>
-        <button type="button" class="bbf-tab" {literal}:class="{ active: tab === 'test' }" @click="tab = 'test'"{/literal}>Test</button>
+    <div class="bbf-tabs" role="tablist" aria-label="Smart-Spamfilter-Ansicht">
+        <button type="button" class="bbf-tab" role="tab" id="bbf-ai-tab-settings" aria-controls="bbf-ai-panel-settings" {literal}:aria-selected="tab === 'settings' ? 'true' : 'false'" :tabindex="tab === 'settings' ? 0 : -1" :class="{ active: tab === 'settings' }" @click="tab = 'settings'"{/literal}>Einstellungen</button>
+        <button type="button" class="bbf-tab" role="tab" id="bbf-ai-tab-words" aria-controls="bbf-ai-panel-words" {literal}:aria-selected="tab === 'words' ? 'true' : 'false'" :tabindex="tab === 'words' ? 0 : -1" :class="{ active: tab === 'words' }" @click="tab = 'words'"{/literal}>Spam-W&ouml;rter</button>
+        <button type="button" class="bbf-tab" role="tab" id="bbf-ai-tab-domains" aria-controls="bbf-ai-panel-domains" {literal}:aria-selected="tab === 'domains' ? 'true' : 'false'" :tabindex="tab === 'domains' ? 0 : -1" :class="{ active: tab === 'domains' }" @click="tab = 'domains'"{/literal}>Disposable Domains</button>
+        <button type="button" class="bbf-tab" role="tab" id="bbf-ai-tab-test" aria-controls="bbf-ai-panel-test" {literal}:aria-selected="tab === 'test' ? 'true' : 'false'" :tabindex="tab === 'test' ? 0 : -1" :class="{ active: tab === 'test' }" @click="tab = 'test'"{/literal}>Test</button>
     </div>
 
     {* ── Settings Tab ── *}
-    <div class="bbf-tab-content" {literal}:class="{ active: tab === 'settings' }"{/literal}>
+    <div class="bbf-tab-content" role="tabpanel" id="bbf-ai-panel-settings" aria-labelledby="bbf-ai-tab-settings" {literal}:hidden="tab !== 'settings'" :class="{ active: tab === 'settings' }"{/literal}>
         <div class="bbf-card">
             <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
                 <label class="bbf-form-label">Schwelle: OK</label>
@@ -37,17 +37,17 @@
                 </div>
             </div>
             <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
-                <label class="bbf-form-label">Spracherkennung</label>
-                <label class="bbf-toggle">
-                    <input type="checkbox" {literal}x-model="aiSettings.ai_check_language"{/literal}>
-                    <span class="bbf-toggle-slider"></span>
+                <label class="bbf-form-label" for="bbf-ai-lang-check">Spracherkennung</label>
+                <label class="bbf-toggle" aria-label="Spracherkennung aktivieren">
+                    <input type="checkbox" id="bbf-ai-lang-check" {literal}x-model="aiSettings.ai_check_language"{/literal}>
+                    <span class="bbf-toggle-slider" aria-hidden="true"></span>
                 </label>
             </div>
             <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-lg);">
-                <label class="bbf-form-label">Wegwerf-E-Mails</label>
-                <label class="bbf-toggle">
-                    <input type="checkbox" {literal}x-model="aiSettings.ai_check_disposable_email"{/literal}>
-                    <span class="bbf-toggle-slider"></span>
+                <label class="bbf-form-label" for="bbf-ai-disposable-check">Wegwerf-E-Mails</label>
+                <label class="bbf-toggle" aria-label="Wegwerf-E-Mail-Pruefung aktivieren">
+                    <input type="checkbox" id="bbf-ai-disposable-check" {literal}x-model="aiSettings.ai_check_disposable_email"{/literal}>
+                    <span class="bbf-toggle-slider" aria-hidden="true"></span>
                 </label>
             </div>
             <button type="button" class="bbf-btn bbf-btn-primary" {literal}@click="saveAiSettings()"{/literal}>Speichern</button>
@@ -55,7 +55,7 @@
     </div>
 
     {* ── Spam Words Tab ── *}
-    <div class="bbf-tab-content" {literal}:class="{ active: tab === 'words' }"{/literal}>
+    <div class="bbf-tab-content" role="tabpanel" id="bbf-ai-panel-words" aria-labelledby="bbf-ai-tab-words" {literal}:hidden="tab !== 'words'" :class="{ active: tab === 'words' }"{/literal}>
         <div class="bbf-card">
             <div style="display: flex; gap: 8px; margin-bottom: var(--bbf-spacing-md);">
                 <input type="text" class="bbf-input" placeholder="Neues Spam-Wort..." style="max-width: 300px;" {literal}x-model="newWord"{/literal}>
@@ -65,11 +65,11 @@
             <table class="bbf-table">
                 <thead>
                     <tr>
-                        <th>Wort</th>
-                        <th>Kategorie</th>
-                        <th>Gewicht</th>
-                        <th>Gelernt</th>
-                        <th></th>
+                        <th scope="col">Wort</th>
+                        <th scope="col">Kategorie</th>
+                        <th scope="col">Gewicht</th>
+                        <th scope="col">Gelernt</th>
+                        <th scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -94,7 +94,7 @@
     </div>
 
     {* ── Disposable Domains Tab ── *}
-    <div class="bbf-tab-content" {literal}:class="{ active: tab === 'domains' }"{/literal}>
+    <div class="bbf-tab-content" role="tabpanel" id="bbf-ai-panel-domains" aria-labelledby="bbf-ai-tab-domains" {literal}:hidden="tab !== 'domains'" :class="{ active: tab === 'domains' }"{/literal}>
         <div class="bbf-card">
             <div class="bbf-alert bbf-alert-info">
                 Die Liste der Wegwerf-E-Mail-Domains wird in Phase 5 vollst&auml;ndig implementiert.
@@ -104,7 +104,7 @@
     </div>
 
     {* ── Test Tab ── *}
-    <div class="bbf-tab-content" {literal}:class="{ active: tab === 'test' }"{/literal}>
+    <div class="bbf-tab-content" role="tabpanel" id="bbf-ai-panel-test" aria-labelledby="bbf-ai-tab-test" {literal}:hidden="tab !== 'test'" :class="{ active: tab === 'test' }"{/literal}>
         <div class="bbf-card">
             <h3 class="bbf-card-title" style="margin-bottom: var(--bbf-spacing-md);">Spam-Score testen</h3>
             <textarea class="bbf-input bbf-textarea" placeholder="Text eingeben..." {literal}x-model="testText"{/literal}></textarea>

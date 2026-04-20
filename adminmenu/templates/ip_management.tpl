@@ -1,16 +1,16 @@
 <h2 class="bbf-page-title">IP-Verwaltung</h2>
 
 <div {literal}x-data="bbfIpManagement()"{/literal}>
-    <div class="bbf-tabs">
-        <button type="button" class="bbf-tab" {literal}:class="{ active: tab === 'blacklist' }" @click="tab = 'blacklist'; loadEntries('blacklist')"{/literal}>Blacklist</button>
-        <button type="button" class="bbf-tab" {literal}:class="{ active: tab === 'whitelist' }" @click="tab = 'whitelist'; loadEntries('whitelist')"{/literal}>Whitelist</button>
-        <button type="button" class="bbf-tab" {literal}:class="{ active: tab === 'autoblock' }" @click="tab = 'autoblock'"{/literal}>Auto-Block Regeln</button>
+    <div class="bbf-tabs" role="tablist" aria-label="IP-Verwaltung-Ansicht">
+        <button type="button" class="bbf-tab" role="tab" id="bbf-ip-tab-blacklist" aria-controls="bbf-ip-panel-blacklist" {literal}:aria-selected="tab === 'blacklist' ? 'true' : 'false'" :tabindex="tab === 'blacklist' ? 0 : -1" :class="{ active: tab === 'blacklist' }" @click="tab = 'blacklist'; loadEntries('blacklist')"{/literal}>Blacklist</button>
+        <button type="button" class="bbf-tab" role="tab" id="bbf-ip-tab-whitelist" aria-controls="bbf-ip-panel-whitelist" {literal}:aria-selected="tab === 'whitelist' ? 'true' : 'false'" :tabindex="tab === 'whitelist' ? 0 : -1" :class="{ active: tab === 'whitelist' }" @click="tab = 'whitelist'; loadEntries('whitelist')"{/literal}>Whitelist</button>
+        <button type="button" class="bbf-tab" role="tab" id="bbf-ip-tab-autoblock" aria-controls="bbf-ip-panel-autoblock" {literal}:aria-selected="tab === 'autoblock' ? 'true' : 'false'" :tabindex="tab === 'autoblock' ? 0 : -1" :class="{ active: tab === 'autoblock' }" @click="tab = 'autoblock'"{/literal}>Auto-Block Regeln</button>
     </div>
 
     {* ── Blacklist/Whitelist ── *}
     {literal}
     <template x-if="tab === 'blacklist' || tab === 'whitelist'">
-        <div class="bbf-card">
+        <div class="bbf-card" role="tabpanel" :id="'bbf-ip-panel-' + tab" :aria-labelledby="'bbf-ip-tab-' + tab">
             <div style="display: flex; gap: 8px; margin-bottom: var(--bbf-spacing-md); flex-wrap: wrap;">
                 <input type="text" class="bbf-input" placeholder="IP-Adresse (z.B. 192.168.1.1)" style="max-width: 250px;" x-model="newIp">
                 <input type="text" class="bbf-input" placeholder="CIDR (z.B. /24)" style="max-width: 100px;" x-model="newRange">
@@ -20,13 +20,13 @@
             <table class="bbf-table">
                 <thead>
                     <tr>
-                        <th>IP-Adresse</th>
-                        <th>CIDR</th>
-                        <th>Grund</th>
-                        <th>Auto</th>
-                        <th>Ablauf</th>
-                        <th>Erstellt</th>
-                        <th></th>
+                        <th scope="col">IP-Adresse</th>
+                        <th scope="col">CIDR</th>
+                        <th scope="col">Grund</th>
+                        <th scope="col">Auto</th>
+                        <th scope="col">Ablauf</th>
+                        <th scope="col">Erstellt</th>
+                        <th scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -64,12 +64,12 @@
     {* ── Auto-Block Regeln ── *}
     {literal}
     <template x-if="tab === 'autoblock'">
-        <div class="bbf-card">
+        <div class="bbf-card" role="tabpanel" id="bbf-ip-panel-autoblock" aria-labelledby="bbf-ip-tab-autoblock">
             <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
-                <label class="bbf-form-label">Auto-Block aktiv</label>
-                <label class="bbf-toggle">
-                    <input type="checkbox" x-model="autoBlock.enabled">
-                    <span class="bbf-toggle-slider"></span>
+                <label class="bbf-form-label" for="bbf-ip-autoblock-enabled">Auto-Block aktiv</label>
+                <label class="bbf-toggle" aria-label="Auto-Block aktivieren">
+                    <input type="checkbox" id="bbf-ip-autoblock-enabled" x-model="autoBlock.enabled">
+                    <span class="bbf-toggle-slider" aria-hidden="true"></span>
                 </label>
             </div>
             <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">

@@ -16,9 +16,9 @@
                 <span class="bbf-badge bbf-badge-primary">Empfohlen</span>
                 <span class="bbf-badge bbf-badge-success">Kein Consent n&ouml;tig</span>
             </div>
-            <label class="bbf-toggle">
+            <label class="bbf-toggle" aria-label="Schutzmethode aktivieren">
                 <input type="checkbox" {literal}x-model="methods.altcha_enabled" @change="saveSetting('altcha_enabled', methods.altcha_enabled ? '1' : '0')"{/literal}>
-                <span class="bbf-toggle-slider"></span>
+                <span class="bbf-toggle-slider" aria-hidden="true"></span>
             </label>
         </div>
         <div class="bbf-method-desc">
@@ -52,9 +52,9 @@
                 Honeypot
                 <span class="bbf-badge bbf-badge-success">Kein Consent n&ouml;tig</span>
             </div>
-            <label class="bbf-toggle">
+            <label class="bbf-toggle" aria-label="Schutzmethode aktivieren">
                 <input type="checkbox" {literal}x-model="methods.honeypot_enabled" @change="saveSetting('honeypot_enabled', methods.honeypot_enabled ? '1' : '0')"{/literal}>
-                <span class="bbf-toggle-slider"></span>
+                <span class="bbf-toggle-slider" aria-hidden="true"></span>
             </label>
         </div>
         <div class="bbf-method-desc">
@@ -77,10 +77,10 @@
                 <div class="bbf-form-grid">
                     <label class="bbf-form-label">Alle Formulare</label>
                     <div>
-                        <label class="bbf-toggle">
+                        <label class="bbf-toggle" aria-label="Schutzmethode aktivieren">
                             <input type="checkbox" {literal}x-model="methods.honeypot_inject_all_forms"
                                    @change="saveSetting('honeypot_inject_all_forms', methods.honeypot_inject_all_forms ? '1' : '0')"{/literal}>
-                            <span class="bbf-toggle-slider"></span>
+                            <span class="bbf-toggle-slider" aria-hidden="true"></span>
                         </label>
                         <div class="bbf-form-help">Honeypot-Felder in alle Formulare per Output-Filter injizieren</div>
                     </div>
@@ -97,9 +97,9 @@
                 Timing-Schutz
                 <span class="bbf-badge bbf-badge-success">Kein Consent n&ouml;tig</span>
             </div>
-            <label class="bbf-toggle">
+            <label class="bbf-toggle" aria-label="Schutzmethode aktivieren">
                 <input type="checkbox" {literal}x-model="methods.timing_enabled" @change="saveSetting('timing_enabled', methods.timing_enabled ? '1' : '0')"{/literal}>
-                <span class="bbf-toggle-slider"></span>
+                <span class="bbf-toggle-slider" aria-hidden="true"></span>
             </label>
         </div>
         <div class="bbf-method-desc">
@@ -135,9 +135,9 @@
                 Smart-Spamfilter
                 <span class="bbf-badge bbf-badge-success">Kein Consent n&ouml;tig</span>
             </div>
-            <label class="bbf-toggle">
+            <label class="bbf-toggle" aria-label="Schutzmethode aktivieren">
                 <input type="checkbox" {literal}x-model="methods.ai_filter_enabled" @change="saveSetting('ai_filter_enabled', methods.ai_filter_enabled ? '1' : '0')"{/literal}>
-                <span class="bbf-toggle-slider"></span>
+                <span class="bbf-toggle-slider" aria-hidden="true"></span>
             </label>
         </div>
         <div class="bbf-method-desc">
@@ -154,9 +154,9 @@
                 Cloudflare Turnstile
                 <span class="bbf-badge bbf-badge-warning">Consent erforderlich</span>
             </div>
-            <label class="bbf-toggle">
+            <label class="bbf-toggle" aria-label="Schutzmethode aktivieren">
                 <input type="checkbox" {literal}x-model="methods.turnstile_enabled" @change="saveSetting('turnstile_enabled', methods.turnstile_enabled ? '1' : '0')"{/literal}>
-                <span class="bbf-toggle-slider"></span>
+                <span class="bbf-toggle-slider" aria-hidden="true"></span>
             </label>
         </div>
         <div class="bbf-method-desc">
@@ -202,9 +202,9 @@
                 Google reCAPTCHA
                 <span class="bbf-badge bbf-badge-danger">Consent zwingend!</span>
             </div>
-            <label class="bbf-toggle">
+            <label class="bbf-toggle" aria-label="Schutzmethode aktivieren">
                 <input type="checkbox" {literal}x-model="methods.recaptcha_enabled" @change="saveSetting('recaptcha_enabled', methods.recaptcha_enabled ? '1' : '0')"{/literal}>
-                <span class="bbf-toggle-slider"></span>
+                <span class="bbf-toggle-slider" aria-hidden="true"></span>
             </label>
         </div>
         <div class="bbf-method-desc">
@@ -257,9 +257,9 @@
                 Friendly Captcha
                 <span class="bbf-badge bbf-badge-success">EU-Anbieter</span>
             </div>
-            <label class="bbf-toggle">
+            <label class="bbf-toggle" aria-label="Schutzmethode aktivieren">
                 <input type="checkbox" {literal}x-model="methods.friendly_captcha_enabled" @change="saveSetting('friendly_captcha_enabled', methods.friendly_captcha_enabled ? '1' : '0')"{/literal}>
-                <span class="bbf-toggle-slider"></span>
+                <span class="bbf-toggle-slider" aria-hidden="true"></span>
             </label>
         </div>
         <div class="bbf-method-desc">
@@ -294,9 +294,9 @@
                 hCaptcha
                 <span class="bbf-badge bbf-badge-warning">Consent erforderlich</span>
             </div>
-            <label class="bbf-toggle">
+            <label class="bbf-toggle" aria-label="Schutzmethode aktivieren">
                 <input type="checkbox" {literal}x-model="methods.hcaptcha_enabled" @change="saveSetting('hcaptcha_enabled', methods.hcaptcha_enabled ? '1' : '0')"{/literal}>
-                <span class="bbf-toggle-slider"></span>
+                <span class="bbf-toggle-slider" aria-hidden="true"></span>
             </label>
         </div>
         <div class="bbf-method-desc">

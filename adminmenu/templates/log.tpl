@@ -5,16 +5,16 @@
     <div class="bbf-card" style="margin-bottom: var(--bbf-spacing-md);">
         <div style="display: flex; flex-wrap: wrap; gap: var(--bbf-spacing-sm); align-items: flex-end;">
             <div>
-                <label style="font-size: 12px; color: var(--bbf-muted); display: block; margin-bottom: 4px;">Von</label>
-                <input type="date" class="bbf-input" style="height: 36px; width: 150px;" {literal}x-model="filters.from"{/literal}>
+                <label for="bbf-log-filter-from" style="font-size: 12px; color: var(--bbf-muted); display: block; margin-bottom: 4px;">Von</label>
+                <input id="bbf-log-filter-from" type="date" class="bbf-input" style="height: 36px; width: 150px;" {literal}x-model="filters.from"{/literal}>
             </div>
             <div>
-                <label style="font-size: 12px; color: var(--bbf-muted); display: block; margin-bottom: 4px;">Bis</label>
-                <input type="date" class="bbf-input" style="height: 36px; width: 150px;" {literal}x-model="filters.to"{/literal}>
+                <label for="bbf-log-filter-to" style="font-size: 12px; color: var(--bbf-muted); display: block; margin-bottom: 4px;">Bis</label>
+                <input id="bbf-log-filter-to" type="date" class="bbf-input" style="height: 36px; width: 150px;" {literal}x-model="filters.to"{/literal}>
             </div>
             <div>
-                <label style="font-size: 12px; color: var(--bbf-muted); display: block; margin-bottom: 4px;">Formular</label>
-                <select class="bbf-input bbf-select" style="height: 36px; width: 160px;" {literal}x-model="filters.form"{/literal}>
+                <label for="bbf-log-filter-form" style="font-size: 12px; color: var(--bbf-muted); display: block; margin-bottom: 4px;">Formular</label>
+                <select id="bbf-log-filter-form" class="bbf-input bbf-select" style="height: 36px; width: 160px;" {literal}x-model="filters.form"{/literal}>
                     <option value="">Alle</option>
                     <option value="contact">Kontakt</option>
                     <option value="registration">Registrierung</option>
@@ -25,8 +25,8 @@
                 </select>
             </div>
             <div>
-                <label style="font-size: 12px; color: var(--bbf-muted); display: block; margin-bottom: 4px;">Methode</label>
-                <select class="bbf-input bbf-select" style="height: 36px; width: 150px;" {literal}x-model="filters.method"{/literal}>
+                <label for="bbf-log-filter-method" style="font-size: 12px; color: var(--bbf-muted); display: block; margin-bottom: 4px;">Methode</label>
+                <select id="bbf-log-filter-method" class="bbf-input bbf-select" style="height: 36px; width: 150px;" {literal}x-model="filters.method"{/literal}>
                     <option value="">Alle</option>
                     <option value="honeypot">Honeypot</option>
                     <option value="timing">Timing</option>
@@ -38,12 +38,12 @@
                 </select>
             </div>
             <div>
-                <label style="font-size: 12px; color: var(--bbf-muted); display: block; margin-bottom: 4px;">IP</label>
-                <input type="text" class="bbf-input" style="height: 36px; width: 140px;" placeholder="IP..." {literal}x-model="filters.ip"{/literal}>
+                <label for="bbf-log-filter-ip" style="font-size: 12px; color: var(--bbf-muted); display: block; margin-bottom: 4px;">IP</label>
+                <input id="bbf-log-filter-ip" type="text" class="bbf-input" style="height: 36px; width: 140px;" placeholder="IP..." {literal}x-model="filters.ip"{/literal}>
             </div>
             <div>
-                <label style="font-size: 12px; color: var(--bbf-muted); display: block; margin-bottom: 4px;">Aktion</label>
-                <select class="bbf-input bbf-select" style="height: 36px; width: 130px;" {literal}x-model="filters.action"{/literal}>
+                <label for="bbf-log-filter-action" style="font-size: 12px; color: var(--bbf-muted); display: block; margin-bottom: 4px;">Aktion</label>
+                <select id="bbf-log-filter-action" class="bbf-input bbf-select" style="height: 36px; width: 130px;" {literal}x-model="filters.action"{/literal}>
                     <option value="">Alle</option>
                     <option value="blocked">Geblockt</option>
                     <option value="logged">Geloggt</option>
@@ -61,13 +61,13 @@
             <table class="bbf-table">
                 <thead>
                     <tr>
-                        <th>Zeitpunkt</th>
-                        <th>IP</th>
-                        <th>Formular</th>
-                        <th>Methode</th>
-                        <th>Score</th>
-                        <th>Aktion</th>
-                        <th>Aktionen</th>
+                        <th scope="col">Zeitpunkt</th>
+                        <th scope="col">IP</th>
+                        <th scope="col">Formular</th>
+                        <th scope="col">Methode</th>
+                        <th scope="col">Score</th>
+                        <th scope="col">Aktion</th>
+                        <th scope="col">Aktionen</th>
                     </tr>
                 </thead>
                 <tbody>

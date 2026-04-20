@@ -20,10 +20,10 @@
         <table class="bbf-table">
             <thead>
                 <tr>
-                    <th>Methode</th>
-                    <th>DSGVO</th>
-                    <th>Consent</th>
-                    <th>Beschreibung</th>
+                    <th scope="col">Methode</th>
+                    <th scope="col">DSGVO</th>
+                    <th scope="col">Consent</th>
+                    <th scope="col">Beschreibung</th>
                 </tr>
             </thead>
             <tbody>

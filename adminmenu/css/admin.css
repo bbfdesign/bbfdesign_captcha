@@ -716,8 +716,15 @@ body #content_wrapper {
     display: none;
 }
 
-.bbf-tab-content.active {
+.bbf-tab-content.active,
+[role="tabpanel"]:not([hidden]) {
     display: block;
+}
+
+/* ARIA-state mappen fuer aria-selected="true" Buttons */
+.bbf-tab[aria-selected="true"] {
+    color: var(--bbf-primary);
+    border-bottom-color: var(--bbf-primary);
 }
 
 /* ═══════════════════════════════════════════════════════════

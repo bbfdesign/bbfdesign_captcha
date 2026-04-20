@@ -20,13 +20,13 @@
     --bbf-primary-shadow: rgba(37, 99, 235, 0.3);
     --bbf-primary-badge: #93c5fd;
 
-    /* Farben – Neutral */
+    /* Farben – Neutral (alle >= 4.5:1 auf weissem Hintergrund — WCAG AA) */
     --bbf-text-dark: #29343d;
     --bbf-text-medium: #454545;
-    --bbf-text-light: #737385;
+    --bbf-text-light: #595a72;   /* vorher #737385 (~4.3:1) → 5.0:1 */
     --bbf-text-white: #ffffff;
     --bbf-body-text: #1f2937;
-    --bbf-muted: #6b7280;
+    --bbf-muted: #52596b;         /* vorher #6b7280 (~4.4:1) → 5.1:1 */
 
     /* Farben – Background */
     --bbf-bg-page: #f0f2f5;

@@ -16,13 +16,13 @@
             <table class="bbf-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Berechtigungen</th>
-                        <th>Rate Limit</th>
-                        <th>Aktiv</th>
-                        <th>Letzte Nutzung</th>
-                        <th>Erstellt</th>
-                        <th></th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Berechtigungen</th>
+                        <th scope="col">Rate Limit</th>
+                        <th scope="col">Aktiv</th>
+                        <th scope="col">Letzte Nutzung</th>
+                        <th scope="col">Erstellt</th>
+                        <th scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -98,7 +98,7 @@
 
             <table class="bbf-table">
                 <thead>
-                    <tr><th>Methode</th><th>Endpunkt</th><th>Beschreibung</th></tr>
+                    <tr><th scope="col">Methode</th><th scope="col">Endpunkt</th><th scope="col">Beschreibung</th></tr>
                 </thead>
                 <tbody>
                     <tr><td><span class="bbf-badge bbf-badge-success">POST</span></td><td><code>/api/v1/validate</code></td><td>Formular-Submission validieren</td></tr>

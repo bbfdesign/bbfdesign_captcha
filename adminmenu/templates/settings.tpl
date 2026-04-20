@@ -9,9 +9,9 @@
                 Globaler Schutz
                 <div class="bbf-form-help">Notfall-Kill-Switch: Deaktiviert den gesamten Spam-Schutz</div>
             </label>
-            <label class="bbf-toggle">
+            <label class="bbf-toggle" aria-label="Globalen Schutz aktivieren">
                 <input type="checkbox" {literal}x-model="s.global_enabled"{/literal}>
-                <span class="bbf-toggle-slider"></span>
+                <span class="bbf-toggle-slider" aria-hidden="true"></span>
             </label>
         </div>
 
@@ -37,9 +37,9 @@
 
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
             <label class="bbf-form-label">Auto-Cleanup</label>
-            <label class="bbf-toggle">
+            <label class="bbf-toggle" aria-label="Automatisches Aufraeumen aktivieren">
                 <input type="checkbox" {literal}x-model="s.auto_cleanup"{/literal}>
-                <span class="bbf-toggle-slider"></span>
+                <span class="bbf-toggle-slider" aria-hidden="true"></span>
             </label>
         </div>
 
@@ -48,9 +48,9 @@
                 Debug-Modus
                 <div class="bbf-form-help">Zus&auml;tzliches Logging f&uuml;r Fehlersuche</div>
             </label>
-            <label class="bbf-toggle">
+            <label class="bbf-toggle" aria-label="Debug-Modus aktivieren">
                 <input type="checkbox" {literal}x-model="s.debug_mode"{/literal}>
-                <span class="bbf-toggle-slider"></span>
+                <span class="bbf-toggle-slider" aria-hidden="true"></span>
             </label>
         </div>
 
@@ -59,9 +59,9 @@
 
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
             <label class="bbf-form-label">Aktiviert</label>
-            <label class="bbf-toggle">
+            <label class="bbf-toggle" aria-label="E-Mail-Benachrichtigung bei Spam-Welle aktivieren">
                 <input type="checkbox" {literal}x-model="s.email_alert_enabled"{/literal}>
-                <span class="bbf-toggle-slider"></span>
+                <span class="bbf-toggle-slider" aria-hidden="true"></span>
             </label>
         </div>
 

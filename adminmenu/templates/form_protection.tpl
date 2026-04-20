@@ -11,12 +11,12 @@
             <table class="bbf-table">
                 <thead>
                     <tr>
-                        <th>Formular</th>
-                        <th>Methoden</th>
-                        <th>Score-Schwelle</th>
-                        <th>Aktion bei Spam</th>
-                        <th>Aktiv</th>
-                        <th></th>
+                        <th scope="col">Formular</th>
+                        <th scope="col">Methoden</th>
+                        <th scope="col">Score-Schwelle</th>
+                        <th scope="col">Aktion bei Spam</th>
+                        <th scope="col">Aktiv</th>
+                        <th scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -54,10 +54,10 @@
                                 </select>
                             </td>
                             <td>
-                                <label class="bbf-toggle">
+                                <label class="bbf-toggle" aria-label="Schutzmethode aktivieren">
                                     <input type="checkbox" x-model="form.is_active" @change="saveForm(form)"
                                            :true-value="1" :false-value="0">
-                                    <span class="bbf-toggle-slider"></span>
+                                    <span class="bbf-toggle-slider" aria-hidden="true"></span>
                                 </label>
                             </td>
                             <td>

@@ -15,9 +15,9 @@
                 {$langVars->getTranslation('llm_enabled', $adminLang)|default:'LLM-Prüfung aktivieren'|escape:'html'}
                 <div class="bbf-form-help">Wenn aktiviert, wird eingehender Text zusätzlich durch das gewählte LLM geprüft.</div>
             </label>
-            <label class="bbf-toggle">
+            <label class="bbf-toggle" aria-label="LLM-Pruefung aktivieren">
                 <input type="checkbox" {literal}x-model="s.llm_enabled"{/literal}>
-                <span class="bbf-toggle-slider"></span>
+                <span class="bbf-toggle-slider" aria-hidden="true"></span>
             </label>
         </div>
 
@@ -62,9 +62,9 @@
                 {$langVars->getTranslation('llm_only_borderline', $adminLang)|default:'Nur bei Grenzfällen prüfen'|escape:'html'}
                 <div class="bbf-form-help">{$langVars->getTranslation('llm_only_borderline_help', $adminLang)|default:'LLM nur aufrufen, wenn der regelbasierte Score zwischen „OK" und „Spam" liegt. Spart API-Kosten.'|escape:'html'}</div>
             </label>
-            <label class="bbf-toggle">
+            <label class="bbf-toggle" aria-label="LLM nur bei Grenzfaellen aufrufen">
                 <input type="checkbox" {literal}x-model="s.llm_only_borderline"{/literal}>
-                <span class="bbf-toggle-slider"></span>
+                <span class="bbf-toggle-slider" aria-hidden="true"></span>
             </label>
         </div>
 
