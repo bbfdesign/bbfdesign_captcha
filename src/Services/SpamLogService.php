@@ -32,36 +32,29 @@ class SpamLogService
     // ─── Dashboard-Statistiken ──────────────────────────────
 
     /**
-     * KPI-Daten für das Dashboard
+     * KPI-Daten für das Dashboard.
+     *
+     * Konsolidierter Single-Query (vorher 3 separate COUNT-Statements).
+     * MySQL nutzt idx_action_created fuer die SUM(CASE)-Aggregation.
      */
     public function getKPIs(): array
     {
-        $today = date('Y-m-d');
-
-        $blockedToday = $this->db->queryPrepared(
-            "SELECT COUNT(*) AS cnt FROM `bbf_captcha_spam_log`
-             WHERE `action_taken` = 'blocked' AND DATE(`created_at`) = :today",
-            ['today' => $today],
-            1
-        );
-
-        $blockedTotal = $this->db->queryPrepared(
-            "SELECT COUNT(*) AS cnt FROM `bbf_captcha_spam_log` WHERE `action_taken` = 'blocked'",
+        $row = $this->db->queryPrepared(
+            "SELECT
+                SUM(CASE WHEN `action_taken` = 'blocked' AND DATE(`created_at`) = CURDATE() THEN 1 ELSE 0 END) AS blocked_today,
+                SUM(CASE WHEN `action_taken` = 'blocked' THEN 1 ELSE 0 END) AS blocked_total,
+                COUNT(*) AS total_entries
+             FROM `bbf_captcha_spam_log`",
             [],
             1
         );
 
-        $totalEntries = $this->db->queryPrepared(
-            "SELECT COUNT(*) AS cnt FROM `bbf_captcha_spam_log`",
-            [],
-            1
-        );
-
-        $totalCount   = (int)($totalEntries->cnt ?? 0);
-        $blockedCount = (int)($blockedTotal->cnt ?? 0);
+        $blockedToday = (int)($row->blocked_today ?? 0);
+        $blockedCount = (int)($row->blocked_total ?? 0);
+        $totalCount   = (int)($row->total_entries ?? 0);
 
         return [
-            'blocked_today'  => (int)($blockedToday->cnt ?? 0),
+            'blocked_today'  => $blockedToday,
             'blocked_total'  => $blockedCount,
             'total_entries'  => $totalCount,
             'detection_rate' => $totalCount > 0 ? round(($blockedCount / $totalCount) * 100, 1) : 0,
@@ -142,29 +135,27 @@ class SpamLogService
     }
 
     /**
-     * Trend-Daten: Vergleich der letzten 7 Tage mit den 7 davor
+     * Trend-Daten: Vergleich der letzten 7 Tage mit den 7 davor.
+     *
+     * Konsolidierter Single-Query (vorher 2 separate COUNT-Statements).
      */
     public function getTrend(): array
     {
-        $current = $this->db->queryPrepared(
-            "SELECT COUNT(*) AS cnt FROM `bbf_captcha_spam_log`
+        $row = $this->db->queryPrepared(
+            "SELECT
+                SUM(CASE WHEN `created_at` >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 ELSE 0 END) AS cur,
+                SUM(CASE WHEN `created_at` >= DATE_SUB(NOW(), INTERVAL 14 DAY)
+                          AND `created_at` <  DATE_SUB(NOW(), INTERVAL 7 DAY)
+                         THEN 1 ELSE 0 END) AS prev
+             FROM `bbf_captcha_spam_log`
              WHERE `action_taken` = 'blocked'
-             AND `created_at` >= DATE_SUB(NOW(), INTERVAL 7 DAY)",
+               AND `created_at` >= DATE_SUB(NOW(), INTERVAL 14 DAY)",
             [],
             1
         );
 
-        $previous = $this->db->queryPrepared(
-            "SELECT COUNT(*) AS cnt FROM `bbf_captcha_spam_log`
-             WHERE `action_taken` = 'blocked'
-             AND `created_at` >= DATE_SUB(NOW(), INTERVAL 14 DAY)
-             AND `created_at` < DATE_SUB(NOW(), INTERVAL 7 DAY)",
-            [],
-            1
-        );
-
-        $cur  = (int)($current->cnt ?? 0);
-        $prev = (int)($previous->cnt ?? 0);
+        $cur  = (int)($row->cur ?? 0);
+        $prev = (int)($row->prev ?? 0);
 
         $change = 0;
         if ($prev > 0) {

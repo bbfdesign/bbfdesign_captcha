@@ -35,19 +35,45 @@
         });
     }
 
-    // Auto-refresh every 60 seconds when dashboard is visible
+    // Auto-refresh every 60 seconds when dashboard is visible.
+    // Page Visibility API: pausiert den Timer automatisch, wenn der Tab
+    // nicht sichtbar ist — spart Requests + Admin-Worker-Last bei
+    // versteckten Hintergrund-Tabs.
     var refreshInterval = null;
+    var autoRefreshRequested = false;
 
     function startAutoRefresh() {
+        autoRefreshRequested = true;
         if (refreshInterval) return;
+        if (typeof document !== 'undefined' && document.hidden) return; // wake via visibilitychange
         refreshInterval = setInterval(refreshDashboard, 60000);
     }
 
     function stopAutoRefresh() {
+        autoRefreshRequested = false;
         if (refreshInterval) {
             clearInterval(refreshInterval);
             refreshInterval = null;
         }
+    }
+
+    // Timer transparent an Tab-Visibility koppeln.
+    if (typeof document !== 'undefined' && 'visibilityState' in document) {
+        document.addEventListener('visibilitychange', function() {
+            if (!autoRefreshRequested) return;
+            if (document.hidden) {
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                    refreshInterval = null;
+                }
+            } else {
+                // Direkt ein Refresh feuern, um abgelaufenen Stand aufzuholen
+                refreshDashboard();
+                if (!refreshInterval) {
+                    refreshInterval = setInterval(refreshDashboard, 60000);
+                }
+            }
+        });
     }
 
     // Expose
