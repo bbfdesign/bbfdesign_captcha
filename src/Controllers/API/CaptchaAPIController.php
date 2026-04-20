@@ -45,6 +45,23 @@ class CaptchaAPIController
         header('Content-Type: application/json; charset=utf-8');
         header('X-BBF-Captcha-Version: 1.0.0');
 
+        try {
+            $this->dispatch($endpoint, $method);
+        } catch (\Throwable $e) {
+            // Kein Leak von internen Details, aber Log fuer den Betreiber.
+            try {
+                \JTL\Shop::Container()->getLogService()->error(
+                    'BBF Captcha API error [' . $endpoint . ']: ' . $e->getMessage()
+                );
+            } catch (\Throwable $ignore) {
+                // ignore
+            }
+            $this->sendError('Internal server error', 500);
+        }
+    }
+
+    private function dispatch(string $endpoint, string $method): void
+    {
         // Health-Check braucht keine Auth
         if ($endpoint === 'health') {
             $this->sendJson(['status' => 'ok', 'version' => '1.0.0', 'timestamp' => time()]);
