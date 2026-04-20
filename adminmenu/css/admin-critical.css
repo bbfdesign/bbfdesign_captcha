@@ -1,0 +1,328 @@
+/**
+ * BBF Captcha & Spam-Schutz — Admin Critical CSS (above-the-fold)
+ *
+ * Dieses Stylesheet enthaelt NUR die Regeln, die zum ersten Rendern der
+ * Admin-Shell noetig sind (Sidebar + Header + Content-Container + Skip-Link
+ * + Spinner + Layout-Breakpoints). Es wird *blocking* geladen.
+ *
+ * Alle Komponenten-Styles (Tabellen, Modals, Formulare, Badges, Buttons,
+ * Tabs, Charts etc.) liegen in admin.css und werden asynchron per
+ * `<link rel="stylesheet" media="print" onload="this.media='all'">`
+ * nachgeladen. Siehe index.tpl.
+ *
+ * Die Regeln hier sind eine Teilmenge der Regeln in admin.css — Browser
+ * de-duplizieren, die Regel die spaeter kommt (admin.css) gewinnt bei
+ * gleicher Spezifitaet.
+ */
+
+/* ─── JTL-Admin-Shell-Overrides (muessen vor dem ersten Paint da sein) ─── */
+
+body #content_wrapper {
+    font-family: var(--bbf-font-family);
+    font-weight: var(--bbf-font-weight-normal);
+    font-size: var(--bbf-font-size-base);
+}
+
+.container {
+    background-color: var(--bbf-bg-page);
+}
+
+#content_wrapper {
+    padding: 5px;
+}
+
+#content .sidebar,
+.sidebar[data-background-color="white"] {
+    position: static !important;
+}
+
+#content .main-header {
+    position: absolute;
+    width: 100%;
+}
+
+.content-header {
+    display: none;
+}
+
+#tabs-bbfdesign_captcha .tabs-nav {
+    display: none;
+}
+
+#tabs-bbfdesign_captcha .tab-content {
+    padding: 0;
+    box-shadow: 0 0 0 0 transparent;
+    margin-bottom: 0 !important;
+}
+
+/* ─── Plugin-Page Layout ─── */
+
+.bbf-plugin-page {
+    position: relative;
+    display: flex;
+    min-height: calc(100vh - 120px);
+    background: var(--bbf-bg-page);
+}
+
+/* ─── Sidebar (Shell) ─── */
+
+.bbf-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--bbf-bg-sidebar);
+    border-right: 1px solid var(--bbf-border);
+    display: flex;
+    flex-direction: column;
+    transition: width var(--bbf-transition-slow);
+    overflow: hidden;
+}
+
+.bbf-sidebar-collapsed {
+    width: 0;
+    border-right: none;
+}
+
+.bbf-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--bbf-spacing-md) var(--bbf-spacing-lg);
+    border-bottom: 1px solid var(--bbf-border-light);
+}
+
+.bbf-sidebar-logo {
+    flex: 1;
+}
+
+.bbf-logo-img {
+    height: 30px;
+    width: auto;
+}
+
+.bbf-sidebar-toggle {
+    background: none;
+    border: none;
+    color: var(--bbf-text-light);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--bbf-radius-sm);
+    display: flex;
+    align-items: center;
+}
+
+.bbf-sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--bbf-spacing-md) 0;
+}
+
+.bbf-nav-section {
+    font-size: 11px;
+    font-weight: var(--bbf-font-weight-bold);
+    color: var(--bbf-text-light);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: var(--bbf-spacing-md) var(--bbf-spacing-lg) var(--bbf-spacing-xs);
+    margin-top: var(--bbf-spacing-xs);
+}
+
+.bbf-sidebar-nav {
+    list-style: none;
+    padding: 0 var(--bbf-spacing-sm);
+    margin: 0 0 var(--bbf-spacing-xs);
+}
+
+.bbf-sidebar-nav li {
+    margin-bottom: 2px;
+}
+
+.bbf-sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: var(--bbf-sidebar-item-radius);
+    color: var(--bbf-text-dark);
+    text-decoration: none;
+    font-size: var(--bbf-font-size-base);
+    font-weight: var(--bbf-font-weight-normal);
+    height: var(--bbf-sidebar-item-height);
+}
+
+.bbf-sidebar-nav a.bbf-nav-active {
+    background: var(--bbf-primary);
+    color: #fff;
+    font-weight: var(--bbf-font-weight-medium);
+}
+
+.bbf-sidebar-nav a svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.bbf-sidebar-footer {
+    padding: var(--bbf-spacing-sm) var(--bbf-spacing-lg);
+    border-top: 1px solid var(--bbf-border-light);
+    text-align: center;
+}
+
+.bbf-sidebar-footer .bbf-version {
+    font-size: var(--bbf-font-size-xs);
+    color: var(--bbf-text-light);
+}
+
+/* ─── Main Content Area ─── */
+
+.bbf-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+}
+
+/* ─── Gradient Header ─── */
+
+.bbf-header {
+    background: url("../images/colorimage.png") no-repeat center center;
+    background-size: cover;
+    padding: 0;
+}
+
+.bbf-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 32px;
+}
+
+.bbf-header-title {
+    font-size: 1.4rem;
+    font-weight: var(--bbf-font-weight-bold);
+    color: #fff;
+    margin: 0 0 4px;
+}
+
+.bbf-header-subtitle {
+    font-size: var(--bbf-font-size-base);
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    font-weight: var(--bbf-font-weight-light);
+}
+
+/* ─── Page Content Container ─── */
+
+.bbf-content {
+    flex: 1;
+    padding: var(--bbf-spacing-lg);
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+    background: var(--bbf-bg-page);
+}
+
+.bbf-page-title {
+    font-size: var(--bbf-font-size-xl);
+    font-weight: var(--bbf-font-weight-bold);
+    color: var(--bbf-primary);
+    margin-bottom: var(--bbf-spacing-lg);
+    text-transform: uppercase;
+}
+
+/* ─── Initial Loading-Spinner (wird beim ersten Render gezeigt) ─── */
+
+.bbf-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--bbf-border);
+    border-top-color: var(--bbf-primary);
+    border-radius: 50%;
+    animation: bbf-spin 0.6s linear infinite;
+}
+
+.bbf-spinner-lg {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+}
+
+@keyframes bbf-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ─── Skip-Link (A11y) ─── */
+
+.bbf-skip-link {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+.bbf-skip-link:focus,
+.bbf-skip-link:focus-visible {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 8px 14px;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: normal;
+    background: var(--bbf-primary);
+    color: #fff;
+    text-decoration: none;
+    border-radius: var(--bbf-radius, 6px);
+    z-index: 100000;
+}
+
+/* ─── Visually-Hidden (A11y-Utility, oft genutzt) ─── */
+
+.bbf-sr-only {
+    position: absolute !important;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* ─── Responsive Layout (Shell muss auf Mobile korrekt kollabieren) ─── */
+
+@media (max-width: 992px) {
+    .bbf-sidebar {
+        width: 240px;
+    }
+}
+
+@media (max-width: 768px) {
+    .bbf-plugin-page {
+        flex-direction: column;
+    }
+
+    .bbf-sidebar {
+        width: 100% !important;
+        border-right: none;
+        border-bottom: 1px solid var(--bbf-border);
+    }
+}
+
+/* ─── Reduced Motion (A11y) ─── */
+
+@media (prefers-reduced-motion: reduce) {
+    .bbf-plugin-page *,
+    .bbf-plugin-page *::before,
+    .bbf-plugin-page *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}

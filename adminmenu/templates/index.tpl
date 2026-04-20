@@ -1,5 +1,12 @@
+{* Critical CSS (blocking): Tokens + Shell-Layout. Klein (~6KB) — schnelles First Paint. *}
 <link rel="stylesheet" href="{$adminUrl|escape:'html'}css/admin-base.css">
-<link rel="stylesheet" href="{$adminUrl|escape:'html'}css/admin.css">
+<link rel="stylesheet" href="{$adminUrl|escape:'html'}css/admin-critical.css">
+
+{* Full stylesheet (non-blocking): alle Komponenten-Styles. Wird per
+   media="print"+onload-Trick geladen, damit der Browser es nicht als
+   render-blocking einstuft. Fallback fuer Clients ohne JS: <noscript>. *}
+<link rel="stylesheet" href="{$adminUrl|escape:'html'}css/admin.css" media="print" onload="this.media='all';this.onload=null;">
+<noscript><link rel="stylesheet" href="{$adminUrl|escape:'html'}css/admin.css"></noscript>
 
 <div class="bbf-plugin-page" {literal}x-data="bbfCaptchaAdmin()" x-init="init()"{/literal}>
     <a href="#bbf-main-content" class="bbf-skip-link">Skip to content</a>
