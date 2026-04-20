@@ -254,8 +254,8 @@ class CaptchaAPIController
                     `action_taken`, `created_at`
              FROM `bbf_captcha_spam_log`
              ORDER BY `created_at` DESC
-             LIMIT {$perPage} OFFSET {$offset}",
-            [],
+             LIMIT :lim OFFSET :off",
+            ['lim' => max(1, (int)$perPage), 'off' => max(0, (int)$offset)],
             2
         );
 

@@ -271,10 +271,6 @@ class AdminController
 
         $whereClause = count($where) > 0 ? 'WHERE ' . implode(' AND ', $where) : '';
 
-        // LIMIT/OFFSET sind int und geklammert -> kein Injection-Risiko
-        $perPage = (int)$perPage;
-        $offset  = (int)$offset;
-
         $total = $this->db->queryPrepared(
             "SELECT COUNT(*) AS cnt FROM `bbf_captcha_spam_log` {$whereClause}",
             $params,
@@ -284,10 +280,12 @@ class AdminController
         $rows = $this->db->queryPrepared(
             "SELECT * FROM `bbf_captcha_spam_log` {$whereClause}
              ORDER BY `created_at` DESC
-             LIMIT {$perPage} OFFSET {$offset}",
-            $params,
+             LIMIT :lim OFFSET :off",
+            $params + ['lim' => max(1, (int)$perPage), 'off' => max(0, (int)$offset)],
             2
         );
+
+        $perPage = max(1, (int)$perPage);
 
         return $this->jsonResponse([
             'success' => true,

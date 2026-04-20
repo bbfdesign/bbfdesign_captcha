@@ -115,8 +115,8 @@ class SpamLogService
              WHERE `created_at` >= DATE_SUB(NOW(), INTERVAL :days DAY)
              GROUP BY `form_type`
              ORDER BY cnt DESC
-             LIMIT " . (int)$limit,
-            ['days' => $days],
+             LIMIT :lim",
+            ['days' => $days, 'lim' => max(1, $limit)],
             2
         );
 
@@ -133,8 +133,8 @@ class SpamLogService
                     `action_taken`, `created_at`
              FROM `bbf_captcha_spam_log`
              ORDER BY `created_at` DESC
-             LIMIT " . (int)$limit,
-            [],
+             LIMIT :lim",
+            ['lim' => max(1, $limit)],
             2
         );
 
@@ -191,8 +191,8 @@ class SpamLogService
              AND `created_at` >= DATE_SUB(NOW(), INTERVAL :days DAY)
              GROUP BY `ip_address`
              ORDER BY cnt DESC
-             LIMIT " . (int)$limit,
-            ['days' => $days],
+             LIMIT :lim",
+            ['days' => $days, 'lim' => max(1, $limit)],
             2
         );
 
@@ -328,8 +328,8 @@ class SpamLogService
                     `action_taken`, `user_agent`, `is_false_positive`, `created_at`
              FROM `bbf_captcha_spam_log`
              ORDER BY `created_at` DESC
-             LIMIT " . (int)$limit,
-            [],
+             LIMIT :lim",
+            ['lim' => max(1, $limit)],
             2
         );
 
