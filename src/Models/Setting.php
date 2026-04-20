@@ -40,6 +40,64 @@ class Setting
     }
 
     /**
+     * Mehrere Einstellungen gefiltert laden (Hot-Path-Optimierung).
+     *
+     * Laedt nur die angeforderten Keys in den Prozess-Cache und vermeidet
+     * SELECT * auf die Tabelle. Wiederholte Aufrufe nutzen den Cache.
+     * Nicht vorhandene Keys werden mit Default belegt.
+     *
+     * @param array<int, string> $keys
+     * @return array<string, string>
+     */
+    public function getMany(array $keys, string $default = ''): array
+    {
+        $out  = [];
+        $miss = [];
+        foreach ($keys as $k) {
+            if (!is_string($k) || $k === '') {
+                continue;
+            }
+            if (array_key_exists($k, $this->cache)) {
+                $out[$k] = $this->cache[$k];
+            } else {
+                $miss[] = $k;
+            }
+        }
+        if ($miss === [] || $this->loaded) {
+            foreach ($miss as $k) {
+                $out[$k] = $default;
+            }
+            return $out;
+        }
+
+        $placeholders = [];
+        $params       = [];
+        foreach ($miss as $i => $k) {
+            $ph              = ':k' . $i;
+            $placeholders[]  = $ph;
+            $params[substr($ph, 1)] = $k;
+        }
+        $rows = $this->db->queryPrepared(
+            'SELECT `setting_key`, `setting_value` FROM `bbf_captcha_settings` WHERE `setting_key` IN (' . implode(',', $placeholders) . ')',
+            $params,
+            2
+        );
+        if (is_array($rows)) {
+            foreach ($rows as $row) {
+                $this->cache[$row->setting_key] = $row->setting_value ?? '';
+                $out[$row->setting_key]         = $row->setting_value ?? '';
+            }
+        }
+        foreach ($miss as $k) {
+            if (!array_key_exists($k, $out)) {
+                $out[$k]          = $default;
+                $this->cache[$k]  = $default;
+            }
+        }
+        return $out;
+    }
+
+    /**
      * Boolean-Einstellung lesen
      */
     public function getBool(string $key): bool
