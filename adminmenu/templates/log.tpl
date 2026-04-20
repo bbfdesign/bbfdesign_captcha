@@ -31,7 +31,8 @@
                     <option value="honeypot">Honeypot</option>
                     <option value="timing">Timing</option>
                     <option value="altcha">ALTCHA</option>
-                    <option value="ai">KI-Filter</option>
+                    <option value="ai">Smart-Filter</option>
+                    <option value="llm">LLM</option>
                     <option value="ip">IP-Block</option>
                     <option value="rate">Rate Limit</option>
                 </select>

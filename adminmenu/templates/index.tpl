@@ -42,9 +42,15 @@
                     </a>
                 </li>
                 <li role="none">
-                    <a href="#" role="menuitem" aria-label="{$langVars->getTranslation('nav_ai_filter', $adminLang)|default:'KI-Spamfilter'|escape:'html'}" {literal}:class="{ 'bbf-nav-active': page === 'ai_spam_filter' }" :aria-current="page === 'ai_spam_filter' ? 'page' : false" @click.prevent="navigate('ai_spam_filter')"{/literal}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2a4 4 0 0 1 4 4v2H8V6a4 4 0 0 1 4-4z"/><rect x="3" y="10" width="18" height="12" rx="2"/><line x1="12" y1="14" x2="12" y2="18"/></svg>
-                        <span>{$langVars->getTranslation('nav_ai_filter', $adminLang)|default:'KI-Spamfilter'|escape:'html'}</span>
+                    <a href="#" role="menuitem" aria-label="{$langVars->getTranslation('nav_ai_filter', $adminLang)|default:'Smart-Spamfilter'|escape:'html'}" {literal}:class="{ 'bbf-nav-active': page === 'ai_spam_filter' }" :aria-current="page === 'ai_spam_filter' ? 'page' : false" @click.prevent="navigate('ai_spam_filter')"{/literal}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        <span>{$langVars->getTranslation('nav_ai_filter', $adminLang)|default:'Smart-Spamfilter'|escape:'html'}</span>
+                    </a>
+                </li>
+                <li role="none">
+                    <a href="#" role="menuitem" aria-label="{$langVars->getTranslation('nav_llm_check', $adminLang)|default:'LLM-Prüfung'|escape:'html'}" {literal}:class="{ 'bbf-nav-active': page === 'llm_check' }" :aria-current="page === 'llm_check' ? 'page' : false" @click.prevent="navigate('llm_check')"{/literal}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/></svg>
+                        <span>{$langVars->getTranslation('nav_llm_check', $adminLang)|default:'LLM-Prüfung'|escape:'html'}</span>
                     </a>
                 </li>
             </ul>

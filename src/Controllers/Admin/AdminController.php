@@ -112,6 +112,12 @@ class AdminController
             case 'testAiFilter':
                 return $this->testAiFilter($request);
 
+            case 'testLlmProvider':
+                return $this->testLlmProvider($request);
+
+            case 'classifyWithLlm':
+                return $this->classifyWithLlm($request);
+
             case 'exportSpamLog':
                 return $this->exportSpamLog($request);
 
@@ -640,6 +646,43 @@ class AdminController
             'score'   => $result['score'],
             'verdict' => $result['verdict'],
             'details' => $result['details'],
+        ]);
+    }
+
+    private function testLlmProvider(array $request): string
+    {
+        $service = new \Plugin\bbfdesign_captcha\src\Services\LLMSpamService($this->settings);
+        $result  = $service->testConnection();
+        return $this->jsonResponse([
+            'success' => $result['success'],
+            'message' => $result['message'],
+            'result'  => $result['result'] ?? null,
+        ]);
+    }
+
+    private function classifyWithLlm(array $request): string
+    {
+        $text = (string)($request['text'] ?? '');
+        if (trim($text) === '') {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => $this->t('msg_missing_text', 'Text fehlt'),
+            ]);
+        }
+
+        $service = new \Plugin\bbfdesign_captcha\src\Services\LLMSpamService($this->settings);
+        if (!$service->isEnabled()) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => $this->t('llm_not_configured', 'Kein Anbieter konfiguriert'),
+            ]);
+        }
+
+        $result = $service->classify(mb_substr($text, 0, 5000));
+        return $this->jsonResponse([
+            'success' => !isset($result['error']),
+            'result'  => $result,
+            'message' => $result['error'] ?? '',
         ]);
     }
 

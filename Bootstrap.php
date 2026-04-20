@@ -155,6 +155,7 @@ class Bootstrap extends Bootstrapper
             'protection_methods' => 'protection_methods.tpl',
             'form_protection'    => 'form_protection.tpl',
             'ai_spam_filter'     => 'ai_spam_filter.tpl',
+            'llm_check'          => 'llm_check.tpl',
             'ip_management'      => 'ip_management.tpl',
             'log'                => 'log.tpl',
             'api'                => 'api.tpl',

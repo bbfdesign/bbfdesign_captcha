@@ -115,6 +115,7 @@ body #content_wrapper {
    ═══════════════════════════════════════════════════════════ */
 
 .bbf-plugin-page {
+    position: relative;
     display: flex;
     min-height: calc(100vh - 120px);
     background: var(--bbf-bg-page);
@@ -1224,18 +1225,35 @@ html.theme-dark .bbf-btn-outline {
 
 .bbf-skip-link {
     position: absolute;
-    top: -40px;
-    left: 0;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+.bbf-skip-link:focus,
+.bbf-skip-link:focus-visible {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 8px 14px;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: normal;
     background: var(--bbf-primary);
     color: #fff;
-    padding: 8px 14px;
     text-decoration: none;
-    border-radius: 0 0 var(--bbf-radius, 6px) 0;
+    border-radius: var(--bbf-radius, 6px);
     z-index: 100000;
-    transition: top 0.15s ease;
-}
-.bbf-skip-link:focus {
-    top: 0;
+    box-shadow: var(--bbf-shadow-md);
 }
 
 .bbf-sr-only {

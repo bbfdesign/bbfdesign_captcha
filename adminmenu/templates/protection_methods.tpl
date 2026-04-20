@@ -127,12 +127,12 @@
         </div>
     </div>
 
-    {* ── KI-Spamfilter ── *}
+    {* ── Smart-Spamfilter ── *}
     <div class="bbf-method-card">
         <div class="bbf-method-header">
             <div class="bbf-method-title">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v2H8V6a4 4 0 0 1 4-4z"/><rect x="3" y="10" width="18" height="12" rx="2"/><line x1="12" y1="14" x2="12" y2="18"/></svg>
-                KI-Spamfilter
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                Smart-Spamfilter
                 <span class="bbf-badge bbf-badge-success">Kein Consent n&ouml;tig</span>
             </div>
             <label class="bbf-toggle">
@@ -141,7 +141,8 @@
             </label>
         </div>
         <div class="bbf-method-desc">
-            Lokale Textanalyse mit Punktesystem. Erkennt Spam anhand von URLs, Spam-W&ouml;rtern, Sprache und mehr.
+            Regelbasierte Textanalyse mit Punktesystem: erkennt Spam anhand von URLs, Spam-W&ouml;rtern, Sprache, Wegwerf-Emails u.v.m.
+            Optional mit LLM-Zweitpr&uuml;fung (Ollama, OpenAI, Claude, Gemini) kombinierbar &mdash; siehe Men&uuml;punkt „LLM-Pr&uuml;fung".
         </div>
     </div>
 

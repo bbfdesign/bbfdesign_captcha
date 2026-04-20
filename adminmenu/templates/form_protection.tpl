@@ -102,7 +102,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 { key: 'honeypot', label: 'Honeypot' },
                 { key: 'timing', label: 'Timing' },
                 { key: 'altcha', label: 'ALTCHA' },
-                { key: 'ai_filter', label: 'KI-Filter' },
+                { key: 'ai_filter', label: 'Smart-Filter' },
                 { key: 'turnstile', label: 'Turnstile' },
                 { key: 'recaptcha', label: 'reCAPTCHA' },
                 { key: 'friendly_captcha', label: 'Friendly' },

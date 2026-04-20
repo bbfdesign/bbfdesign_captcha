@@ -1,4 +1,7 @@
-<h2 class="bbf-page-title">KI-Spamfilter</h2>
+<h2 class="bbf-page-title">{$langVars->getTranslation('nav_ai_filter', $adminLang)|default:'Smart-Spamfilter'|escape:'html'}</h2>
+<p class="bbf-muted" style="margin-top:-var(--bbf-spacing-md);margin-bottom:var(--bbf-spacing-lg);color:var(--bbf-text-light);font-size:var(--bbf-font-size-sm);">
+    Regelbasierte Textanalyse (URLs, Sprache, Wortlisten, Disposable-Emails, Wiederholungen). F&uuml;r eine echte LLM-Pr&uuml;fung siehe Men&uuml;punkt „LLM-Pr&uuml;fung".
+</p>
 
 <div {literal}x-data="bbfAiFilter()"{/literal}>
     {* ── Tabs ── *}

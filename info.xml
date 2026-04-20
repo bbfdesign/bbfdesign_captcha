@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <jtlshopplugin>
     <Name>BBF Captcha</Name>
-    <Description>Umfassendes Anti-Spam &amp; Bot-Schutz System: Honeypot, Timing, ALTCHA PoW, Turnstile, reCAPTCHA, Friendly Captcha, hCaptcha, KI-Spamfilter, IP-Management, Rate Limiting. DSGVO-konform mit Consent Manager Integration.</Description>
+    <Description>Umfassendes Anti-Spam &amp; Bot-Schutz System: Honeypot, Timing, ALTCHA PoW, Turnstile, reCAPTCHA, Friendly Captcha, hCaptcha, Smart-Spamfilter (regelbasiert) mit optionaler LLM-Zweitpr&#252;fung (Ollama, OpenAI, Claude, Gemini), IP-Management, Rate Limiting. DSGVO-konform mit Consent Manager Integration.</Description>
     <Author>bbfdesign.de</Author>
     <URL>https://www.bbfdesign.de</URL>
     <PluginID>bbfdesign_captcha</PluginID>
@@ -98,8 +98,13 @@
             </Variable>
             <Variable>
                 <Name>nav_ai_filter</Name>
-                <VariableLocalized iso="GER">KI-Spamfilter</VariableLocalized>
-                <VariableLocalized iso="ENG">AI Spam Filter</VariableLocalized>
+                <VariableLocalized iso="GER">Smart-Spamfilter</VariableLocalized>
+                <VariableLocalized iso="ENG">Smart Spam Filter</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>nav_llm_check</Name>
+                <VariableLocalized iso="GER">LLM-Pr&#252;fung</VariableLocalized>
+                <VariableLocalized iso="ENG">LLM Check</VariableLocalized>
             </Variable>
             <Variable>
                 <Name>nav_ip_management</Name>
@@ -252,13 +257,13 @@
             </Variable>
             <Variable>
                 <Name>method_ai_filter</Name>
-                <VariableLocalized iso="GER">KI-Spamfilter</VariableLocalized>
-                <VariableLocalized iso="ENG">AI Spam Filter</VariableLocalized>
+                <VariableLocalized iso="GER">Smart-Spamfilter</VariableLocalized>
+                <VariableLocalized iso="ENG">Smart Spam Filter</VariableLocalized>
             </Variable>
             <Variable>
                 <Name>method_ai_filter_desc</Name>
-                <VariableLocalized iso="GER">Lokale Textanalyse mit Punktesystem. DSGVO-konform, kein Consent nötig.</VariableLocalized>
-                <VariableLocalized iso="ENG">Local text analysis with scoring system. GDPR compliant, no consent needed.</VariableLocalized>
+                <VariableLocalized iso="GER">Regelbasierte Textanalyse mit Punktesystem (URLs, Sprache, Wortlisten, Disposable-Emails). DSGVO-konform, kein Consent nötig. Optional mit LLM-Zweitprüfung kombinierbar.</VariableLocalized>
+                <VariableLocalized iso="ENG">Rule-based text analysis with scoring (URLs, language, word lists, disposable emails). GDPR compliant, no consent needed. Optionally combinable with LLM second-pass check.</VariableLocalized>
             </Variable>
             <Variable>
                 <Name>no_consent_required</Name>
@@ -630,6 +635,88 @@
                 <Name>loading_page</Name>
                 <VariableLocalized iso="GER">Seite wird geladen</VariableLocalized>
                 <VariableLocalized iso="ENG">Loading page</VariableLocalized>
+            </Variable>
+
+            <!-- LLM / KI-Prüfung -->
+            <Variable>
+                <Name>llm_enabled</Name>
+                <VariableLocalized iso="GER">LLM-Pr&#252;fung aktivieren</VariableLocalized>
+                <VariableLocalized iso="ENG">Enable LLM check</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>llm_provider</Name>
+                <VariableLocalized iso="GER">KI-Anbieter</VariableLocalized>
+                <VariableLocalized iso="ENG">AI provider</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>llm_api_key</Name>
+                <VariableLocalized iso="GER">API-Key</VariableLocalized>
+                <VariableLocalized iso="ENG">API key</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>llm_model</Name>
+                <VariableLocalized iso="GER">Modell</VariableLocalized>
+                <VariableLocalized iso="ENG">Model</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>llm_endpoint</Name>
+                <VariableLocalized iso="GER">Endpoint-URL (nur f&#252;r Ollama)</VariableLocalized>
+                <VariableLocalized iso="ENG">Endpoint URL (Ollama only)</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>llm_only_borderline</Name>
+                <VariableLocalized iso="GER">Nur bei Grenzf&#228;llen pr&#252;fen</VariableLocalized>
+                <VariableLocalized iso="ENG">Check borderline cases only</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>llm_only_borderline_help</Name>
+                <VariableLocalized iso="GER">LLM nur aufrufen, wenn der regelbasierte Score zwischen „OK" und „Spam" liegt. Spart API-Kosten.</VariableLocalized>
+                <VariableLocalized iso="ENG">Only call the LLM when the rule-based score is between „OK" and „Spam". Saves API costs.</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>llm_test_connection</Name>
+                <VariableLocalized iso="GER">Verbindung testen</VariableLocalized>
+                <VariableLocalized iso="ENG">Test connection</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>llm_test_text</Name>
+                <VariableLocalized iso="GER">Testtext</VariableLocalized>
+                <VariableLocalized iso="ENG">Test text</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>llm_classification</Name>
+                <VariableLocalized iso="GER">Klassifizierung</VariableLocalized>
+                <VariableLocalized iso="ENG">Classification</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>llm_confidence</Name>
+                <VariableLocalized iso="GER">Konfidenz</VariableLocalized>
+                <VariableLocalized iso="ENG">Confidence</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>llm_reason</Name>
+                <VariableLocalized iso="GER">Begr&#252;ndung</VariableLocalized>
+                <VariableLocalized iso="ENG">Reason</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>llm_timeout</Name>
+                <VariableLocalized iso="GER">Timeout (Sekunden)</VariableLocalized>
+                <VariableLocalized iso="ENG">Timeout (seconds)</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>llm_not_configured</Name>
+                <VariableLocalized iso="GER">Kein Anbieter konfiguriert</VariableLocalized>
+                <VariableLocalized iso="ENG">No provider configured</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>llm_connection_ok</Name>
+                <VariableLocalized iso="GER">Verbindung erfolgreich</VariableLocalized>
+                <VariableLocalized iso="ENG">Connection successful</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>llm_connection_failed</Name>
+                <VariableLocalized iso="GER">Verbindung fehlgeschlagen</VariableLocalized>
+                <VariableLocalized iso="ENG">Connection failed</VariableLocalized>
             </Variable>
         </Locales>
     </Install>

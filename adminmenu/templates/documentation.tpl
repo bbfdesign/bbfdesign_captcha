@@ -6,7 +6,7 @@
         <ol style="padding-left: 20px;">
             <li>Plugin &uuml;ber den JTL-Shop Plugin-Manager installieren</li>
             <li>Nach der Installation werden automatisch die Standard-Schutzmethoden aktiviert:
-                <strong>Honeypot</strong>, <strong>Timing</strong>, <strong>ALTCHA</strong> und <strong>KI-Spamfilter</strong></li>
+                <strong>Honeypot</strong>, <strong>Timing</strong>, <strong>ALTCHA</strong> und <strong>Smart-Spamfilter</strong></li>
             <li>Unter <strong>Schutzmethoden</strong> k&ouml;nnen weitere Methoden aktiviert werden</li>
             <li>Unter <strong>Formulare</strong> l&auml;sst sich pro Formular konfigurieren, welche Methoden aktiv sind</li>
             <li>Das <strong>Dashboard</strong> zeigt Ihnen Statistiken &uuml;ber geblockte Spam-Versuche</li>
@@ -46,10 +46,16 @@
                     <td>Self-hosted Proof-of-Work Challenge</td>
                 </tr>
                 <tr>
-                    <td><strong>KI-Filter</strong></td>
+                    <td><strong>Smart-Filter</strong></td>
                     <td><span class="bbf-badge bbf-badge-success">Konform</span></td>
                     <td>Nein</td>
-                    <td>Lokale Textanalyse mit Punktesystem</td>
+                    <td>Regelbasierte Textanalyse mit Punktesystem</td>
+                </tr>
+                <tr>
+                    <td><strong>LLM-Prüfung</strong> <span class="bbf-badge">optional</span></td>
+                    <td><span class="bbf-badge bbf-badge-warning">Ollama: konform / Cloud: extern</span></td>
+                    <td>Ollama: Nein / Cloud-LLMs: ja</td>
+                    <td>Zweitprüfung durch ein echtes LLM (Ollama lokal, oder OpenAI/Claude/Gemini)</td>
                 </tr>
                 <tr>
                     <td><strong>Turnstile</strong></td>
@@ -88,9 +94,15 @@
         <ol style="padding-left: 20px;">
             <li>ALTCHA (self-hosted) &rarr; Kein Consent n&ouml;tig</li>
             <li>Honeypot + Timing &rarr; Kein Consent n&ouml;tig</li>
-            <li>KI-Filter &rarr; Kein Consent n&ouml;tig</li>
+            <li>Smart-Filter &rarr; Kein Consent n&ouml;tig</li>
         </ol>
         <p><strong>Es ist immer ein Schutz aktiv, auch ohne Consent!</strong></p>
+        <p style="margin-top:12px;font-size:13px;color:var(--bbf-text-light);">
+            Hinweis: Die optionale <strong>LLM-Pr&uuml;fung</strong> (Ollama/OpenAI/Claude/Gemini) ist kein Captcha und
+            ersetzt keine der obigen Methoden. Sie kann als Zweitpr&uuml;fung f&uuml;r Textinhalte aktiviert werden.
+            Bei Cloud-Anbietern (OpenAI/Claude/Gemini) werden Formulardaten an den jeweiligen Dienst &uuml;bertragen &mdash;
+            Consent / DSGVO-Hinweis ist dann Aufgabe des Shopbetreibers.
+        </p>
     </div>
 </div>
 
@@ -105,12 +117,13 @@
     <h3 class="bbf-card-title">FAQ</h3>
     <div style="color: var(--bbf-body-text); line-height: 1.7; margin-top: var(--bbf-spacing-md);">
         <p><strong>Welche Methode soll ich verwenden?</strong><br>
-        Wir empfehlen die Kombination aus <strong>ALTCHA + Honeypot + Timing + KI-Filter</strong>. Diese Kombination ist vollst&auml;ndig DSGVO-konform und ben&ouml;tigt keinen Consent.</p>
+        Wir empfehlen die Kombination aus <strong>ALTCHA + Honeypot + Timing + Smart-Filter</strong>. Diese Kombination ist vollst&auml;ndig DSGVO-konform und ben&ouml;tigt keinen Consent.</p>
 
         <p><strong>Was passiert bei einer Spam-Welle?</strong><br>
         Das System erh&ouml;ht automatisch den ALTCHA-Schwierigkeitsgrad und blockiert auff&auml;llige IPs. Sie k&ouml;nnen unter Einstellungen eine E-Mail-Benachrichtigung konfigurieren.</p>
 
         <p><strong>Wie teste ich den Spam-Filter?</strong><br>
-        Unter <strong>KI-Spamfilter &rarr; Test</strong> k&ouml;nnen Sie Texte eingeben und den Score live berechnen lassen.</p>
+        Unter <strong>Smart-Spamfilter &rarr; Test</strong> k&ouml;nnen Sie Texte eingeben und den Score live berechnen lassen.
+        Unter <strong>LLM-Pr&uuml;fung</strong> k&ouml;nnen Sie zus&auml;tzlich ein echtes LLM einbinden und Texte dadurch klassifizieren lassen.</p>
     </div>
 </div>

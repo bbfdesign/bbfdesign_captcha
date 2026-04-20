@@ -153,10 +153,33 @@ class AISpamService
         $result    = $this->analyze($text, $email, $name);
         $threshold = $this->settings->getInt('ai_threshold_suspicious', 60);
 
+        // Optionale LLM-Zweitpruefung: ueberschreibt das Urteil des Scoring-Filters,
+        // wenn aktiviert und (je nach Setting) nur im Grenzbereich.
+        $llmVerdict = $this->maybeLlmCheck($text, $result['score']);
+        if ($llmVerdict !== null) {
+            if ($llmVerdict['spam']) {
+                return [
+                    'valid'  => false,
+                    'reason' => 'LLM (' . $llmVerdict['provider'] . '): '
+                              . ($llmVerdict['reason'] ?: 'classified as spam')
+                              . ' (conf ' . number_format($llmVerdict['confidence'], 2) . ')',
+                    'score'  => max($result['score'], 100),
+                ];
+            }
+            // LLM sagt "kein Spam" → ueberschreibt einen Borderline-Block
+            if ($result['score'] >= $threshold && $result['score'] < 100) {
+                return [
+                    'valid'  => true,
+                    'reason' => '',
+                    'score'  => $result['score'],
+                ];
+            }
+        }
+
         if ($result['score'] >= $threshold) {
             return [
                 'valid'  => false,
-                'reason' => 'KI-Filter: ' . $result['verdict'] . ' (Score: ' . $result['score'] . ')',
+                'reason' => 'Smart-Filter: ' . $result['verdict'] . ' (Score: ' . $result['score'] . ')',
                 'score'  => $result['score'],
             ];
         }
@@ -166,6 +189,39 @@ class AISpamService
             'reason' => '',
             'score'  => $result['score'],
         ];
+    }
+
+    /**
+     * Loest die LLM-Zweitpruefung aus, falls konfiguriert.
+     * Im Default ("only_borderline") nur, wenn der Score im Grau-Bereich liegt.
+     *
+     * @return array{spam: bool, confidence: float, reason: string, provider: string}|null
+     */
+    private function maybeLlmCheck(string $text, int $heuristicScore): ?array
+    {
+        $llm = new LLMSpamService($this->settings);
+        if (!$llm->isEnabled()) {
+            return null;
+        }
+
+        $onlyBorderline = $this->settings->getBool('llm_only_borderline');
+        if ($onlyBorderline) {
+            $ok   = $this->settings->getInt('ai_threshold_ok', 30);
+            $spam = $this->settings->getInt('ai_threshold_spam', 100);
+            if ($heuristicScore < $ok || $heuristicScore >= $spam) {
+                return null;
+            }
+        }
+
+        if (trim($text) === '') {
+            return null;
+        }
+
+        $result = $llm->classify($text);
+        if (isset($result['error'])) {
+            return null; // fail-open
+        }
+        return $result;
     }
 
     // ─── Einzelne Prüfungen ─────────────────────────────────
