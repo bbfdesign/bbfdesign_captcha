@@ -241,4 +241,4 @@ document.addEventListener('alpine:init', function() {
 });
 {/literal}
 </script>
-<script src="{$adminUrl|escape:'html'}js/admin.js"></script>
+<script src="{$adminUrl|escape:'html'}js/admin.js" defer></script>

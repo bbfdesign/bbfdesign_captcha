@@ -16,6 +16,22 @@ use Plugin\bbfdesign_captcha\src\Hooks\IncludeAssets;
 
 class Bootstrap extends Bootstrapper
 {
+    /**
+     * Setting-Keys, die geheim sind und NIEMALS an das Frontend/Browser
+     * ausgeliefert werden duerfen. Werden vor der settingsJson-Serialisierung
+     * durch einen leeren String ersetzt; im saveSettings-Flow werden leere
+     * Werte fuer diese Keys nicht uebernommen (kein Ueberschreiben via "leerer Save").
+     * Stattdessen gibt es pro Key einen companion-flag `*_configured`.
+     */
+    public const SENSITIVE_SETTING_KEYS = [
+        'llm_api_key',
+        'turnstile_secret_key',
+        'recaptcha_secret_key',
+        'hcaptcha_secret_key',
+        'friendly_captcha_api_key',
+        'altcha_hmac_key',
+    ];
+
     private ?Setting $settingsModel = null;
     private ?FormProtection $formProtection = null;
 
@@ -136,7 +152,9 @@ class Bootstrap extends Bootstrapper
         $langVars     = $plugin->getLocalization();
         $templatePath = $plugin->getPaths()->getAdminPath() . 'templates/';
 
-        $allSettings = $settings->getAll();
+        $allSettings    = $settings->getAll();
+        $publicSettings = $this->redactSecrets($allSettings);
+
         $smarty->assign([
             'plugin'        => $plugin,
             'pluginId'      => $plugin->getPluginID(),
@@ -146,8 +164,8 @@ class Bootstrap extends Bootstrapper
             'adminLang'     => $adminLang,
             'langVars'      => $langVars,
             'pluginVersion' => $plugin->getCurrentVersion(),
-            'settings'      => $allSettings,
-            'settingsJson'  => json_encode($allSettings, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
+            'settings'      => $publicSettings,
+            'settingsJson'  => json_encode($publicSettings, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
         ]);
 
         $templateMap = [
@@ -369,6 +387,25 @@ class Bootstrap extends Bootstrapper
         $account = $_SESSION['AdminAccount'];
         $id = $account->kAdminlogin ?? ($account->id ?? 0);
         return (int)$id > 0;
+    }
+
+    /**
+     * Entfernt sensible Keys aus dem Settings-Array (fuer die Auslieferung
+     * an das Admin-Frontend). Setzt stattdessen Companion-Flags "<key>_configured",
+     * damit die UI anzeigen kann, ob ein Wert hinterlegt ist.
+     *
+     * @param array<string, string> $settings
+     * @return array<string, string>
+     */
+    private function redactSecrets(array $settings): array
+    {
+        foreach (self::SENSITIVE_SETTING_KEYS as $key) {
+            if (array_key_exists($key, $settings)) {
+                $settings[$key . '_configured'] = ($settings[$key] !== '' ? '1' : '0');
+                $settings[$key] = '';
+            }
+        }
+        return $settings;
     }
 
     /**

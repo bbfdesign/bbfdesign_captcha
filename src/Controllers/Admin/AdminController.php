@@ -158,8 +158,8 @@ class AdminController
             }
         }
 
-        // Auto-Cleanup ausführen (Pseudo-Cron)
-        $logService->cleanup();
+        // Auto-Cleanup liegt seit Phase 3 im RetentionService (wird per Pseudo-Cron
+        // aus FormProtection::handleFormHook() gestartet). Kein Doppel-Cleanup hier.
 
         // Spam-Welle prüfen
         $logService->checkSpamWaveAlert();
@@ -188,7 +188,14 @@ class AdminController
             return $this->jsonResponse(['success' => false, 'message' => $this->t('msg_missing_key', 'Schlüssel fehlt')]);
         }
 
-        $this->settings->set($key, $value, $group);
+        // Secrets nicht mit einem leeren "Save" ueberschreiben. Passiert, wenn
+        // die UI den redacted (leeren) Wert zurueckspielt, ohne dass der Admin
+        // das Feld neu ausgefuellt hat.
+        if ((string)$value === '' && $this->isSensitiveKey($key)) {
+            return $this->jsonResponse(['success' => true, 'message' => $this->t('settings_saved', 'Einstellungen gespeichert')]);
+        }
+
+        $this->settings->set($key, (string)$value, $group);
         $this->settings->invalidateCache();
 
         return $this->jsonResponse(['success' => true, 'message' => $this->t('settings_saved', 'Einstellungen gespeichert')]);
@@ -209,11 +216,20 @@ class AdminController
             if (!$this->isAllowedSettingKey($key)) {
                 continue;
             }
+            // Secrets: leerer String = "nicht ändern" (verhindert Wipe bei redacted UI-Values)
+            if ((string)$value === '' && $this->isSensitiveKey($key)) {
+                continue;
+            }
             $this->settings->set($key, (string)$value);
         }
         $this->settings->invalidateCache();
 
         return $this->jsonResponse(['success' => true, 'message' => $this->t('settings_saved', 'Einstellungen gespeichert')]);
+    }
+
+    private function isSensitiveKey(string $key): bool
+    {
+        return in_array($key, \Plugin\bbfdesign_captcha\Bootstrap::SENSITIVE_SETTING_KEYS, true);
     }
 
     /**

@@ -49,10 +49,12 @@ class IncludeAssets
                  . htmlspecialchars($frontendUrl . 'css/bbfdesign-captcha.css', ENT_QUOTES, 'UTF-8')
                  . '" media="all">' . "\n";
 
-        // Custom CSS (aus Admin-Einstellungen) – gegen Style-Context-Escape härten
+        // Custom CSS (aus Admin-Einstellungen) – gegen Style-Context-Escape haerten.
+        // Regex faengt oeffnende und schliessende <style>-Tags in allen Varianten:
+        // "< /style", "<\t/STYLE>", "<style ...>" etc.
         $customCss = (string)$this->settings->get('custom_css');
         if (trim($customCss) !== '') {
-            $safeCss = preg_replace('#</\s*style#i', '', $customCss);
+            $safeCss = preg_replace('#<\s*/?\s*style\b[^>]*>?#i', '', $customCss);
             $safeCss = str_replace(['<!--', '-->'], '', (string)$safeCss);
             $assets .= '<style>' . $safeCss . '</style>' . "\n";
         }

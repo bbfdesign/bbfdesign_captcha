@@ -96,10 +96,12 @@
     {* ── Disposable Domains Tab ── *}
     <div class="bbf-tab-content" {literal}:class="{ active: tab === 'domains' }"{/literal}>
         <div class="bbf-card">
-            <div class="bbf-alert bbf-alert-info">
-                Die Liste der Wegwerf-E-Mail-Domains wird in Phase 5 vollst&auml;ndig implementiert.
-                Aktuell k&ouml;nnen Domains manuell hinzugef&uuml;gt werden.
-            </div>
+            <p style="color: var(--bbf-text-medium); font-size: var(--bbf-font-size-sm); margin: 0;">
+                Die Liste der Wegwerf-E-Mail-Domains wird beim Plugin-Setup per Migration bef&uuml;llt
+                (ca. 500 bekannte Anbieter wie Mailinator, TrashMail, YopMail etc.). Neue Domains
+                greifen sofort, da die Liste bei jedem Write im Spam-Words-Cache invalidiert wird.
+                Eintr&auml;ge werden direkt in der Tabelle <code>bbf_captcha_disposable_domains</code> gepflegt.
+            </p>
         </div>
     </div>
 

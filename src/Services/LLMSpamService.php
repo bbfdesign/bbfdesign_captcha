@@ -149,7 +149,9 @@ class LLMSpamService
 
     private function callOllama(string $text, string $model): string
     {
-        $endpoint = $this->settings->get('llm_endpoint', 'http://localhost:11434');
+        $endpoint = $this->validateOllamaEndpoint(
+            $this->settings->get('llm_endpoint', 'http://localhost:11434')
+        );
         $endpoint = rtrim($endpoint, '/') . '/api/generate';
 
         $body = [
@@ -270,6 +272,33 @@ class LLMSpamService
     }
 
     // ─── Helpers ───────────────────────────────────────────────
+
+    /**
+     * Minimal-Validierung der admin-konfigurierten Ollama-Endpoint-URL.
+     * Blockt "javascript:", "file://", fehlende Hosts etc. — voll-aggressive
+     * SSRF-Abwehr macht hier keinen Sinn, weil Admins legitime interne
+     * Ollama-Setups (Docker, LAN) brauchen und das Threat-Model "trusted admin" ist.
+     * Default-Wert (localhost:11434) ist immer zulaessig.
+     */
+    private function validateOllamaEndpoint(string $url): string
+    {
+        $url = trim($url);
+        if ($url === '') {
+            return 'http://localhost:11434';
+        }
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new \RuntimeException('Ollama: invalid endpoint URL');
+        }
+        $scheme = strtolower((string)parse_url($url, PHP_URL_SCHEME));
+        if ($scheme !== 'http' && $scheme !== 'https') {
+            throw new \RuntimeException('Ollama: endpoint scheme must be http or https');
+        }
+        $host = parse_url($url, PHP_URL_HOST);
+        if (!is_string($host) || $host === '') {
+            throw new \RuntimeException('Ollama: endpoint host missing');
+        }
+        return $url;
+    }
 
     private function systemPrompt(): string
     {
