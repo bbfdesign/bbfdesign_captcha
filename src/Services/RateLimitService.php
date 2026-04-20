@@ -90,8 +90,10 @@ class RateLimitService
     }
 
     /**
-     * Pseudo-Cron: Alte Rate-Limit-Einträge aufräumen
-     * Wird maximal 1x pro Minute ausgeführt.
+     * Pseudo-Cron: Alte Rate-Limit-Einträge aufräumen.
+     *
+     * Wird maximal 1x pro Minute und nur mit LIMIT ausgeführt, damit ein
+     * einzelner Request nicht die DB blockiert.
      */
     private function pseudoCleanup(int $windowMinutes): void
     {
@@ -103,11 +105,13 @@ class RateLimitService
 
         self::$lastCleanup = $now;
 
-        // Einträge älter als 2x das Zeitfenster löschen
+        // Einträge älter als 2x das Zeitfenster löschen, aber mit LIMIT.
         $cutoff = date('Y-m-d H:i:s', $now - ($windowMinutes * 120));
 
         $this->db->queryPrepared(
-            "DELETE FROM `bbf_captcha_rate_limits` WHERE `window_start` < :cutoff",
+            "DELETE FROM `bbf_captcha_rate_limits`
+             WHERE `window_start` < :cutoff
+             LIMIT 1000",
             ['cutoff' => $cutoff]
         );
     }

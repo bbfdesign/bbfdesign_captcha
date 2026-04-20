@@ -127,6 +127,12 @@ class AdminController
             case 'regenerateHmacKey':
                 return $this->regenerateHmacKey();
 
+            case 'getRetentionStatus':
+                return $this->getRetentionStatus();
+
+            case 'runRetention':
+                return $this->runRetention();
+
             default:
                 return $this->jsonResponse([
                     'success' => false,
@@ -715,5 +721,26 @@ class AdminController
         $this->settings->set('altcha_hmac_rotated_at', date('Y-m-d H:i:s'), 'altcha');
 
         return $this->jsonResponse(['success' => true, 'message' => $this->t('hmac_regenerated', 'HMAC-Key neu generiert')]);
+    }
+
+    private function getRetentionStatus(): string
+    {
+        $service = new \Plugin\bbfdesign_captcha\src\Services\RetentionService($this->db, $this->settings);
+        return $this->jsonResponse([
+            'success'      => true,
+            'last_run'     => $service->getLastRun(),
+            'last_stats'   => $service->getLastRunStats(),
+            'table_sizes'  => $service->getTableSizes(),
+        ]);
+    }
+
+    private function runRetention(): string
+    {
+        $service = new \Plugin\bbfdesign_captcha\src\Services\RetentionService($this->db, $this->settings);
+        $deleted = $service->runAll();
+        return $this->jsonResponse([
+            'success' => true,
+            'deleted' => $deleted,
+        ]);
     }
 }

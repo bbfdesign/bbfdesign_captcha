@@ -90,12 +90,15 @@ class IPEntry
     }
 
     /**
-     * Abgelaufene Einträge entfernen
+     * Abgelaufene Einträge entfernen.
+     * LIMIT verhindert, dass eine grosse Aufraeumung einen Request blockiert.
      */
     public function cleanupExpired(): void
     {
         $this->db->queryPrepared(
-            "DELETE FROM `bbf_captcha_ip_entries` WHERE `expires_at` IS NOT NULL AND `expires_at` < NOW()",
+            "DELETE FROM `bbf_captcha_ip_entries`
+             WHERE `expires_at` IS NOT NULL AND `expires_at` < NOW()
+             LIMIT 1000",
             []
         );
     }

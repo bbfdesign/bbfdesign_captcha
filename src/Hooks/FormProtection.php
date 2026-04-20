@@ -64,6 +64,19 @@ class FormProtection
             // Spam erkannt – Fehlermeldung setzen
             $this->setFormError($formType, $args);
         }
+
+        // Pseudo-Cron: Retention-Policies rollierend anwenden (60s-Gate, LIMITed).
+        // Wird nach dem Validation-Pfad aufgerufen, damit Fehler hier den
+        // Formular-Flow nicht beeinflussen.
+        try {
+            $retention = new \Plugin\bbfdesign_captcha\src\Services\RetentionService(
+                $this->db,
+                $this->settings
+            );
+            $retention->maybeRun();
+        } catch (\Throwable $e) {
+            // Retention darf nie einen Request brechen.
+        }
     }
 
     /**
