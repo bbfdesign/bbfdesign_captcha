@@ -28,7 +28,9 @@ class IncludeAssets
      * Frontend-Assets einbinden
      *
      * Wird im HOOK_SMARTY_OUTPUTFILTER aufgerufen.
-     * Prüft ob die Seite ein Formular enthält und fügt nur dann Assets hinzu.
+     * Prüft ob die Seite ein schutzrelevantes Formular enthält und fügt nur
+     * dann Assets hinzu. Such-/Filter-Formulare (method=get bzw. ohne method)
+     * werden bewusst nicht erkannt, um unnötigen Frontend-Payload zu sparen.
      */
     public function includeIfNeeded(string $html): string
     {
@@ -36,8 +38,7 @@ class IncludeAssets
             return $html;
         }
 
-        // Prüfe ob die Seite ein <form> enthält
-        if (stripos($html, '<form') === false) {
+        if (!$this->pageHasProtectedForm($html)) {
             return $html;
         }
 
@@ -129,5 +130,26 @@ class IncludeAssets
         }
 
         return $html;
+    }
+
+    /**
+     * Erkennt, ob auf der Seite ein schutzrelevantes (POST-) Formular steht.
+     *
+     * Strategie:
+     *  1. Schneller "enthält <form"-Shortcut (stripos) — 0-Allokation.
+     *  2. Wenn ja: präzisere Pruefung auf method="post" (Regex).
+     *     Such-/Filter-Formulare (GET) werden damit ausgefiltert.
+     *  3. Fallback: Formulare, die kein `method`-Attribut setzen, gelten per
+     *     HTML-Spec als GET — und werden bewusst nicht geschuetzt.
+     */
+    private function pageHasProtectedForm(string $html): bool
+    {
+        if (stripos($html, '<form') === false) {
+            return false;
+        }
+        return (bool)preg_match(
+            '#<form\b[^>]*\bmethod\s*=\s*["\']?post#i',
+            $html
+        );
     }
 }
