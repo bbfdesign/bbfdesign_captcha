@@ -718,6 +718,23 @@
                 <VariableLocalized iso="GER">Verbindung fehlgeschlagen</VariableLocalized>
                 <VariableLocalized iso="ENG">Connection failed</VariableLocalized>
             </Variable>
+
+            <!-- Chart-Data-Table A11y-Fallback -->
+            <Variable>
+                <Name>chart_data_toggle</Name>
+                <VariableLocalized iso="GER">Daten als Tabelle anzeigen</VariableLocalized>
+                <VariableLocalized iso="ENG">Show data as table</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>chart_data_count</Name>
+                <VariableLocalized iso="GER">Anzahl</VariableLocalized>
+                <VariableLocalized iso="ENG">Count</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>chart_data_share</Name>
+                <VariableLocalized iso="GER">Anteil</VariableLocalized>
+                <VariableLocalized iso="ENG">Share</VariableLocalized>
+            </Variable>
         </Locales>
     </Install>
 </jtlshopplugin>

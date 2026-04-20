@@ -397,6 +397,37 @@ body #content_wrapper {
     width: 100% !important;
 }
 
+/* A11y-Fallback: Daten-Tabelle unter jedem Chart.
+   Default collapsed; expandable via <details>. Visuell unaufdringlich,
+   aber fuer Screenreader und Keyboard-Nutzer voll erreichbar. */
+.bbf-chart-data-details {
+    margin-top: var(--bbf-spacing-sm);
+    border-top: 1px dashed var(--bbf-border);
+    padding-top: var(--bbf-spacing-sm);
+}
+.bbf-chart-data-details > summary {
+    cursor: pointer;
+    font-size: var(--bbf-font-size-xs);
+    color: var(--bbf-text-light);
+    padding: 4px 2px;
+    border-radius: var(--bbf-radius-sm);
+}
+.bbf-chart-data-details > summary:hover {
+    color: var(--bbf-primary);
+}
+.bbf-chart-data-details > summary:focus-visible {
+    outline: 2px solid var(--bbf-primary);
+    outline-offset: 2px;
+}
+.bbf-chart-data-table {
+    margin-top: var(--bbf-spacing-sm);
+    font-size: var(--bbf-font-size-sm);
+}
+.bbf-chart-data-table th,
+.bbf-chart-data-table td {
+    padding: 4px 10px;
+}
+
 /* ═══════════════════════════════════════════════════════════
    Buttons
    ═══════════════════════════════════════════════════════════ */

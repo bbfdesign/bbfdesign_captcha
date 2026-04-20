@@ -73,8 +73,24 @@
             </div>
         </div>
         <div class="bbf-chart-container" style="height: 280px;">
-            <canvas id="bbf-chart-history" aria-label="{$langVars->getTranslation('spam_history', $adminLang)|default:'Spam history'|escape:'html'}" role="img"></canvas>
+            <canvas id="bbf-chart-history" aria-label="{$langVars->getTranslation('spam_history', $adminLang)|default:'Spam history'|escape:'html'}" role="img" aria-describedby="bbf-chart-history-summary"></canvas>
         </div>
+        <details class="bbf-chart-data-details">
+            <summary>{$langVars->getTranslation('chart_data_toggle', $adminLang)|default:'Daten als Tabelle anzeigen'|escape:'html'}</summary>
+            <div id="bbf-chart-history-summary" class="bbf-sr-only" aria-live="polite"></div>
+            <div style="overflow-x:auto;">
+                <table class="bbf-table bbf-chart-data-table" id="bbf-chart-history-table">
+                    <caption class="bbf-sr-only">{$langVars->getTranslation('spam_history', $adminLang)|default:'Spam history'|escape:'html'}</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">{$langVars->getTranslation('timestamp', $adminLang)|default:'Datum'|escape:'html'}</th>
+                            <th scope="col">{$langVars->getTranslation('blocked', $adminLang)|default:'Blocked'|escape:'html'}</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </details>
     </div>
 
     {* Verteilung nach Methode *}
@@ -83,8 +99,25 @@
             <h3 class="bbf-card-title">{$langVars->getTranslation('distribution_by_method', $adminLang)|default:'Distribution by method'|escape:'html'}</h3>
         </div>
         <div class="bbf-chart-container" style="height: 280px;">
-            <canvas id="bbf-chart-methods" aria-label="{$langVars->getTranslation('distribution_by_method', $adminLang)|default:'Distribution by method'|escape:'html'}" role="img"></canvas>
+            <canvas id="bbf-chart-methods" aria-label="{$langVars->getTranslation('distribution_by_method', $adminLang)|default:'Distribution by method'|escape:'html'}" role="img" aria-describedby="bbf-chart-methods-summary"></canvas>
         </div>
+        <details class="bbf-chart-data-details">
+            <summary>{$langVars->getTranslation('chart_data_toggle', $adminLang)|default:'Daten als Tabelle anzeigen'|escape:'html'}</summary>
+            <div id="bbf-chart-methods-summary" class="bbf-sr-only" aria-live="polite"></div>
+            <div style="overflow-x:auto;">
+                <table class="bbf-table bbf-chart-data-table" id="bbf-chart-methods-table">
+                    <caption class="bbf-sr-only">{$langVars->getTranslation('distribution_by_method', $adminLang)|default:'Distribution by method'|escape:'html'}</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">{$langVars->getTranslation('method', $adminLang)|default:'Method'|escape:'html'}</th>
+                            <th scope="col">{$langVars->getTranslation('chart_data_count', $adminLang)|default:'Anzahl'|escape:'html'}</th>
+                            <th scope="col">{$langVars->getTranslation('chart_data_share', $adminLang)|default:'Anteil'|escape:'html'}</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </details>
     </div>
 
     {* Top-Formulare *}
@@ -93,8 +126,24 @@
             <h3 class="bbf-card-title">{$langVars->getTranslation('top_forms', $adminLang)|default:'Top forms'|escape:'html'}</h3>
         </div>
         <div class="bbf-chart-container" style="height: 280px;">
-            <canvas id="bbf-chart-forms" aria-label="{$langVars->getTranslation('top_forms', $adminLang)|default:'Top forms'|escape:'html'}" role="img"></canvas>
+            <canvas id="bbf-chart-forms" aria-label="{$langVars->getTranslation('top_forms', $adminLang)|default:'Top forms'|escape:'html'}" role="img" aria-describedby="bbf-chart-forms-summary"></canvas>
         </div>
+        <details class="bbf-chart-data-details">
+            <summary>{$langVars->getTranslation('chart_data_toggle', $adminLang)|default:'Daten als Tabelle anzeigen'|escape:'html'}</summary>
+            <div id="bbf-chart-forms-summary" class="bbf-sr-only" aria-live="polite"></div>
+            <div style="overflow-x:auto;">
+                <table class="bbf-table bbf-chart-data-table" id="bbf-chart-forms-table">
+                    <caption class="bbf-sr-only">{$langVars->getTranslation('top_forms', $adminLang)|default:'Top forms'|escape:'html'}</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">{$langVars->getTranslation('form', $adminLang)|default:'Form'|escape:'html'}</th>
+                            <th scope="col">{$langVars->getTranslation('chart_data_count', $adminLang)|default:'Anzahl'|escape:'html'}</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </details>
     </div>
 </div>
 
@@ -221,6 +270,49 @@ var bbfDashboardData = {$dashboardDataJson nofilter};
         initDashboardCharts();
     }
 
+    /**
+     * Baue eine Daten-Tabelle unter einem Chart auf (a11y-Fallback).
+     * Alle Zell-Inhalte werden via textContent gesetzt – kein XSS-Risiko.
+     *
+     * @param {string} tableId
+     * @param {string} summaryId   ID der visually-hidden Live-Region
+     * @param {Array<Array<string|number>>} rows  [[col1, col2, ...], ...]
+     * @param {string} srSummary   Kurzer Satz fuer Screenreader
+     */
+    function renderChartDataTable(tableId, summaryId, rows, srSummary) {
+        var table = document.getElementById(tableId);
+        if (table) {
+            var tbody = table.querySelector('tbody');
+            if (tbody) {
+                while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+                if (rows.length === 0) {
+                    var tr = document.createElement('tr');
+                    var td = document.createElement('td');
+                    td.setAttribute('colspan', table.querySelectorAll('thead th').length || 2);
+                    td.style.textAlign = 'center';
+                    td.style.color = 'var(--bbf-text-light)';
+                    td.textContent = (window.bbfLang && window.bbfLang.no_data) || 'Keine Daten';
+                    tr.appendChild(td);
+                    tbody.appendChild(tr);
+                } else {
+                    rows.forEach(function(row) {
+                        var tr = document.createElement('tr');
+                        row.forEach(function(cell) {
+                            var td = document.createElement('td');
+                            td.textContent = (cell === null || cell === undefined) ? '' : String(cell);
+                            tr.appendChild(td);
+                        });
+                        tbody.appendChild(tr);
+                    });
+                }
+            }
+        }
+        var sumEl = document.getElementById(summaryId);
+        if (sumEl) {
+            sumEl.textContent = srSummary;
+        }
+    }
+
     function initDashboardCharts() {
         if (typeof Chart === 'undefined') return;
 
@@ -280,6 +372,16 @@ var bbfDashboardData = {$dashboardDataJson nofilter};
             });
         }
 
+        // A11y-Fallback: Spam-Verlauf als Tabelle + SR-Zusammenfassung
+        var historyRows = historyLabels.map(function(lbl, i) { return [lbl, historyData[i]]; });
+        var historyTotal = historyData.reduce(function(a, b) { return a + b; }, 0);
+        renderChartDataTable(
+            'bbf-chart-history-table',
+            'bbf-chart-history-summary',
+            historyRows,
+            'Spam-Verlauf: ' + historyTotal + ' geblockte Versuche über ' + historyLabels.length + ' Tage.'
+        );
+
         // Spam History Chart
         var historyCtx = document.getElementById('bbf-chart-history');
         if (historyCtx) {
@@ -324,7 +426,8 @@ var bbfDashboardData = {$dashboardDataJson nofilter};
         var mLabels = [];
         var mData = [];
         var mColors = [];
-        if (data.method_distribution && data.method_distribution.length > 0) {
+        var mHasData = data.method_distribution && data.method_distribution.length > 0;
+        if (mHasData) {
             data.method_distribution.forEach(function(row) {
                 mLabels.push(methodLabels[row.detection_method] || row.detection_method);
                 mData.push(parseInt(row.cnt));
@@ -334,6 +437,23 @@ var bbfDashboardData = {$dashboardDataJson nofilter};
             mLabels = ['Keine Daten'];
             mData = [1];
             mColors = ['#e5e7eb'];
+        }
+
+        // A11y-Fallback: Methoden-Verteilung als Tabelle + Anteilsspalte
+        if (mHasData) {
+            var mTotal = mData.reduce(function(a, b) { return a + b; }, 0) || 1;
+            var mRows = mLabels.map(function(lbl, i) {
+                var share = Math.round((mData[i] / mTotal) * 1000) / 10;
+                return [lbl, mData[i], share + ' %'];
+            });
+            renderChartDataTable(
+                'bbf-chart-methods-table',
+                'bbf-chart-methods-summary',
+                mRows,
+                'Verteilung nach Methode: ' + mLabels.length + ' Kategorien, ' + mTotal + ' Treffer gesamt.'
+            );
+        } else {
+            renderChartDataTable('bbf-chart-methods-table', 'bbf-chart-methods-summary', [], 'Keine Methoden-Daten vorhanden.');
         }
 
         var methodsCtx = document.getElementById('bbf-chart-methods');
@@ -365,7 +485,8 @@ var bbfDashboardData = {$dashboardDataJson nofilter};
         // Top Forms Bar Chart – from server data
         var fLabels = [];
         var fData = [];
-        if (data.top_forms && data.top_forms.length > 0) {
+        var fHasData = data.top_forms && data.top_forms.length > 0;
+        if (fHasData) {
             data.top_forms.forEach(function(row) {
                 fLabels.push(formLabels[row.form_type] || row.form_type);
                 fData.push(parseInt(row.cnt));
@@ -373,6 +494,19 @@ var bbfDashboardData = {$dashboardDataJson nofilter};
         } else {
             fLabels = ['Keine Daten'];
             fData = [0];
+        }
+
+        // A11y-Fallback: Top-Formulare als Tabelle
+        if (fHasData) {
+            var fRows = fLabels.map(function(lbl, i) { return [lbl, fData[i]]; });
+            renderChartDataTable(
+                'bbf-chart-forms-table',
+                'bbf-chart-forms-summary',
+                fRows,
+                'Top-Formulare nach Spam-Aufkommen: ' + fLabels.length + ' Einträge.'
+            );
+        } else {
+            renderChartDataTable('bbf-chart-forms-table', 'bbf-chart-forms-summary', [], 'Keine Formular-Daten vorhanden.');
         }
 
         var formsCtx = document.getElementById('bbf-chart-forms');
