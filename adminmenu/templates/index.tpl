@@ -170,75 +170,90 @@
 <script src="{$adminUrl|escape:'html'}js/vendor/alpine.min.js" defer></script>
 <script>
 {literal}
-document.addEventListener('alpine:init', function() {
-    Alpine.data('bbfCaptchaAdmin', function() {
-        return {
-            page: '',
-            loading: false,
-            sidebarCollapsed: false,
+;(function() {
+    function registerBbfCaptchaAdmin() {
+        if (!window.Alpine || window.__bbfCaptchaAdminRegistered) {
+            return;
+        }
+        window.__bbfCaptchaAdminRegistered = true;
 
-            init: function() {
-                // Dashboard ist IMMER die erste Seite
-                this.navigate('dashboard');
-            },
+        Alpine.data('bbfCaptchaAdmin', function() {
+            return {
+                page: '',
+                loading: false,
+                sidebarCollapsed: false,
 
-            navigate: function(pageName) {
-                var self = this;
-                this.page = pageName;
-                this.loading = true;
-                var container = document.getElementById('bbf-page-content');
-                var loadingText = (window.bbfLang && window.bbfLang.loading_page) || 'Loading...';
-                container.innerHTML = '<div class="text-center py-5"><div class="bbf-spinner bbf-spinner-lg" role="status" aria-label="' + loadingText + '"></div><p class="mt-3" style="color: var(--bbf-text-light);">' + loadingText + '</p></div>';
+                init: function() {
+                    // Dashboard ist IMMER die erste Seite
+                    this.navigate('dashboard');
+                },
 
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', postURL, true);
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === 4) {
-                        self.loading = false;
-                        if (xhr.status === 200) {
-                            try {
-                                var resp = JSON.parse(xhr.responseText);
-                                if (resp && resp.content) {
-                                    container.innerHTML = resp.content;
+                navigate: function(pageName) {
+                    var self = this;
+                    this.page = pageName;
+                    this.loading = true;
+                    var container = document.getElementById('bbf-page-content');
+                    var loadingText = (window.bbfLang && window.bbfLang.loading_page) || 'Loading...';
+                    container.innerHTML = '<div class="text-center py-5"><div class="bbf-spinner bbf-spinner-lg" role="status" aria-label="' + loadingText + '"></div><p class="mt-3" style="color: var(--bbf-text-light);">' + loadingText + '</p></div>';
+
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', postURL, true);
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
+                            self.loading = false;
+                            if (xhr.status === 200) {
+                                try {
+                                    var resp = JSON.parse(xhr.responseText);
+                                    if (resp && resp.content) {
+                                        container.innerHTML = resp.content;
+                                        self.evalScripts(container);
+                                        Alpine.initTree(container);
+                                    } else {
+                                        var msgErr = (window.bbfLang && window.bbfLang.page_load_error) || 'Error loading page';
+                                        container.innerHTML = '<div class="bbf-alert bbf-alert-danger" role="alert">' + msgErr + '</div>';
+                                    }
+                                } catch (e) {
+                                    container.innerHTML = xhr.responseText;
                                     self.evalScripts(container);
                                     Alpine.initTree(container);
-                                } else {
-                                    var msgErr = (window.bbfLang && window.bbfLang.page_load_error) || 'Error loading page';
-                                    container.innerHTML = '<div class="bbf-alert bbf-alert-danger" role="alert">' + msgErr + '</div>';
                                 }
-                            } catch (e) {
-                                container.innerHTML = xhr.responseText;
-                                self.evalScripts(container);
-                                Alpine.initTree(container);
+                            } else {
+                                var msgConn = (window.bbfLang && window.bbfLang.connection_error) || 'Connection error';
+                                container.innerHTML = '<div class="bbf-alert bbf-alert-danger" role="alert">' + msgConn + ' (' + xhr.status + ')</div>';
                             }
-                        } else {
-                            var msgConn = (window.bbfLang && window.bbfLang.connection_error) || 'Connection error';
-                            container.innerHTML = '<div class="bbf-alert bbf-alert-danger" role="alert">' + msgConn + ' (' + xhr.status + ')</div>';
                         }
-                    }
-                };
-                var token = document.querySelector('[name="jtl_token"]');
-                var params = 'action=getPage&page=' + encodeURIComponent(pageName) + '&is_ajax=1';
-                if (token) params += '&jtl_token=' + encodeURIComponent(token.value);
-                xhr.send(params);
-            },
+                    };
+                    var token = document.querySelector('[name="jtl_token"]');
+                    var params = 'action=getPage&page=' + encodeURIComponent(pageName) + '&is_ajax=1';
+                    if (token) params += '&jtl_token=' + encodeURIComponent(token.value);
+                    xhr.send(params);
+                },
 
-            evalScripts: function(container) {
-                var scripts = container.querySelectorAll('script');
-                scripts.forEach(function(oldScript) {
-                    var newScript = document.createElement('script');
-                    if (oldScript.src) {
-                        newScript.src = oldScript.src;
-                    } else {
-                        newScript.textContent = oldScript.textContent;
-                    }
-                    oldScript.parentNode.replaceChild(newScript, oldScript);
-                });
-            }
-        };
-    });
-});
+                evalScripts: function(container) {
+                    var scripts = container.querySelectorAll('script');
+                    scripts.forEach(function(oldScript) {
+                        var newScript = document.createElement('script');
+                        if (oldScript.src) {
+                            newScript.src = oldScript.src;
+                        } else {
+                            newScript.textContent = oldScript.textContent;
+                        }
+                        oldScript.parentNode.replaceChild(newScript, oldScript);
+                    });
+                }
+            };
+        });
+
+        var root = document.querySelector('.bbf-plugin-page[x-data]');
+        if (root && !root._x_dataStack && typeof Alpine.initTree === 'function') {
+            Alpine.initTree(root);
+        }
+    }
+
+    document.addEventListener('alpine:init', registerBbfCaptchaAdmin);
+    registerBbfCaptchaAdmin();
+})();
 {/literal}
 </script>
 <script src="{$adminUrl|escape:'html'}js/admin.js"></script>
