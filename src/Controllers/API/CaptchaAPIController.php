@@ -48,8 +48,15 @@ class CaptchaAPIController
         header('Content-Type: application/json; charset=utf-8');
         header('X-BBF-Captcha-Version: 1.0.0');
 
+        $pathParameters = $this->extractPathParameters($endpoint);
+        $endpoint       = $pathParameters['endpoint'];
+
         // Health-Check braucht keine Auth
         if ($endpoint === 'health') {
+            if ($method !== 'GET') {
+                $this->sendError('Method not allowed', 405);
+                return;
+            }
             $this->sendJson(['status' => 'ok', 'version' => '1.0.0', 'timestamp' => time()]);
             return;
         }
@@ -84,10 +91,18 @@ class CaptchaAPIController
                 break;
 
             case 'stats':
+                if ($method !== 'GET') {
+                    $this->sendError('Method not allowed', 405);
+                    return;
+                }
                 $this->handleStats($apiKey);
                 break;
 
             case 'stats/today':
+                if ($method !== 'GET') {
+                    $this->sendError('Method not allowed', 405);
+                    return;
+                }
                 $this->handleStatsToday($apiKey);
                 break;
 
@@ -103,17 +118,25 @@ class CaptchaAPIController
                 if ($method === 'POST') {
                     $this->handleIpBlock($apiKey);
                 } elseif ($method === 'DELETE') {
-                    $this->handleIpUnblock($apiKey);
+                    $this->handleIpUnblock($apiKey, $pathParameters['ip'] ?? null);
                 } else {
                     $this->sendError('Method not allowed', 405);
                 }
                 break;
 
             case 'log':
+                if ($method !== 'GET') {
+                    $this->sendError('Method not allowed', 405);
+                    return;
+                }
                 $this->handleLog($apiKey);
                 break;
 
             case 'methods':
+                if ($method !== 'GET') {
+                    $this->sendError('Method not allowed', 405);
+                    return;
+                }
                 $this->handleMethods($apiKey);
                 break;
 
@@ -251,7 +274,7 @@ class CaptchaAPIController
         $this->sendJson(['success' => true, 'message' => 'IP blocked', 'ip' => $ip]);
     }
 
-    private function handleIpUnblock(object $apiKey): void
+    private function handleIpUnblock(object $apiKey, ?string $pathIp = null): void
     {
         if (!$this->requirePermission($apiKey, 'ip_manage')) {
             return;
@@ -262,7 +285,7 @@ class CaptchaAPIController
             return;
         }
 
-        $ip    = $input['ip'] ?? $_GET['ip'] ?? '';
+        $ip = $pathIp ?? $input['ip'] ?? $_GET['ip'] ?? '';
 
         if (!filter_var($ip, FILTER_VALIDATE_IP)) {
             $this->sendError('Invalid IP address', 400);
@@ -388,29 +411,27 @@ class CaptchaAPIController
 
     private function incrementApiRateLimitCounter(string $bucket, string $windowStart): void
     {
-        $existing = $this->db->queryPrepared(
-            "SELECT `id` FROM `bbf_captcha_rate_limits`
-             WHERE `ip_address` = :bucket AND `form_type` = 'api' AND `window_start` = :start
-             ORDER BY `id` ASC LIMIT 1",
-            ['bucket' => $bucket, 'start' => $windowStart],
-            1
-        );
-
-        if ($existing !== null && isset($existing->id)) {
-            $this->db->queryPrepared(
-                "UPDATE `bbf_captcha_rate_limits`
-                 SET `request_count` = `request_count` + 1
-                 WHERE `id` = :id",
-                ['id' => (int)$existing->id]
-            );
-            return;
-        }
-
         $this->db->queryPrepared(
             "INSERT INTO `bbf_captcha_rate_limits` (`ip_address`, `form_type`, `window_start`, `request_count`)
-             VALUES (:bucket, 'api', :start, 1)",
+             VALUES (:bucket, 'api', :start, 1)
+             ON DUPLICATE KEY UPDATE `request_count` = `request_count` + 1",
             ['bucket' => $bucket, 'start' => $windowStart]
         );
+    }
+
+    /**
+     * @return array{endpoint: string, ip?: string}
+     */
+    private function extractPathParameters(string $endpoint): array
+    {
+        if (preg_match('#^ip/block/([^/]+)$#', $endpoint, $matches) === 1) {
+            return [
+                'endpoint' => 'ip/block',
+                'ip'       => rawurldecode($matches[1]),
+            ];
+        }
+
+        return ['endpoint' => $endpoint];
     }
 
     private function getJsonInput(): array

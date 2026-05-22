@@ -81,27 +81,10 @@ class RateLimitService
         // Aktuelles Minuten-Fenster (für Sliding Window Bucket)
         $currentMinute = date('Y-m-d H:i:00');
 
-        $existing = $this->db->queryPrepared(
-            "SELECT `id` FROM `bbf_captcha_rate_limits`
-             WHERE `ip_address` = :ip AND `form_type` = :form AND `window_start` = :start
-             ORDER BY `id` ASC LIMIT 1",
-            ['ip' => $ip, 'form' => $formType, 'start' => $currentMinute],
-            1
-        );
-
-        if ($existing !== null && isset($existing->id)) {
-            $this->db->queryPrepared(
-                "UPDATE `bbf_captcha_rate_limits`
-                 SET `request_count` = `request_count` + 1
-                 WHERE `id` = :id",
-                ['id' => (int)$existing->id]
-            );
-            return;
-        }
-
         $this->db->queryPrepared(
             "INSERT INTO `bbf_captcha_rate_limits` (`ip_address`, `form_type`, `window_start`, `request_count`)
-             VALUES (:ip, :form, :start, 1)",
+             VALUES (:ip, :form, :start, 1)
+             ON DUPLICATE KEY UPDATE `request_count` = `request_count` + 1",
             ['ip' => $ip, 'form' => $formType, 'start' => $currentMinute]
         );
     }
