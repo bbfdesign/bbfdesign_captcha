@@ -23,7 +23,11 @@ class ApiKey
      */
     public function validateKey(string $rawKey): ?object
     {
-        if ($rawKey === '') {
+        $rawKey = trim($rawKey);
+        if ($rawKey === '' || strlen($rawKey) > 128) {
+            return null;
+        }
+        if (!preg_match('/^bbf_[a-f0-9]{48}$/i', $rawKey)) {
             return null;
         }
         $hash = hash('sha256', $rawKey);

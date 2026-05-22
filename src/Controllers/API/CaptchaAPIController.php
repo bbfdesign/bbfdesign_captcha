@@ -24,10 +24,13 @@ use Plugin\bbfdesign_captcha\src\Helpers\PluginHelper;
  */
 class CaptchaAPIController
 {
+    private const MAX_JSON_INPUT_BYTES = 1048576;
+
     private PluginInterface $plugin;
     private DbInterface $db;
     private Setting $settings;
     private ApiKey $apiKeyModel;
+    private ?string $jsonInputError = null;
 
     public function __construct(PluginInterface $plugin, DbInterface $db, Setting $settings)
     {
@@ -81,11 +84,11 @@ class CaptchaAPIController
                 break;
 
             case 'stats':
-                $this->handleStats();
+                $this->handleStats($apiKey);
                 break;
 
             case 'stats/today':
-                $this->handleStatsToday();
+                $this->handleStatsToday($apiKey);
                 break;
 
             case 'ip/check':
@@ -111,7 +114,7 @@ class CaptchaAPIController
                 break;
 
             case 'methods':
-                $this->handleMethods();
+                $this->handleMethods($apiKey);
                 break;
 
             default:
@@ -130,14 +133,26 @@ class CaptchaAPIController
 
     private function handleValidate(object $apiKey): void
     {
-        if (!$this->apiKeyModel->hasPermission($apiKey, 'validate')) {
-            $this->sendError('Permission denied: validate', 403);
+        if (!$this->requirePermission($apiKey, 'validate')) {
             return;
         }
 
-        $input    = $this->getJsonInput();
+        $input = $this->getJsonInputOrFail();
+        if ($input === null) {
+            return;
+        }
+
         $postData = $input['data'] ?? $input;
-        $formType = $input['form_type'] ?? 'api';
+        if (!is_array($postData)) {
+            $this->sendError('Invalid data payload', 400);
+            return;
+        }
+
+        $formType = $this->normalizeFormType((string)($input['form_type'] ?? 'api'));
+        if ($formType === null) {
+            $this->sendError('Invalid form_type', 400);
+            return;
+        }
 
         $captcha = new CaptchaService($this->plugin, $this->db, $this->settings);
         $result  = $captcha->validate($postData, $formType);
@@ -149,8 +164,12 @@ class CaptchaAPIController
         ]);
     }
 
-    private function handleStats(): void
+    private function handleStats(object $apiKey): void
     {
+        if (!$this->requirePermission($apiKey, 'stats')) {
+            return;
+        }
+
         $logService = new SpamLogService($this->db, $this->settings);
         $kpis       = $logService->getKPIs();
         $trend      = $logService->getTrend();
@@ -163,8 +182,12 @@ class CaptchaAPIController
         ]);
     }
 
-    private function handleStatsToday(): void
+    private function handleStatsToday(object $apiKey): void
     {
+        if (!$this->requirePermission($apiKey, 'stats')) {
+            return;
+        }
+
         $logService = new SpamLogService($this->db, $this->settings);
         $kpis       = $logService->getKPIs();
 
@@ -176,7 +199,15 @@ class CaptchaAPIController
 
     private function handleIpCheck(object $apiKey): void
     {
-        $input = $this->getJsonInput();
+        if (!$this->requireAnyPermission($apiKey, ['ip_manage', 'validate'])) {
+            return;
+        }
+
+        $input = $this->getJsonInputOrFail();
+        if ($input === null) {
+            return;
+        }
+
         $ip    = $input['ip'] ?? '';
 
         if (empty($ip) || !filter_var($ip, FILTER_VALIDATE_IP)) {
@@ -195,15 +226,19 @@ class CaptchaAPIController
 
     private function handleIpBlock(object $apiKey): void
     {
-        if (!$this->apiKeyModel->hasPermission($apiKey, 'ip_manage')) {
-            $this->sendError('Permission denied: ip_manage', 403);
+        if (!$this->requirePermission($apiKey, 'ip_manage')) {
             return;
         }
 
-        $input    = $this->getJsonInput();
+        $input = $this->getJsonInputOrFail();
+        if ($input === null) {
+            return;
+        }
+
         $ip       = $input['ip'] ?? '';
-        $reason   = $input['reason'] ?? 'Blocked via API';
-        $duration = (int)($input['duration_minutes'] ?? 1440);
+        $reason   = trim((string)($input['reason'] ?? 'Blocked via API'));
+        $reason   = mb_substr($reason !== '' ? $reason : 'Blocked via API', 0, 255);
+        $duration = min(525600, max(1, (int)($input['duration_minutes'] ?? 1440)));
 
         if (empty($ip) || !filter_var($ip, FILTER_VALIDATE_IP)) {
             $this->sendError('Invalid IP address', 400);
@@ -218,12 +253,15 @@ class CaptchaAPIController
 
     private function handleIpUnblock(object $apiKey): void
     {
-        if (!$this->apiKeyModel->hasPermission($apiKey, 'ip_manage')) {
-            $this->sendError('Permission denied: ip_manage', 403);
+        if (!$this->requirePermission($apiKey, 'ip_manage')) {
             return;
         }
 
-        $input = $this->getJsonInput();
+        $input = $this->getJsonInputOrFail();
+        if ($input === null) {
+            return;
+        }
+
         $ip    = $input['ip'] ?? $_GET['ip'] ?? '';
 
         if (!filter_var($ip, FILTER_VALIDATE_IP)) {
@@ -239,6 +277,10 @@ class CaptchaAPIController
 
     private function handleLog(object $apiKey): void
     {
+        if (!$this->requirePermission($apiKey, 'log_read')) {
+            return;
+        }
+
         $page    = max(1, (int)($_GET['page'] ?? 1));
         $perPage = min(100, max(1, (int)($_GET['per_page'] ?? 50)));
         $offset  = ($page - 1) * $perPage;
@@ -267,8 +309,12 @@ class CaptchaAPIController
         ]);
     }
 
-    private function handleMethods(): void
+    private function handleMethods(object $apiKey): void
     {
+        if (!$this->requirePermission($apiKey, 'stats')) {
+            return;
+        }
+
         $methodKeys = [
             'honeypot'          => 'honeypot_enabled',
             'timing'            => 'timing_enabled',
@@ -317,11 +363,11 @@ class CaptchaAPIController
 
     private function checkRateLimit(object $apiKey): bool
     {
-        $limit = (int)($apiKey->rate_limit ?? 60);
+        $limit = max(1, (int)($apiKey->rate_limit ?? 60));
         $hash  = (string)($apiKey->key_hash ?? '');
 
         // Bucket-Key: Kurzhash(API-Key) + ClientIP -> pro Key UND IP limitieren
-        $ip     = PluginHelper::getClientIp();
+        $ip     = preg_replace('/[^a-f0-9:.]/i', '', PluginHelper::getClientIp()) ?: 'unknown';
         $bucket = substr('apk_' . substr($hash, 0, 16) . '_' . $ip, 0, 45);
         $windowStart = date('Y-m-d H:i:00');
 
@@ -335,25 +381,117 @@ class CaptchaAPIController
 
         $current = (int)($count->total ?? 0);
 
-        $this->db->queryPrepared(
-            "INSERT INTO `bbf_captcha_rate_limits` (`ip_address`, `form_type`, `window_start`, `request_count`)
-             VALUES (:bucket, 'api', :start, 1)
-             ON DUPLICATE KEY UPDATE `request_count` = `request_count` + 1",
-            ['bucket' => $bucket, 'start' => $windowStart]
-        );
+        $this->incrementApiRateLimitCounter($bucket, $windowStart);
 
         return $current < $limit;
     }
 
+    private function incrementApiRateLimitCounter(string $bucket, string $windowStart): void
+    {
+        $existing = $this->db->queryPrepared(
+            "SELECT `id` FROM `bbf_captcha_rate_limits`
+             WHERE `ip_address` = :bucket AND `form_type` = 'api' AND `window_start` = :start
+             ORDER BY `id` ASC LIMIT 1",
+            ['bucket' => $bucket, 'start' => $windowStart],
+            1
+        );
+
+        if ($existing !== null && isset($existing->id)) {
+            $this->db->queryPrepared(
+                "UPDATE `bbf_captcha_rate_limits`
+                 SET `request_count` = `request_count` + 1
+                 WHERE `id` = :id",
+                ['id' => (int)$existing->id]
+            );
+            return;
+        }
+
+        $this->db->queryPrepared(
+            "INSERT INTO `bbf_captcha_rate_limits` (`ip_address`, `form_type`, `window_start`, `request_count`)
+             VALUES (:bucket, 'api', :start, 1)",
+            ['bucket' => $bucket, 'start' => $windowStart]
+        );
+    }
+
     private function getJsonInput(): array
     {
+        $this->jsonInputError = null;
+
+        $contentLength = (int)($_SERVER['CONTENT_LENGTH'] ?? 0);
+        if ($contentLength > self::MAX_JSON_INPUT_BYTES) {
+            $this->jsonInputError = 'Payload too large';
+            return [];
+        }
+
         $raw = file_get_contents('php://input');
-        if (empty($raw)) {
+        if ($raw === false || $raw === '') {
+            return $_POST;
+        }
+
+        if (strlen($raw) > self::MAX_JSON_INPUT_BYTES) {
+            $this->jsonInputError = 'Payload too large';
+            return [];
+        }
+
+        $contentType = (string)($_SERVER['CONTENT_TYPE'] ?? '');
+        if (stripos($contentType, 'application/json') === false && !empty($_POST)) {
             return $_POST;
         }
 
         $decoded = json_decode($raw, true);
-        return is_array($decoded) ? $decoded : $_POST;
+        if (!is_array($decoded)) {
+            $this->jsonInputError = 'Invalid JSON payload';
+            return [];
+        }
+
+        return $decoded;
+    }
+
+    private function getJsonInputOrFail(): ?array
+    {
+        $input = $this->getJsonInput();
+        if ($this->jsonInputError !== null) {
+            $statusCode = $this->jsonInputError === 'Payload too large' ? 413 : 400;
+            $this->sendError($this->jsonInputError, $statusCode);
+            return null;
+        }
+
+        return $input;
+    }
+
+    private function normalizeFormType(string $formType): ?string
+    {
+        $formType = strtolower(trim($formType));
+        if ($formType === '' || !preg_match('/^[a-z0-9_-]{1,50}$/', $formType)) {
+            return null;
+        }
+
+        return $formType;
+    }
+
+    private function requirePermission(object $apiKey, string $permission): bool
+    {
+        if ($this->apiKeyModel->hasPermission($apiKey, $permission)) {
+            return true;
+        }
+
+        $this->sendError('Permission denied: ' . $permission, 403);
+        return false;
+    }
+
+    /**
+     * @param string[] $permissions
+     */
+    private function requireAnyPermission(object $apiKey, array $permissions): bool
+    {
+        foreach ($permissions as $permission) {
+            if ($this->apiKeyModel->hasPermission($apiKey, $permission)) {
+                return true;
+            }
+        }
+
+        $this->sendError('Permission denied', 403);
+        return false;
     }
 
     private function sendJson(array $data, int $statusCode = 200): void

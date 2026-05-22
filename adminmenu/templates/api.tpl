@@ -10,7 +10,7 @@
     <div class="bbf-tab-content" {literal}:class="{ active: tab === 'keys' }"{/literal}>
         <div class="bbf-card">
             <div style="margin-bottom: var(--bbf-spacing-md);">
-                <button type="button" class="bbf-btn bbf-btn-primary" {literal}@click="showCreateModal = true"{/literal}>Neuen API-Key erstellen</button>
+                <button type="button" class="bbf-btn bbf-btn-primary" {literal}@click="openCreateModal()"{/literal}>Neuen API-Key erstellen</button>
             </div>
 
             <table class="bbf-table">
@@ -71,6 +71,17 @@
                     <div style="margin-bottom: var(--bbf-spacing-md);">
                         <label class="bbf-form-label">Name</label>
                         <input type="text" class="bbf-input" placeholder="z.B. Externes Plugin" x-model="newKeyName">
+                    </div>
+                    <div style="margin-bottom: var(--bbf-spacing-md);">
+                        <label class="bbf-form-label">Berechtigungen</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;">
+                            <template x-for="permission in availablePermissions" :key="permission.value">
+                                <label style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" x-model="selectedPermissions" :value="permission.value">
+                                    <span x-text="permission.label"></span>
+                                </label>
+                            </template>
+                        </div>
                     </div>
                     <div x-show="createdKey" class="bbf-alert bbf-alert-warning">
                         <strong>API-Key (nur einmal sichtbar!):</strong><br>
@@ -138,10 +149,25 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
             apiKeys: [],
             showCreateModal: false,
             newKeyName: '',
+            selectedPermissions: ['validate', 'challenge'],
             createdKey: '',
+            availablePermissions: [
+                { value: 'validate', label: 'Validate' },
+                { value: 'challenge', label: 'Challenge' },
+                { value: 'stats', label: 'Stats' },
+                { value: 'log_read', label: 'Log lesen' },
+                { value: 'ip_manage', label: 'IP verwalten' }
+            ],
 
             init: function() {
                 this.loadKeys();
+            },
+
+            openCreateModal: function() {
+                this.newKeyName = '';
+                this.selectedPermissions = ['validate', 'challenge'];
+                this.createdKey = '';
+                this.showCreateModal = true;
             },
 
             loadKeys: function() {
@@ -154,7 +180,10 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
             createKey: function() {
                 var self = this;
                 if (!this.newKeyName.trim()) return;
-                bbfAdmin.post('createApiKey', { key_name: this.newKeyName }).then(function(resp) {
+                bbfAdmin.post('createApiKey', {
+                    key_name: this.newKeyName,
+                    permissions: JSON.stringify(this.selectedPermissions)
+                }).then(function(resp) {
                     if (resp.success) {
                         self.createdKey = resp.key;
                         self.loadKeys();
