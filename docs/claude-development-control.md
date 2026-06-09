@@ -147,10 +147,17 @@ bash tools/development-control.sh --status
 - Hell-/Dunkelmodus gleichwertig, mobil geprüft.
 - Keine abgeschnittenen Controls, keine Hover-Layout-Sprünge.
 
-## 6. Autonomer Blockmodus
+## 6. Autonomer Blockmodus (Autopilot)
 
-Wenn der Nutzer „weiter", „arbeite" oder „lege los" sagt, arbeitet Claude die
-offene Queue selbstständig ab. Reihenfolge:
+Standardbetrieb ist autark. Wenn der Nutzer „weiter", „arbeite", „lege los",
+„mach autonom" o. ä. sagt — und generell, solange eine offene Queue existiert —
+arbeitet Claude den führenden Masterplan (`docs/refactor/masterplan.md`)
+selbstständig ab und **committet und pusht grüne Inkremente eigenständig**
+(`--release`), ohne Rückfrage. Arbeitsschleife pro Punkt:
+lesen → klein ändern → `--local`-Gate → (falls `BBF_CAPTCHA_SMOKE_URL` gesetzt)
+`--smoke` → committen → pushen → nächster Punkt.
+
+Reihenfolge innerhalb einer Phase:
 
 1. Akute Vorfälle zuerst: echtes Formular nicht absendbar / Kunden ausgesperrt.
 2. Dann Fail-open und Sekret-Dichtheit sichern.
@@ -159,9 +166,37 @@ offene Queue selbstständig ab. Reihenfolge:
 5. Dann UI/UX-Konsolidierung.
 6. Dann neue, opt-in Provider/Module.
 
-Rückfragen nur bei: irreversibler externer Aktion, einem Secret/Schlüssel,
-rechtlichem/DSGVO-Inhalt oder einer Live-DB-Aktion ohne sichere Grundlage.
-Blockierte Punkte dokumentieren, dann nächsten sicheren Punkt bearbeiten.
+**Hotpath-Pflicht:** Jede Änderung an Formular-Interception, Provider-Verifizierung
+oder Bot-Scoring wird **fail-open** konstruiert — ein Fehler führt nur zu *weniger*
+Schutz, nie zur Aussperrung echter Kunden. Damit ist autonomes Pushen sicher
+gegenüber der obersten Regel. Ist kein Smoke-Ziel konfiguriert, wird der
+ausstehende Live-Smoke im Commit/Doku vermerkt (kein Blocker).
+
+Bereits in §11 getroffene Entscheidungen werden **nicht erneut erfragt**.
+
+Rückfrage/Stopp nur bei echtem, irreversiblem Risiko: produktiver Datenverlust /
+Live-DB-Restore ohne sichere Grundlage, drohendem Secret-Leak, rechtlich/DSGVO
+heiklem Inhalt mit nötiger Menschen-Entscheidung, oder Löschen/Überschreiben von
+Daten, die Claude nicht selbst erzeugt hat. Blockierte Punkte dokumentieren, dann
+nächsten sicheren Punkt bearbeiten.
+
+## 11. Getroffene Entscheidungen (verbindlich, nicht erneut erfragen)
+
+Diese Punkte sind für den Autopilot abschließend entschieden:
+
+1. **Backend-Akzentfarbe: Magenta (`#db2e87`) als Primärakzent** gemäß BBF-CI und
+   Ticket-Plugin. Das bisherige Security-Blau (`#2563eb`) bleibt als *sekundärer*
+   Akzent für Status/Badges erhalten. Volle Übernahme der `--bbf-ui-*`-Token-
+   Architektur.
+2. **MinShopVersion bleibt 5.2.0.** Ein Schutz-Plugin verkleinert seine Reichweite
+   nicht ohne Not; es werden nur stabile JTL-5-APIs genutzt. Primäres Testziel ist
+   **5.7.1** (Bikepark-Live); wo nötig per Feature-Detection abfedern.
+3. **Phase-4-Anbieter-Reihenfolge:** zuerst Produktberater (`bbf_productadvisor`),
+   dann AI Concierge, dann Suche. Alle guarded via Feature-Detection, nie harte
+   Abhängigkeit.
+4. **Such-/Layer-Overlay („Doofinder-artig") ist NICHT Teil dieses Plugins.** Es
+   gehört in ein Such-/Empfehlungs-Plugin. BBF Captcha liefert nur die guarded
+   Erweiterungs-API (Phase 4) als optionalen Host.
 
 ## 7. Commit-/Push-Regeln
 

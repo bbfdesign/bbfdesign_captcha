@@ -62,13 +62,30 @@ ausführliche Fassung steht in `docs/claude-development-control.md`.
 
 6. Nur bei grünem Stand committen und pushen (`--release`).
 
-## Autonomer Blockmodus
+## Autonomer Blockmodus (Autopilot)
 
-Bei „weiter", „arbeite", „lege los" o. ä. arbeitet Claude die offene Queue
-selbstständig ab. Rückfragen nur bei: irreversibler externer Aktion, einem
-Secret/Schlüssel, rechtlichem/DSGVO-Inhalt oder einer Live-DB-Aktion ohne
-sichere Grundlage. Blockierte Punkte dokumentieren, dann den nächsten sicheren
-Punkt bearbeiten.
+Standardbetrieb ist autark. Bei „weiter", „arbeite", „lege los", „mach autonom"
+o. ä. — und generell, solange eine offene Queue existiert — arbeitet Claude den
+führenden Masterplan (`docs/refactor/masterplan.md`) selbstständig Punkt für Punkt
+ab: lesen → ändern → `--local`-Gate → bei grünem Stand **eigenständig committen
+und pushen** (`bash tools/development-control.sh --release`), ohne Rückfrage.
+Smoke: ist `BBF_CAPTCHA_SMOKE_URL` gesetzt, läuft `--smoke` mit; sonst wird der
+ausstehende Live-Smoke im Commit/Doku vermerkt und weitergearbeitet (kein Blocker).
+
+Bereits im Masterplan getroffene Entscheidungen werden **nicht erneut erfragt**
+(siehe dort „Getroffene Entscheidungen").
+
+**Pflicht: Hotpath-Änderungen sind fail-open konstruiert** — ein Fehler darf nur
+zu *weniger* Schutz führen, niemals dazu, dass echte Kunden ausgesperrt werden.
+Dadurch ist autonomes Pushen solcher Änderungen sicher gegenüber der obersten Regel.
+
+Rückfrage/Stopp nur bei echtem, irreversiblem Risiko:
+- produktiver Datenverlust / Live-DB-Restore ohne sichere Grundlage,
+- ein Secret/Schlüssel würde geleakt,
+- rechtlich/DSGVO heikler Inhalt, der eine menschliche Entscheidung braucht,
+- Löschen/Überschreiben von Daten, die Claude nicht selbst erzeugt hat.
+
+Blockierte Punkte werden dokumentiert, danach der nächste sichere Punkt bearbeitet.
 
 ## Git-Remote (wichtig)
 
