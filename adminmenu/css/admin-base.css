@@ -1,7 +1,8 @@
 /**
  * BBF Design System – CSS Custom Properties
  * Plugin: bbfdesign_captcha (Captcha & Spam-Schutz)
- * Primärfarbe: Blau (#2563eb) — Sicherheit/Trust
+ * Primärakzent: Magenta (#db2e87) — BBF-CI, angeglichen an das Ticket-Plugin.
+ * Security-Blau (#2563eb) bleibt als sekundärer Akzent (--bbf-secondary).
  */
 
 @font-face {
@@ -12,49 +13,58 @@
 }
 
 :root {
-    /* Farben – Primary (Blau für Security) */
-    --bbf-primary: #2563eb;
-    --bbf-primary-hover: #1d4ed8;
-    --bbf-primary-light: rgba(37, 99, 235, 0.08);
-    --bbf-primary-dark: #1e40af;
-    --bbf-primary-shadow: rgba(37, 99, 235, 0.3);
-    --bbf-primary-badge: #93c5fd;
+    /* Farben – Primary (Magenta, BBF-CI) */
+    --bbf-primary: #db2e87;
+    --bbf-primary-hover: #c41f76;
+    --bbf-primary-light: rgba(219, 46, 135, 0.08);
+    --bbf-primary-dark: #a01861;
+    --bbf-primary-shadow: rgba(219, 46, 135, 0.3);
+    --bbf-primary-badge: rgba(219, 46, 135, 0.16);
+
+    /* Farben – Secondary (Security-Blau, sekundärer Akzent) */
+    --bbf-secondary: #2563eb;
+    --bbf-secondary-hover: #1d4ed8;
+    --bbf-secondary-light: rgba(37, 99, 235, 0.10);
+
+    /* Farben – Akzent (für Gradienten/Hover, wie Ticket-Plugin) */
+    --bbf-cyan: #13a8d2;
+    --bbf-green: #1fbf75;
 
     /* Farben – Neutral */
     --bbf-text-dark: #29343d;
     --bbf-text-medium: #454545;
     --bbf-text-light: #737385;
     --bbf-text-white: #ffffff;
-    --bbf-body-text: #1f2937;
-    --bbf-muted: #6b7280;
+    --bbf-body-text: #162033;
+    --bbf-muted: #60708a;
 
     /* Farben – Background */
-    --bbf-bg-page: #f0f2f5;
+    --bbf-bg-page: #f4f7fb;
     --bbf-bg-card: #ffffff;
     --bbf-bg-input: #f5f5f5;
-    --bbf-bg-table-header: #f8f9fa;
+    --bbf-bg-table-header: #f6f9fc;
     --bbf-bg-sidebar: #ffffff;
     --bbf-bg-hover: #f0f0f5;
     --bbf-row-stripe: #fafbfc;
-    --bbf-row-hover: rgba(37, 99, 235, 0.04);
+    --bbf-row-hover: rgba(219, 46, 135, 0.04);
 
     /* Farben – Border */
-    --bbf-border: #e5e7eb;
+    --bbf-border: #e6e6e8;
     --bbf-border-light: #f7f7f7;
     --bbf-border-input: #f5f5f5;
 
     /* Farben – Status */
-    --bbf-success: #16a34a;
-    --bbf-success-light: #dcfce7;
+    --bbf-success: #28a745;
+    --bbf-success-light: #d4edda;
     --bbf-success-dark: #155724;
-    --bbf-warning: #f59e0b;
-    --bbf-warning-light: #fef3c7;
+    --bbf-warning: #ffc107;
+    --bbf-warning-light: #fff3cd;
     --bbf-warning-dark: #856404;
-    --bbf-danger: #dc2626;
-    --bbf-danger-light: #fee2e2;
+    --bbf-danger: #dc3545;
+    --bbf-danger-light: #f8d7da;
     --bbf-danger-dark: #721c24;
-    --bbf-info: #0ea5e9;
-    --bbf-info-light: #e0f2fe;
+    --bbf-info: #17a2b8;
+    --bbf-info-light: #d1ecf1;
     --bbf-info-dark: #0c5460;
 
     /* Typografie */
@@ -96,6 +106,9 @@
     --bbf-shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
     --bbf-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 
+    /* Fokus-Ring (Magenta, wie Ticket-Plugin) */
+    --bbf-focus-ring: 0 0 0 3px rgba(219, 46, 135, 0.22);
+
     /* Form Controls */
     --bbf-input-height: 48px;
     --bbf-input-padding: 0.59rem 1rem;
@@ -113,7 +126,7 @@
     --bbf-btn-height-sm: 32px;
 
     /* Table */
-    --bbf-th-bg: #f8f9fa;
+    --bbf-th-bg: #f6f9fc;
     --bbf-th-text: #6b7280;
 
     /* Transitions */
@@ -122,4 +135,60 @@
 
     /* Font alias */
     --bbf-font: var(--bbf-font-family);
+}
+
+/**
+ * Dark Mode – token-basiert, wie im Ticket-Plugin.
+ * Aktiviert über die Klasse html.theme-dark (Theme-Umschalter des Backends);
+ * Aliase für Datalayer-/Forward-Kompatibilität.
+ */
+html.theme-dark,
+html.bbf-theme-dark,
+html[data-bbf-theme="dark"] {
+    --bbf-primary: #ee5fa8;
+    --bbf-primary-hover: #db2e87;
+    --bbf-primary-light: rgba(238, 95, 168, 0.14);
+    --bbf-primary-dark: #db2e87;
+    --bbf-primary-shadow: rgba(238, 95, 168, 0.32);
+    --bbf-primary-badge: rgba(238, 95, 168, 0.18);
+
+    --bbf-secondary: #60a5fa;
+    --bbf-secondary-hover: #3b82f6;
+    --bbf-secondary-light: rgba(96, 165, 250, 0.16);
+
+    --bbf-text-dark: #f8fafc;
+    --bbf-text-medium: #e2e8f0;
+    --bbf-text-light: #bac7da;
+    --bbf-text-white: #ffffff;
+    --bbf-body-text: #dbe7f6;
+    --bbf-muted: #a8b7ca;
+
+    --bbf-bg-page: #080f1c;
+    --bbf-bg-card: #0f1728;
+    --bbf-bg-input: #121d31;
+    --bbf-bg-table-header: #18243a;
+    --bbf-bg-sidebar: #0b1221;
+    --bbf-bg-hover: #18243a;
+    --bbf-row-stripe: rgba(255, 255, 255, 0.02);
+    --bbf-row-hover: rgba(238, 95, 168, 0.10);
+
+    --bbf-border: #33445f;
+    --bbf-border-light: #263650;
+    --bbf-border-input: #42536f;
+
+    --bbf-success: #4ade80;
+    --bbf-success-light: rgba(74, 222, 128, 0.16);
+    --bbf-warning: #fbbf24;
+    --bbf-warning-light: rgba(251, 191, 36, 0.16);
+    --bbf-danger: #fb7185;
+    --bbf-danger-light: rgba(251, 113, 133, 0.16);
+    --bbf-info: #38bdf8;
+    --bbf-info-light: rgba(56, 189, 248, 0.16);
+
+    --bbf-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+    --bbf-shadow-md: 0 12px 28px rgba(0, 0, 0, 0.28);
+    --bbf-shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.36);
+    --bbf-card-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+    --bbf-th-bg: #18243a;
+    --bbf-th-text: #bac7da;
 }

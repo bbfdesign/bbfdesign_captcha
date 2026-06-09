@@ -3,6 +3,26 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.5 – 2026-06-09
+
+### Geändert (Backend-Design, Phase 2 des Masterplans)
+
+- **Admin-Backend an das Ticket-Designsystem angeglichen.** Primärakzent von Blau
+  auf **Magenta `#db2e87`** (BBF-CI) umgestellt; das Security-Blau bleibt als
+  Sekundär-Token (`--bbf-secondary`) erhalten. Token-Werte (Hintergründe, Border,
+  Status) auf die Ticket-Werte gebracht; Akzent-Tokens `--bbf-cyan`/`--bbf-green`
+  und ein Magenta-Fokus-Ring (`--bbf-focus-ring`) ergänzt.
+- **Token-basierter Dark-Mode** in `admin-base.css` (Selektor `html.theme-dark`),
+  sodass alle token-konsumierenden Komponenten automatisch dunkeln. Zusätzlich
+  Kontrast-Fixes: Alert-Texte nutzen im Dark-Mode die helle Status-Farbe statt der
+  fixen dunklen, und Input-Focus verwendet die Card-Farbe statt hartem Weiß.
+- Hartkodierte Blau-Werte in `admin.css` und den Dashboard-Charts auf Magenta
+  umgestellt (kategoriale Methoden-Palette der Charts bleibt bewusst vielfältig).
+
+> Reine Admin-Backend-Änderung (kein Kunden-Hotpath). Token-Vollständigkeit
+> deterministisch geprüft (keine undefinierte Variable), PHP-Lint/Template-Gate grün.
+> Visuelle Abnahme hell/dunkel im echten Backend steht noch aus.
+
 ## 1.0.4 – 2026-06-09
 
 ### Neu (DSGVO, Phase 0.5 des Masterplans)

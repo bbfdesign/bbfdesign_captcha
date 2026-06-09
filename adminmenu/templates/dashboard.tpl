@@ -225,8 +225,8 @@ var bbfDashboardData = {$dashboardDataJson nofilter};
         if (typeof Chart === 'undefined') return;
 
         var data = window.bbfDashboardData || {};
-        var primaryColor = '#2563eb';
-        var primaryLight = 'rgba(37, 99, 235, 0.1)';
+        var primaryColor = '#db2e87';
+        var primaryLight = 'rgba(219, 46, 135, 0.1)';
         var methodColors = {
             'honeypot': '#2563eb',
             'timing': '#16a34a',

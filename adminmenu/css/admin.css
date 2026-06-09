@@ -3,7 +3,7 @@
 /* ═══════════════════════════════════════════════════════════
    BBF Captcha & Spam-Schutz – Admin Design (bbfdesign Corporate Style)
    Matching: bbfdesign_search, bbfdesign_customercenter
-   Primary: #2563eb (Blau – Sicherheit/Trust)
+   Primary: #db2e87 (Magenta – BBF-CI), Sekundär: #2563eb (Blau)
    ═══════════════════════════════════════════════════════════ */
 
 /* ─── JTL Admin Overrides ─── */
@@ -89,8 +89,8 @@ body #content_wrapper {
 
 #content .form-control:focus {
     border-color: var(--bbf-primary);
-    background: #fff;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    background: var(--bbf-bg-card);
+    box-shadow: 0 0 0 3px rgba(219, 46, 135, 0.1);
 }
 
 #content label {
@@ -216,7 +216,7 @@ body #content_wrapper {
 .bbf-sidebar-nav a:hover {
     background: var(--bbf-primary);
     color: #fff;
-    box-shadow: 0 17px 20px -8px rgba(37, 99, 235, 0.23);
+    box-shadow: 0 17px 20px -8px rgba(219, 46, 135, 0.23);
 }
 
 .bbf-sidebar-nav a:hover svg {
@@ -227,7 +227,7 @@ body #content_wrapper {
     background: var(--bbf-primary);
     color: #fff;
     font-weight: var(--bbf-font-weight-medium);
-    box-shadow: 0 17px 20px -8px rgba(37, 99, 235, 0.23);
+    box-shadow: 0 17px 20px -8px rgba(219, 46, 135, 0.23);
 }
 
 .bbf-sidebar-nav a.bbf-nav-active svg {
@@ -759,8 +759,8 @@ body #content_wrapper {
 .bbf-input:focus {
     outline: none;
     border-color: var(--bbf-primary);
-    background: #fff;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    background: var(--bbf-bg-card);
+    box-shadow: 0 0 0 3px rgba(219, 46, 135, 0.1);
 }
 
 .bbf-select {
@@ -878,6 +878,25 @@ body #content_wrapper {
     background: var(--bbf-danger-light);
     color: var(--bbf-danger-dark);
     border: 1px solid #fecaca;
+}
+
+/* Dark-Mode: fixe dunkle Alert-Textfarben (--bbf-*-dark) wären auf dunklem
+   Grund unlesbar – im Dark-Mode die helle Status-Farbe nutzen. */
+html.theme-dark .bbf-alert-info {
+    color: var(--bbf-info);
+    border-color: rgba(56, 189, 248, 0.4);
+}
+html.theme-dark .bbf-alert-success {
+    color: var(--bbf-success);
+    border-color: rgba(74, 222, 128, 0.4);
+}
+html.theme-dark .bbf-alert-warning {
+    color: var(--bbf-warning);
+    border-color: rgba(251, 191, 36, 0.4);
+}
+html.theme-dark .bbf-alert-danger {
+    color: var(--bbf-danger);
+    border-color: rgba(251, 113, 133, 0.4);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1066,7 +1085,7 @@ html.theme-dark .bbf-table tbody tr:nth-child(even) {
 }
 
 html.theme-dark .bbf-table tbody tr:hover {
-    background: rgba(37, 99, 235, 0.08);
+    background: rgba(219, 46, 135, 0.08);
 }
 
 html.theme-dark .bbf-input,
@@ -1088,7 +1107,7 @@ html.theme-dark .bbf-modal-footer {
 
 html.theme-dark .bbf-accordion-trigger {
     background: #0a2540;
-    color: #93c5fd;
+    color: #ee8fc4;
 }
 
 html.theme-dark .bbf-accordion-body {
@@ -1106,7 +1125,7 @@ html.theme-dark .bbf-tab {
 
 html.theme-dark .bbf-tab:hover,
 html.theme-dark .bbf-tab.active {
-    color: #93c5fd;
+    color: #ee8fc4;
 }
 
 html.theme-dark .bbf-tab.active {
@@ -1216,7 +1235,7 @@ html.theme-dark .bbf-btn-outline {
 .bbf-plugin-page .bbf-toggle input:focus-visible + .bbf-toggle-slider {
     outline: 2px solid var(--bbf-primary);
     outline-offset: 2px;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 0 0 3px rgba(219, 46, 135, 0.25);
 }
 
 .bbf-sidebar-nav a:focus-visible {
