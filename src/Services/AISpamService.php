@@ -158,16 +158,24 @@ class AISpamService
         $llmVerdict = $this->maybeLlmCheck($text, $result['score']);
         if ($llmVerdict !== null) {
             if ($llmVerdict['spam']) {
-                return [
-                    'valid'  => false,
-                    'reason' => 'LLM (' . $llmVerdict['provider'] . '): '
-                              . ($llmVerdict['reason'] ?: 'classified as spam')
-                              . ' (conf ' . number_format($llmVerdict['confidence'], 2) . ')',
-                    'score'  => max($result['score'], 100),
-                ];
-            }
-            // LLM sagt "kein Spam" → ueberschreibt einen Borderline-Block
-            if ($result['score'] >= $threshold && $result['score'] < 100) {
+                // Fail-open: Die LLM-Zweitprüfung darf NIE allein blockieren – eine
+                // Fehlklassifikation würde sonst einen echten Kunden aussperren. Sie
+                // wirkt nur, wenn der heuristische Filter bereits ein
+                // Korroborations-Signal liefert (mindestens "verdächtig").
+                $okThreshold = $this->settings->getInt('ai_threshold_ok', 30);
+                if ($result['score'] >= $okThreshold) {
+                    return [
+                        'valid'  => false,
+                        'reason' => 'LLM (' . $llmVerdict['provider'] . '): '
+                                  . ($llmVerdict['reason'] ?: 'classified as spam')
+                                  . ' (conf ' . number_format($llmVerdict['confidence'], 2) . ')',
+                        'score'  => max($result['score'], 100),
+                    ];
+                }
+                // Kein heuristisches Korroborations-Signal → nicht blockieren.
+                // Das Absenden bleibt möglich; unten entscheidet allein die Heuristik.
+            } elseif ($result['score'] >= $threshold && $result['score'] < 100) {
+                // LLM sagt "kein Spam" → überschreibt einen Borderline-Block (fail-open).
                 return [
                     'valid'  => true,
                     'reason' => '',

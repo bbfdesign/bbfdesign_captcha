@@ -3,6 +3,22 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.2 – 2026-06-09
+
+### Behoben (Sicherheit/Robustheit, Phase 0.2 des Masterplans)
+
+- **LLM-Zweitprüfung ist jetzt strikt non-blocking.** Eine LLM-Spam-Einstufung
+  blockiert ein Absenden nur noch, wenn der lokale Heuristik-Filter bereits ein
+  Korroborations-Signal liefert (mindestens „verdächtig", Score ≥ `ai_threshold_ok`).
+  Eine LLM-Fehlklassifikation kann damit keinen echten Kunden mehr allein aussperren;
+  LLM-Fehler/Timeouts sind weiterhin fail-open (kein Block).
+- **Harte Wartezeit-Obergrenze für die LLM-Prüfung.** Das konfigurierbare
+  `llm_timeout` ist von max. 60 s auf **max. 10 s** gedeckelt, damit die synchrone
+  Prüfung ein echtes Absenden (auch Checkout) nie spürbar blockiert.
+
+> Live-Smoke steht noch aus (`BBF_CAPTCHA_SMOKE_URL` nicht gesetzt). Fail-open
+> konstruiert, PHP-Lint grün.
+
 ## 1.0.1 – 2026-06-09
 
 ### Behoben (Sicherheit/Robustheit, Phase 0 des Masterplans)

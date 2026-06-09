@@ -324,8 +324,11 @@ class LLMSpamService
 
     private function getTimeout(): int
     {
+        // Harte Obergrenze: Die LLM-Prüfung läuft synchron im Absende-Hotpath
+        // (auch Checkout). Mehr als 10 s darf sie ein echtes Absenden nie kosten;
+        // bei Timeout greift fail-open (kein Block).
         $t = $this->settings->getInt('llm_timeout', self::DEFAULT_TIMEOUT);
-        return max(2, min(60, $t));
+        return max(2, min(10, $t));
     }
 
     /**
