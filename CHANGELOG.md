@@ -3,6 +3,19 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.4 – 2026-06-09
+
+### Neu (DSGVO, Phase 0.5 des Masterplans)
+
+- **Optionale IP-Anonymisierung im Spam-Log (Opt-in, standardmäßig AUS).** Neuer
+  Schalter `log_ip_anonymize`. Ist er aktiv, werden gespeicherte IP-Adressen
+  DSGVO-konform gekürzt (IPv4 → /24, IPv6 → /48); der Auto-Block-Zähler arbeitet
+  dann konsistent auf derselben Granularität, während die reale IP des
+  Verursachers weiterhin präzise gesperrt wird. Default ist AUS – bestehendes
+  Verhalten (volle IP, 90 Tage) bleibt unverändert, kein Risiko von
+  CGNAT-Fehlsperren. Helper `PluginHelper::anonymizeIp()`, Default per
+  Migration registriert (Gruppe `privacy`).
+
 ## 1.0.3 – 2026-06-09
 
 ### Robustheit (Phase 0.3 des Masterplans)

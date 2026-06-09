@@ -383,6 +383,21 @@ class CaptchaService
     }
 
     /**
+     * IP für die Speicherung im Spam-Log aufbereiten.
+     *
+     * Opt-in: Standardmäßig wird die volle IP gespeichert (präziser Auto-Block).
+     * Ist `log_ip_anonymize` aktiv, wird DSGVO-konform auf /24 (bzw. /48) gekürzt;
+     * der Auto-Block-Zähler nutzt dieselbe Aufbereitung, damit das Zählen passt.
+     */
+    private function storedIp(string $ip): string
+    {
+        if ($this->settings->getBool('log_ip_anonymize')) {
+            return PluginHelper::anonymizeIp($ip);
+        }
+        return $ip;
+    }
+
+    /**
      * Spam-Versuch loggen
      */
     private function logSpam(
@@ -395,7 +410,7 @@ class CaptchaService
     ): void {
         $spamLog = new SpamLog($this->db);
         $spamLog->log(
-            $ip,
+            $this->storedIp($ip),
             $formType,
             $method,
             $score,
@@ -414,16 +429,20 @@ class CaptchaService
         $window   = $this->settings->getInt('ip_auto_block_window', 10);
         $duration = $this->settings->getInt('ip_auto_block_duration', 1440);
 
+        // Zählung gegen den im Log gespeicherten (ggf. anonymisierten) IP-Wert,
+        // damit Auto-Block bei aktiver Anonymisierung konsistent bleibt.
         $count = $this->db->queryPrepared(
             "SELECT COUNT(*) AS cnt FROM `bbf_captcha_spam_log`
              WHERE `ip_address` = :ip
              AND `action_taken` = 'blocked'
              AND `created_at` >= DATE_SUB(NOW(), INTERVAL :window MINUTE)",
-            ['ip' => $ip, 'window' => $window],
+            ['ip' => $this->storedIp($ip), 'window' => $window],
             1
         );
 
         if ((int)($count->cnt ?? 0) >= $attempts) {
+            // Geblockt wird die reale IP des Verursachers (präzise), nicht der
+            // anonymisierte Zähl-Schlüssel.
             $ipEntry = new IPEntry($this->db);
             $ipEntry->autoBlock(
                 $ip,

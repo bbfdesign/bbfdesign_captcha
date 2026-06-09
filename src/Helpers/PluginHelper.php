@@ -74,6 +74,36 @@ class PluginHelper
     }
 
     /**
+     * IP-Adresse für DSGVO-konformes Logging anonymisieren.
+     * IPv4 → letztes Oktett auf 0 (/24), IPv6 → auf /48 gekürzt.
+     * Ungültige Eingaben werden unverändert zurückgegeben.
+     */
+    public static function anonymizeIp(string $ip): string
+    {
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            $parts = explode('.', $ip);
+            if (count($parts) === 4) {
+                $parts[3] = '0';
+                return implode('.', $parts);
+            }
+            return $ip;
+        }
+
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            $bin = inet_pton($ip);
+            if ($bin === false) {
+                return $ip;
+            }
+            // Erste 48 Bit (6 Bytes) behalten, Rest auf 0.
+            $masked = substr($bin, 0, 6) . str_repeat("\x00", strlen($bin) - 6);
+            $out    = inet_ntop($masked);
+            return $out === false ? $ip : $out;
+        }
+
+        return $ip;
+    }
+
+    /**
      * IP gegen CIDR-Range prüfen
      */
     public static function ipInCidr(string $ip, string $cidr): bool
