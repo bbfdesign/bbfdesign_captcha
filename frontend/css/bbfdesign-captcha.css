@@ -1,14 +1,54 @@
 /**
  * BBF Captcha & Spam-Schutz – Frontend Styles
- * Minimal CSS für Captcha-Widgets
+ * Schlankes, modernes CSS für die Schutz-Widgets.
+ *
+ * Themable über --bbf-captcha-* Custom Properties (vom Admin-Custom-CSS oder
+ * Theme überschreibbar). Heller Default (passt zu den allermeisten Shops); Dunkel
+ * NICHT automatisch via prefers-color-scheme – das würde dem OS des Besuchers statt
+ * dem Theme des Shops folgen und in hellen Formularen falsch aussehen. Stattdessen
+ * opt-in über eine Vorfahren-Klasse `.bbf-captcha-theme-dark`, die ein dunkles
+ * Shop-Theme bewusst setzen kann. Das Widget bleibt dezent – es sitzt in fremden
+ * Kundenformularen und darf deren Layout weder verschieben noch überlagern.
  */
+
+:root {
+    --bbf-captcha-gap: 12px;
+    --bbf-captcha-radius: 8px;
+    --bbf-captcha-font-size: 0.875rem;
+
+    --bbf-captcha-error-text: #b42318;
+    --bbf-captcha-error-bg: #fef3f2;
+    --bbf-captcha-error-border: #fecdca;
+
+    --bbf-captcha-success-text: #067647;
+    --bbf-captcha-success-bg: #ecfdf3;
+    --bbf-captcha-success-border: #abefc6;
+
+    /* BBF-Akzent (für Lade-/Fokuszustände), an die Plugin-CI angelehnt */
+    --bbf-captcha-accent: #db2e87;
+}
+
+/* Opt-in Dark-Variante: nur aktiv, wenn ein Shop-Theme einen Vorfahren mit
+   .bbf-captcha-theme-dark markiert (bewusste Entscheidung des Shops). */
+.bbf-captcha-theme-dark {
+    --bbf-captcha-error-text: #ffb4ab;
+    --bbf-captcha-error-bg: rgba(220, 38, 38, 0.16);
+    --bbf-captcha-error-border: rgba(251, 113, 133, 0.45);
+
+    --bbf-captcha-success-text: #75e0a7;
+    --bbf-captcha-success-bg: rgba(22, 163, 74, 0.16);
+    --bbf-captcha-success-border: rgba(74, 222, 128, 0.45);
+
+    --bbf-captcha-accent: #ee5fa8;
+}
 
 /* ── Captcha Widget Container ── */
 .bbf-captcha-widget {
-    margin: 12px 0;
+    margin: var(--bbf-captcha-gap) 0;
 }
 
-/* ── Honeypot Fields (Off-Screen, nicht display:none!) ── */
+/* ── Honeypot Fields (Off-Screen, nicht display:none!) ──
+   Positionierung/Sichtbarkeit NICHT verändern – funktionaler Schutz. */
 .bbf-captcha-hp {
     position: absolute;
     left: -9999px;
@@ -22,19 +62,26 @@
 
 /* ── Error Message ── */
 .bbf-captcha-error {
-    color: #dc2626;
-    font-size: 0.875rem;
+    color: var(--bbf-captcha-error-text);
+    font-size: var(--bbf-captcha-font-size);
+    line-height: 1.45;
     margin-top: 8px;
     padding: 8px 12px;
-    border-radius: 6px;
-    background: #fee2e2;
-    border: 1px solid #fecaca;
+    border-radius: var(--bbf-captcha-radius);
+    background: var(--bbf-captcha-error-bg);
+    border: 1px solid var(--bbf-captcha-error-border);
 }
 
 /* ── Success State ── */
 .bbf-captcha-success {
-    color: #16a34a;
-    font-size: 0.875rem;
+    color: var(--bbf-captcha-success-text);
+    font-size: var(--bbf-captcha-font-size);
+    line-height: 1.45;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: var(--bbf-captcha-radius);
+    background: var(--bbf-captcha-success-bg);
+    border: 1px solid var(--bbf-captcha-success-border);
 }
 
 /* ── Reduced Motion ── */

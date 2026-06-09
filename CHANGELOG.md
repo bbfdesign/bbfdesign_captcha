@@ -3,6 +3,22 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.6 – 2026-06-09
+
+### Geändert (Frontend-Default, Phase 3.1 des Masterplans)
+
+- **Frontend-Widget-CSS modernisiert und themable gemacht.** Feste Farben durch
+  `--bbf-captcha-*` Custom Properties ersetzt (vom Admin-Custom-CSS/Theme
+  überschreibbar), Fehler-/Erfolgs-Zustände einheitlich als dezente Boxen mit
+  klarem Kontrast. Heller Default (passt zu den meisten Shops); eine Dark-Variante
+  ist **opt-in** über die Vorfahren-Klasse `.bbf-captcha-theme-dark` – bewusst NICHT
+  via `prefers-color-scheme`, das dem OS des Besuchers statt dem Shop-Theme folgen
+  und in hellen Formularen falsch wirken würde.
+- Honeypot-Positionierung (funktionaler Schutz) und Reduced-Motion unverändert.
+
+> Reine CSS-Änderung am Widget; Layout des Kundenformulars unberührt. Visuelle
+> Abnahme im echten Shop steht noch aus.
+
 ## 1.0.5 – 2026-06-09
 
 ### Geändert (Backend-Design, Phase 2 des Masterplans)
