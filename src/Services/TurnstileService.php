@@ -108,8 +108,10 @@ class TurnstileService
         if ($response === null) {
             return [
                 'valid'  => false,
-                'reason' => 'Turnstile-Verifizierung fehlgeschlagen (Netzwerkfehler)',
-                'score'  => 30,
+                // Fail-open: Ein Infrastruktur-Ausfall (Provider nicht erreichbar)
+                // darf echte Kunden nicht bestrafen. Score 0 statt Strafpunkte.
+                'reason' => 'Turnstile nicht erreichbar (Netzwerkfehler) – fail-open',
+                'score'  => 0,
             ];
         }
 
