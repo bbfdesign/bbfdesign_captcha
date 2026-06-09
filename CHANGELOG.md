@@ -3,6 +3,17 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.3 – 2026-06-09
+
+### Robustheit (Phase 0.3 des Masterplans)
+
+- **Render-Fail-safe bestätigt + Diagnose ergänzt.** Schlägt das Rendern des
+  sichtbaren Captcha-Widgets fehl, bleibt der Schutz erhalten: Honeypot/Timing
+  werden über den separaten Output-Filter eingespielt und die serverseitige
+  POST-Validierung läuft unabhängig weiter – ein Render-Fehler öffnet das Formular
+  also nicht. Der bislang **stille** Render-Fehler wird nun (im `debug_mode`)
+  protokolliert; das Logging ist gekapselt und kann den Absende-Hotpath nie stören.
+
 ## 1.0.2 – 2026-06-09
 
 ### Behoben (Sicherheit/Robustheit, Phase 0.2 des Masterplans)

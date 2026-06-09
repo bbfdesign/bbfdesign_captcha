@@ -79,7 +79,20 @@ class FormProtection
         try {
             $html = $this->captcha->renderWidget($formType);
         } catch (\Throwable $e) {
+            // Render-Fail-safe: Der serverseitige Schutz (Honeypot/Timing via
+            // SmartyOutputFilter) und die POST-Validierung laufen unabhängig vom
+            // sichtbaren Widget weiter – ein Render-Fehler öffnet das Formular nicht,
+            // er macht das Widget nur unsichtbar. Fehler nur zur Diagnose loggen.
             $html = '';
+            if ($this->settings->getBool('debug_mode')) {
+                try {
+                    \JTL\Shop::Container()->getLogService()->warning(
+                        'BBF Captcha: Widget-Render fehlgeschlagen (' . $formType . '): ' . $e->getMessage()
+                    );
+                } catch (\Throwable $ignored) {
+                    // Logging darf den Hotpath nie stören.
+                }
+            }
         }
         $args['smarty']->assign('bbfCaptchaWidget', $html);
     }
