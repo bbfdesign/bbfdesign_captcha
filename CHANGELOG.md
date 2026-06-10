@@ -3,6 +3,16 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.8 – 2026-06-09
+
+### Behoben (Diagnose)
+
+- **Health-Endpoint meldet jetzt die echte Plugin-Version** statt hartkodiert
+  „1.0.0". `/bbfdesign-captcha/api/v1/health` und der Header `X-BBF-Captcha-Version`
+  spiegeln den live ausgelieferten Build wider – nützlich, um nach einem Update zu
+  prüfen, welche Version tatsächlich aktiv ist. Defensiv gekapselt (der Health-Check
+  scheitert nie an der Versionsermittlung).
+
 ## 1.0.7 – 2026-06-09
 
 ### Kompatibilität (Phase 1.1 des Masterplans)

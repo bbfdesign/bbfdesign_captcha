@@ -43,11 +43,23 @@ class CaptchaAPIController
     public function handleRequest(string $endpoint, string $method): void
     {
         header('Content-Type: application/json; charset=utf-8');
-        header('X-BBF-Captcha-Version: 1.0.0');
+
+        // Echte Plugin-Version melden (statt hartkodiert) – nützlich, um den live
+        // ausgelieferten Build zu erkennen. Defensiv gekapselt: der Health-Check
+        // darf nie an der Versionsermittlung scheitern.
+        try {
+            $version = (string)$this->plugin->getCurrentVersion();
+        } catch (\Throwable $e) {
+            $version = 'unknown';
+        }
+        if ($version === '') {
+            $version = 'unknown';
+        }
+        header('X-BBF-Captcha-Version: ' . $version);
 
         // Health-Check braucht keine Auth
         if ($endpoint === 'health') {
-            $this->sendJson(['status' => 'ok', 'version' => '1.0.0', 'timestamp' => time()]);
+            $this->sendJson(['status' => 'ok', 'version' => $version, 'timestamp' => time()]);
             return;
         }
 
