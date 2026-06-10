@@ -143,6 +143,9 @@
             </strong>
             <button type="button" class="bbf-btn bbf-btn-sm bbf-btn-secondary" @click="detailEntry = null">Schließen</button>
         </div>
+        <div x-show="detailEntry && detailEntry.reason" class="bbf-alert bbf-alert-warning" style="margin-bottom:12px;">
+            <strong>Begr&uuml;ndung:</strong> <span x-text="detailEntry ? detailEntry.reason : ''"></span>
+        </div>
         <template x-if="detailEntry && Object.keys(detailEntry.fields).length">
             <table class="bbf-table" style="width:100%;">
                 <template x-for="key in Object.keys(detailEntry.fields)" :key="key">
@@ -228,11 +231,13 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
 
             showDetail: function(entry) {
                 var fields = {};
+                var reason = '';
                 try {
                     var raw = entry.request_data;
                     var parsed = (typeof raw === 'string') ? JSON.parse(raw) : raw;
                     if (parsed && typeof parsed === 'object') {
                         Object.keys(parsed).forEach(function(k) {
+                            if (k === '_bbf_reason') { reason = String(parsed[k]); return; }
                             var v = parsed[k];
                             fields[k] = (v && typeof v === 'object') ? JSON.stringify(v) : String(v);
                         });
@@ -244,6 +249,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                     detection_method: entry.detection_method,
                     spam_score: entry.spam_score,
                     user_agent: entry.user_agent,
+                    reason: reason,
                     fields: fields
                 };
             },

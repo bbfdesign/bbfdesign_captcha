@@ -3,6 +3,20 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.17 – 2026-06-10
+
+### Neu (Logging-Privacy + Spam-Begründung)
+
+- **Schalter „Formulardaten protokollieren"** (Einstellungen, DSGVO). Standard an.
+  Aus = es werden nur Metadaten (IP, Formular, Methode, Score, Begründung)
+  geloggt, **nicht** die eingereichten Felder (Name/E-Mail …). Greift in
+  `CaptchaService::logSpam`.
+- **Spam-Begründung im Detail-Panel.** Jeder Spam-Log-Eintrag speichert jetzt die
+  Begründung (welche Methode/Regel mit welchem Score ausgelöst hat) und zeigt sie
+  im „Details"-Panel an. Die Begründung ist kein personenbezogenes Datum und wird
+  auch bei deaktiviertem Daten-Logging gespeichert (im `request_data`-JSON unter
+  `_bbf_reason`, daher ohne Schema-Änderung/Migration).
+
 ## 1.0.16 – 2026-06-10
 
 ### Neu (Logging-Detail + Selbstbereinigung)

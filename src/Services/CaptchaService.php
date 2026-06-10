@@ -226,7 +226,7 @@ class CaptchaService
                 return new ValidationResult(true, 0, '');
             }
             if ($ipEntry->isBlacklisted($clientIp)) {
-                $this->logSpam($clientIp, $formType, 'ip', 100, 'blocked');
+                $this->logSpam($clientIp, $formType, 'ip', 100, 'blocked', null, 'IP ist auf der Blacklist');
                 return new ValidationResult(false, 100, 'IP ist auf der Blacklist');
             }
         }
@@ -382,7 +382,7 @@ class CaptchaService
             }
 
             // Loggen
-            $this->logSpam($clientIp, $formType, $detectionMethod, $totalScore, $actionTaken, $postData);
+            $this->logSpam($clientIp, $formType, $detectionMethod, $totalScore, $actionTaken, $postData, $reason);
 
             // Auto-Block prüfen
             if ($this->settings->getBool('ip_auto_block_enabled')) {
@@ -400,7 +400,7 @@ class CaptchaService
 
         // Score > 0 aber unter Schwelle: nur loggen wenn suspekt
         if ($totalScore > 0 && $this->settings->getBool('debug_mode')) {
-            $this->logSpam($clientIp, $formType, $detectionMethod ?: 'combined', $totalScore, 'allowed', $postData);
+            $this->logSpam($clientIp, $formType, $detectionMethod ?: 'combined', $totalScore, 'allowed', $postData, $reason);
         }
 
         return new ValidationResult(true, $totalScore, $reason);
@@ -430,8 +430,13 @@ class CaptchaService
         string $method,
         int $score,
         string $action,
-        ?array $postData = null
+        ?array $postData = null,
+        string $reason = ''
     ): void {
+        // Privacy/DSGVO: eingereichte Formulardaten nur speichern, wenn nicht
+        // explizit deaktiviert. Die Begründung wird unabhängig davon geloggt.
+        $storeData = $this->settings->get('log_request_data', '1') !== '0';
+
         $spamLog = new SpamLog($this->db);
         $spamLog->log(
             $this->storedIp($ip),
@@ -440,7 +445,8 @@ class CaptchaService
             $score,
             $action,
             $_SERVER['HTTP_USER_AGENT'] ?? null,
-            $postData
+            $storeData ? $postData : null,
+            $reason
         );
     }
 

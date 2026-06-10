@@ -25,15 +25,20 @@ class SpamLog
         int $spamScore,
         string $actionTaken,
         ?string $userAgent = null,
-        ?array $requestData = null
+        ?array $requestData = null,
+        ?string $reason = null
     ): void {
-        $sanitizedData = null;
+        // Eingereichte Felder (sanitisiert) + Begründung in einem JSON. Die
+        // Begründung ist kein personenbezogenes Datum und wird auch dann
+        // gespeichert, wenn das Daten-Logging deaktiviert ist ($requestData null).
+        $payload = [];
         if ($requestData !== null) {
-            $sanitizedData = json_encode(
-                \Plugin\bbfdesign_captcha\src\Helpers\PluginHelper::sanitizeRequestData($requestData),
-                JSON_UNESCAPED_UNICODE
-            );
+            $payload = \Plugin\bbfdesign_captcha\src\Helpers\PluginHelper::sanitizeRequestData($requestData);
         }
+        if ($reason !== null && trim($reason) !== '') {
+            $payload['_bbf_reason'] = mb_substr($reason, 0, 500);
+        }
+        $sanitizedData = empty($payload) ? null : json_encode($payload, JSON_UNESCAPED_UNICODE);
 
         $this->db->queryPrepared(
             "INSERT INTO `bbf_captcha_spam_log`

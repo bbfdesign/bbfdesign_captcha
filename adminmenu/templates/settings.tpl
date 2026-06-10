@@ -59,6 +59,17 @@
 
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
             <label class="bbf-form-label">
+                Formulardaten protokollieren
+                <div class="bbf-form-help">DSGVO: Eingereichte Felder (Name, E-Mail &hellip;) abgelehnter &Uuml;bermittlungen im Spam-Log speichern, damit sie unter „Details" einsehbar sind. Aus = nur Metadaten (IP, Formular, Methode, Score, Begr&uuml;ndung).</div>
+            </label>
+            <label class="bbf-toggle">
+                <input type="checkbox" {literal}x-model="s.log_request_data"{/literal}>
+                <span class="bbf-toggle-slider"></span>
+            </label>
+        </div>
+
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">
                 Debug-Modus
                 <div class="bbf-form-help">Zus&auml;tzliches Logging f&uuml;r Fehlersuche</div>
             </label>
@@ -128,6 +139,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 default_action: sv.default_action || 'both',
                 log_retention_days: sv.log_retention_days || 90,
                 auto_cleanup: sv.auto_cleanup === '1',
+                log_request_data: sv.log_request_data !== '0',
                 debug_mode: sv.debug_mode === '1',
                 email_alert_enabled: sv.email_alert_enabled === '1',
                 email_alert_address: sv.email_alert_address || '',
