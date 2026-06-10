@@ -3,6 +3,19 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.7 – 2026-06-09
+
+### Kompatibilität (Phase 1.1 des Masterplans)
+
+- **JTL 5.7.1 quellcode-verifiziert kompatibel.** Alle genutzten Hooks (inkl.
+  `HOOK_ROUTER_PRE_DISPATCH` für die API-/Altcha-Challenge-Routen) und SDK-Klassen/
+  Methoden gegen den echten 5.7.1-Quellcode geprüft – keine Code-Änderung nötig.
+- **`MinShopVersion` von 5.2.0 auf 5.5.0 korrigiert.** Das Plugin nutzt
+  PHP-8.0-Funktionen (`str_contains`/`str_starts_with`) und Hook 400, die es in
+  JTL 5.2 (PHP 7.4) nicht gibt – der alte Boden war irreführend. PHP-Syntax ist
+  reines 8.0 (keine 8.1+-Features), daher abwärtskompatibel bis JTL 5.5 (PHP 8.0).
+- Details und Verifikationsmatrix: `docs/compat/compatibility-jtl-5.x.md`.
+
 ## 1.0.6 – 2026-06-09
 
 ### Geändert (Frontend-Default, Phase 3.1 des Masterplans)

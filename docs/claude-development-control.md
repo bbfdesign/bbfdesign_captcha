@@ -188,9 +188,10 @@ Diese Punkte sind für den Autopilot abschließend entschieden:
    Ticket-Plugin. Das bisherige Security-Blau (`#2563eb`) bleibt als *sekundärer*
    Akzent für Status/Badges erhalten. Volle Übernahme der `--bbf-ui-*`-Token-
    Architektur.
-2. **MinShopVersion bleibt 5.2.0.** Ein Schutz-Plugin verkleinert seine Reichweite
-   nicht ohne Not; es werden nur stabile JTL-5-APIs genutzt. Primäres Testziel ist
-   **5.7.1** (Bikepark-Live); wo nötig per Feature-Detection abfedern.
+2. **MinShopVersion = 5.5.0** (korrigiert am 2026-06-09 von 5.2.0). Gegen echten
+   5.7.1-Quellcode verifiziert kompatibel; PHP-8.0-Syntax → abwärtskompatibel bis
+   JTL 5.5. 5.2.0 war falsch (PHP 7.4 fehlen `str_contains` & Hook 400). Primäres
+   Testziel **5.7.1**. Details: `docs/compat/compatibility-jtl-5.x.md`.
 3. **Phase-4-Anbieter-Reihenfolge:** zuerst Produktberater (`bbf_productadvisor`),
    dann AI Concierge, dann Suche. Alle guarded via Feature-Detection, nie harte
    Abhängigkeit.
