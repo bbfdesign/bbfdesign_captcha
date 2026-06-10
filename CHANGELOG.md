@@ -3,6 +3,23 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.19 – 2026-06-10
+
+### Recht/Lizenz (Drittanbieter-Attribution)
+
+- **ALTCHA-Lizenz sauber dokumentiert.** Das mitgelieferte lokale Captcha **ALTCHA**
+  (`frontend/js/vendor/altcha.min.js`, v1.5.1) ist **MIT**-lizenziert und darf frei
+  mit dem Plugin weitergegeben werden. MIT verlangt das Mitführen des
+  Copyright-/Lizenzhinweises – dieser fehlte in der minifizierten Datei und ist jetzt
+  ergänzt:
+  - `frontend/js/vendor/altcha.LICENSE.txt` (vollständiger MIT-Text,
+    © 2023-2026 Daniel Regeci, BAU Software s.r.o.)
+  - MIT-Banner-Kommentar am Anfang der ausgelieferten `altcha.min.js`
+  - `THIRD-PARTY-NOTICES.md` im Plugin-Stamm (ALTCHA, Alpine.js, Chart.js – alle MIT;
+    Manrope-Font OFL 1.1)
+- Damit ist der lokale, DSGVO-konforme Captcha-Schutz auch lizenzrechtlich sauber
+  zum Mitliefern.
+
 ## 1.0.18 – 2026-06-10
 
 ### Behoben (Formular-Aktiv-Schalter, der eigentliche Bug)
