@@ -98,6 +98,10 @@
                                         :class="{ 'bbf-badge-success': entry.is_false_positive == 1 }">
                                     Kein Spam
                                 </button>
+                                <button type="button" class="bbf-btn bbf-btn-sm bbf-btn-secondary" title="Eingereichte Daten ansehen"
+                                        @click="showDetail(entry)" style="padding: 4px 8px;">
+                                    Details
+                                </button>
                             </td>
                         </tr>
                     </template>
@@ -128,6 +132,40 @@
             {literal}<span x-text="totalEntries + ' Einträge'"></span>{/literal}
         </div>
     </div>
+
+    {* ── Detail-Ansicht: eingereichte Daten einer abgelehnten Anmeldung ── *}
+    {literal}
+    <div class="bbf-card" x-show="detailEntry" style="margin-top: var(--bbf-spacing-md);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <strong>Eingereichte Daten
+                <span style="color:var(--bbf-muted); font-weight:400;"
+                      x-text="detailEntry ? '(' + detailEntry.form_type + ' · ' + detailEntry.created_at + ')' : ''"></span>
+            </strong>
+            <button type="button" class="bbf-btn bbf-btn-sm bbf-btn-secondary" @click="detailEntry = null">Schließen</button>
+        </div>
+        <template x-if="detailEntry && Object.keys(detailEntry.fields).length">
+            <table class="bbf-table" style="width:100%;">
+                <template x-for="key in Object.keys(detailEntry.fields)" :key="key">
+                    <tr>
+                        <td style="width:200px; color:var(--bbf-muted); vertical-align:top;" x-text="key"></td>
+                        <td><code style="white-space:pre-wrap; word-break:break-word;" x-text="detailEntry.fields[key]"></code></td>
+                    </tr>
+                </template>
+            </table>
+        </template>
+        <template x-if="detailEntry && !Object.keys(detailEntry.fields).length">
+            <div style="color:var(--bbf-text-light);">
+                Keine gespeicherten Formulardaten zu diesem Eintrag
+                (erweitertes Logging war evtl. deaktiviert).
+            </div>
+        </template>
+        <div style="margin-top:12px; font-size:12px; color:var(--bbf-muted);">
+            <span x-text="'Methode: ' + (detailEntry ? detailEntry.detection_method : '')"></span> ·
+            <span x-text="'Score: ' + (detailEntry ? detailEntry.spam_score : '')"></span> ·
+            <span x-text="'User-Agent: ' + (detailEntry ? (detailEntry.user_agent || '–') : '')"></span>
+        </div>
+    </div>
+    {/literal}
 </div>
 
 <script>
@@ -136,6 +174,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
     Alpine.data('bbfSpamLog', function() {
         return {
             logEntries: [],
+            detailEntry: null,
             loading: false,
             currentPage: 1,
             totalPages: 1,
@@ -185,6 +224,28 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 bbfAdmin.post('markFalsePositive', { id: id, is_spam: 0 }).then(function(resp) {
                     if (resp.success) bbfAdmin.showNotification('Als Kein-Spam markiert', 'success');
                 });
+            },
+
+            showDetail: function(entry) {
+                var fields = {};
+                try {
+                    var raw = entry.request_data;
+                    var parsed = (typeof raw === 'string') ? JSON.parse(raw) : raw;
+                    if (parsed && typeof parsed === 'object') {
+                        Object.keys(parsed).forEach(function(k) {
+                            var v = parsed[k];
+                            fields[k] = (v && typeof v === 'object') ? JSON.stringify(v) : String(v);
+                        });
+                    }
+                } catch (e) {}
+                this.detailEntry = {
+                    form_type: entry.form_type,
+                    created_at: entry.created_at,
+                    detection_method: entry.detection_method,
+                    spam_score: entry.spam_score,
+                    user_agent: entry.user_agent,
+                    fields: fields
+                };
             },
 
             exportCsv: function() {

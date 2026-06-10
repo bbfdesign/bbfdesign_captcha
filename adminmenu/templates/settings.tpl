@@ -36,11 +36,25 @@
         </div>
 
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
-            <label class="bbf-form-label">Auto-Cleanup</label>
+            <label class="bbf-form-label">
+                Auto-Cleanup
+                <div class="bbf-form-help">Bereinigt Logs/Rate-Limits/abgelaufene IP-Blocks automatisch (gedrosselt &uuml;ber den Shop-Traffic, h&ouml;chstens 1&times;/Tag).</div>
+            </label>
             <label class="bbf-toggle">
                 <input type="checkbox" {literal}x-model="s.auto_cleanup"{/literal}>
                 <span class="bbf-toggle-slider"></span>
             </label>
+        </div>
+
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">
+                Cron-Bereinigung (URL)
+                <div class="bbf-form-help">Optional: diese URL per JTL-Cron / Server-Cron (z.&nbsp;B. t&auml;glich) aufrufen, um die Bereinigung exakt zu planen.</div>
+            </label>
+            <div>
+                <input type="text" class="bbf-input" readonly onclick="this.select()"
+                       value="{$ShopURL}/bbfdesign-captcha/api/v1/cron?token={$settings.cron_token|default:''}">
+            </div>
         </div>
 
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">

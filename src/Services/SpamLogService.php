@@ -301,6 +301,53 @@ class SpamLogService
     }
 
     /**
+     * Vollständige geplante Bereinigung: Spam-Log (Aufbewahrung), alte
+     * Rate-Limit-Einträge und abgelaufene IP-Auto-Blocks. Für Cron-Aufruf und
+     * den automatischen Fallback. Gibt die gelöschten Mengen zurück.
+     *
+     * @return array{spam_log:int,rate_limits:int}
+     */
+    public function runScheduledCleanup(): array
+    {
+        $retentionDays = max(1, $this->settings->getInt('log_retention_days', 90));
+        $spamDeleted   = $this->spamLog->cleanup($retentionDays);
+
+        // Rate-Limit-Fenster älter als 1 Tag sind irrelevant.
+        $this->db->queryPrepared(
+            "DELETE FROM `bbf_captcha_rate_limits` WHERE `window_start` < DATE_SUB(NOW(), INTERVAL 1 DAY)",
+            []
+        );
+
+        // Abgelaufene IP-Auto-Blocks entfernen.
+        $ipEntry = new \Plugin\bbfdesign_captcha\src\Models\IPEntry($this->db);
+        $ipEntry->cleanupExpired();
+
+        $this->settings->set('cleanup_last_run', (string)time());
+
+        return ['spam_log' => (int)$spamDeleted];
+    }
+
+    /**
+     * Automatischer Fallback: führt die Bereinigung höchstens einmal pro Intervall
+     * aus (Standard 24 h), getriggert durch normalen Shop-Traffic – unabhängig
+     * davon, ob ein echter Cron eingerichtet ist.
+     */
+    public function runIfDue(): bool
+    {
+        if (!$this->settings->getBool('auto_cleanup')) {
+            return false;
+        }
+        $intervalHours = max(1, $this->settings->getInt('cleanup_interval_hours', 24));
+        $lastRun       = (int)$this->settings->get('cleanup_last_run', '0');
+        if ($lastRun > 0 && (time() - $lastRun) < $intervalHours * 3600) {
+            return false;
+        }
+
+        $this->runScheduledCleanup();
+        return true;
+    }
+
+    /**
      * Manuelle Bereinigung
      */
     public function clearOlderThan(int $days): int

@@ -3,6 +3,26 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.16 – 2026-06-10
+
+### Neu (Logging-Detail + Selbstbereinigung)
+
+- **Erweitertes Logging:** Im Spam-Log gibt es pro Eintrag jetzt einen
+  „Details"-Button, der die **eingereichten Formulardaten** der abgelehnten
+  Übermittlung zeigt (Name, E-Mail usw. – z. B. bei Bot-Registrierungen),
+  plus Methode/Score/User-Agent. (Die Daten wurden bereits sanitisiert
+  gespeichert; jetzt sind sie einsehbar.)
+- **Selbstbereinigung der Logs über Cron:** Neuer token-geschützter Endpoint
+  `…/bbfdesign-captcha/api/v1/cron?token=…`, der Spam-Log (Aufbewahrung),
+  alte Rate-Limit-Fenster und abgelaufene IP-Auto-Blocks bereinigt – für den
+  **JTL-/Server-Cron**. Die URL steht im Backend unter Einstellungen →
+  „Cron-Bereinigung (URL)". `HOOK_CRON_INC_SWITCH` ist in JTL 5.7 nicht mehr
+  aktiv, daher dieser saubere Weg.
+- **Automatischer Fallback:** Ist „Auto-Cleanup" an, läuft die Bereinigung auch
+  ohne eingerichteten Cron automatisch – gedrosselt höchstens einmal pro
+  Intervall (`cleanup_interval_hours`, Standard 24 h) über den normalen
+  Shop-Traffic. Cron-Token wird bei Install/erstem Start erzeugt.
+
 ## 1.0.15 – 2026-06-10
 
 ### Behoben (KRITISCH: Formular-Schalter speicherte nicht)

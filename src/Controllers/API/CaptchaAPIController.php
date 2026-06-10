@@ -69,6 +69,24 @@ class CaptchaAPIController
             return;
         }
 
+        // Cron-Bereinigung: token-geschützt (für JTL-/Server-Cron), keine API-Key-Auth.
+        // Aufruf: /bbfdesign-captcha/api/v1/cron?token=<cron_token>
+        if ($endpoint === 'cron') {
+            $token    = (string)($_GET['token'] ?? $_REQUEST['token'] ?? '');
+            $expected = (string)$this->settings->get('cron_token');
+            if ($expected === '' || !hash_equals($expected, $token)) {
+                $this->sendError('Forbidden', 403);
+                return;
+            }
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+            $logService = new \Plugin\bbfdesign_captcha\src\Services\SpamLogService($this->db, $this->settings);
+            $cleaned    = $logService->runScheduledCleanup();
+            $this->sendJson(['status' => 'ok', 'cleaned' => $cleaned, 'timestamp' => time()]);
+            return;
+        }
+
         // Alle anderen Endpoints: API-Key Auth
         $apiKey = $this->authenticate();
         if ($apiKey === null) {

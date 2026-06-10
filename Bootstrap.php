@@ -28,6 +28,15 @@ class Bootstrap extends Bootstrapper
             $db     = Shop::Container()->getDB();
             $this->settingsModel = new Setting($db);
 
+            // Cron-Token für den Bereinigungs-Endpoint sicherstellen (auch Bestand).
+            if (empty($this->settingsModel->get('cron_token'))) {
+                $this->settingsModel->set('cron_token', bin2hex(random_bytes(16)));
+            }
+
+            // Selbstbereinigung der Logs (gedrosselt, höchstens 1×/Intervall) –
+            // läuft über normalen Traffic, auch ohne eingerichteten Cron.
+            (new \Plugin\bbfdesign_captcha\src\Services\SpamLogService($db, $this->settingsModel))->runIfDue();
+
             // Frontend: Hooks + API-Routen registrieren
             if (Shop::isFrontend()) {
                 $this->registerFrontendHooks($dispatcher);
@@ -119,6 +128,11 @@ class Bootstrap extends Bootstrapper
         if (empty($hmacKey)) {
             $settings->set('altcha_hmac_key', bin2hex(random_bytes(32)));
             $settings->set('altcha_hmac_rotated_at', date('Y-m-d H:i:s'));
+        }
+
+        // Cron-Token für den Bereinigungs-Endpoint
+        if (empty($settings->get('cron_token'))) {
+            $settings->set('cron_token', bin2hex(random_bytes(16)));
         }
     }
 
