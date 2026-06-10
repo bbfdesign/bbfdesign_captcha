@@ -592,6 +592,72 @@ body #content_wrapper {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   Method Chips (Formular-Schutz: Methodenauswahl als Pills)
+   ═══════════════════════════════════════════════════════════ */
+
+.bbf-method-chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    user-select: none;
+    padding: 6px 12px;
+    border-radius: var(--bbf-radius-pill);
+    border: 1px solid var(--bbf-border);
+    background: var(--bbf-bg-card);
+    color: var(--bbf-muted);
+    transition: background-color var(--bbf-transition),
+                border-color var(--bbf-transition),
+                color var(--bbf-transition);
+}
+
+.bbf-method-chip::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--bbf-border);
+    transition: background-color var(--bbf-transition),
+                box-shadow var(--bbf-transition);
+}
+
+.bbf-method-chip:hover {
+    border-color: var(--bbf-primary);
+    color: var(--bbf-text-dark);
+}
+
+.bbf-method-chip.is-active {
+    background: var(--bbf-primary-light);
+    border-color: var(--bbf-primary);
+    color: var(--bbf-primary);
+}
+
+.bbf-method-chip.is-active::before {
+    background: var(--bbf-primary);
+    box-shadow: 0 0 0 3px var(--bbf-primary-light);
+}
+
+.bbf-method-chip:focus-within {
+    border-color: var(--bbf-primary);
+    box-shadow: var(--bbf-focus-ring);
+}
+
+/* Die eigentliche Checkbox ist versteckt – der Chip selbst ist der Schalter
+   (klickbar via Label, tastatur-fokussierbar). */
+.bbf-method-chip-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
    Method Cards (Protection Methods page)
    ═══════════════════════════════════════════════════════════ */
 

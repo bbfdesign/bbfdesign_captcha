@@ -29,12 +29,10 @@
                             <td>
                                 <div style="display: flex; flex-wrap: wrap; gap: 4px;">
                                     <template x-for="method in availableMethods" :key="method.key">
-                                        <label style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer; padding: 2px 8px; border-radius: 12px; border: 1px solid var(--bbf-border);"
-                                               :style="isMethodActive(form, method.key) ? 'background: var(--bbf-primary-light); border-color: var(--bbf-primary); color: var(--bbf-primary);' : ''">
-                                            <input type="checkbox"
+                                        <label class="bbf-method-chip" :class="{ 'is-active': isMethodActive(form, method.key) }">
+                                            <input type="checkbox" class="bbf-method-chip-input"
                                                    :checked="isMethodActive(form, method.key)"
-                                                   @change="toggleMethod(form, method.key)"
-                                                   style="width: 12px; height: 12px;">
+                                                   @change="toggleMethod(form, method.key)">
                                             <span x-text="method.label"></span>
                                         </label>
                                     </template>

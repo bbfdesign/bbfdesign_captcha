@@ -3,6 +3,18 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.10 – 2026-06-10
+
+### Geändert (Backend-Optik, Phase 2)
+
+- **Methodenauswahl im Formular-Schutz als saubere Pills statt roher Checkboxen.**
+  Im Tab „Formulare" saßen in jedem Methoden-Chip kleine native Checkboxen – jetzt
+  ist jede Methode ein anklickbarer Pill mit Status-Punkt, der bei Auswahl magenta
+  füllt (Hover- und Tastatur-Fokus inklusive). Die Checkbox bleibt für
+  Funktion/Barrierefreiheit erhalten, ist aber visuell ausgeblendet
+  (`.bbf-method-chip`). Alle übrigen Backend-Schalter nutzen bereits die
+  `.bbf-toggle`-Komponente und sind unverändert.
+
 ## 1.0.9 – 2026-06-10
 
 ### Behoben (KRITISCH, Lauffähigkeit JTL 5.6/5.7)
