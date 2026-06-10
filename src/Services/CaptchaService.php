@@ -43,6 +43,28 @@ class CaptchaService
     }
 
     /**
+     * Default-Konfiguration je Formulartyp (identisch zum Install-Seed).
+     * Wird genutzt, wenn keine DB-Zeile existiert – damit z. B. die Registrierung
+     * auch ohne gespeicherte Konfig den Smart-Spamfilter + ALTCHA nutzt (robust
+     * gegen verlorene Seed-Zeilen nach Plugin-Update/Reinstall).
+     */
+    private function defaultConfigForForm(string $formType): array
+    {
+        $defaults = [
+            'contact'        => ['methods' => ['honeypot', 'timing', 'altcha', 'ai_filter'], 'score_threshold' => 60, 'action_on_spam' => 'both'],
+            'registration'   => ['methods' => ['honeypot', 'timing', 'altcha', 'ai_filter'], 'score_threshold' => 60, 'action_on_spam' => 'both'],
+            'newsletter'     => ['methods' => ['honeypot', 'timing'],                        'score_threshold' => 50, 'action_on_spam' => 'both'],
+            'review'         => ['methods' => ['honeypot', 'timing', 'altcha', 'ai_filter'], 'score_threshold' => 60, 'action_on_spam' => 'both'],
+            'checkout'       => ['methods' => ['honeypot', 'timing'],                        'score_threshold' => 80, 'action_on_spam' => 'log'],
+            'password_reset' => ['methods' => ['honeypot', 'timing'],                        'score_threshold' => 50, 'action_on_spam' => 'both'],
+            'wishlist'       => ['methods' => ['honeypot'],                                  'score_threshold' => 50, 'action_on_spam' => 'log'],
+            'login'          => ['methods' => ['honeypot', 'timing'],                        'score_threshold' => 50, 'action_on_spam' => 'both'],
+        ];
+
+        return $defaults[$formType] ?? ['methods' => ['honeypot', 'timing'], 'score_threshold' => 60, 'action_on_spam' => 'both'];
+    }
+
+    /**
      * Aktive Methoden für ein Formular ermitteln
      */
     public function getActiveMethodsForForm(string $formType): array
@@ -55,12 +77,11 @@ class CaptchaService
         );
 
         if ($row === null || !isset($row->methods) || (int)($row->is_active ?? 0) === 0) {
-            // Default: Honeypot + Timing
-            return ['honeypot', 'timing'];
+            return $this->defaultConfigForForm($formType)['methods'];
         }
 
         $methods = json_decode($row->methods, true);
-        return is_array($methods) ? $methods : ['honeypot', 'timing'];
+        return is_array($methods) ? $methods : $this->defaultConfigForForm($formType)['methods'];
     }
 
     /**
@@ -76,10 +97,11 @@ class CaptchaService
         );
 
         if ($row === null) {
+            $def = $this->defaultConfigForForm($formType);
             return [
-                'methods'         => ['honeypot', 'timing'],
-                'score_threshold' => 60,
-                'action_on_spam'  => 'both',
+                'methods'         => $def['methods'],
+                'score_threshold' => $def['score_threshold'],
+                'action_on_spam'  => $def['action_on_spam'],
                 'is_active'       => 1,
             ];
         }

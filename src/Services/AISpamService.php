@@ -113,6 +113,16 @@ class AISpamService
         $score     += $htmlResult['score'];
         $details    = array_merge($details, $htmlResult['details']);
 
+        // 10. Domains/URLs ohne Protokoll (häufig in Spam-Namen wie "x.blogspot.com.uy")
+        $domainResult = $this->checkBareDomains($combinedText);
+        $score       += $domainResult['score'];
+        $details      = array_merge($details, $domainResult['details']);
+
+        // 11. Krypto-/Investment-Spam-Muster ("0.4 BTC for Review", "$68,005", Wallet …)
+        $cryptoResult = $this->checkCryptoSpam($combinedText);
+        $score       += $cryptoResult['score'];
+        $details      = array_merge($details, $cryptoResult['details']);
+
         // Bewertung
         $thresholdOk         = $this->settings->getInt('ai_threshold_ok', 30);
         $thresholdSuspicious = $this->settings->getInt('ai_threshold_suspicious', 60);
@@ -501,6 +511,76 @@ class AISpamService
         }
 
         return ['score' => $score, 'details' => $details];
+    }
+
+    /**
+     * Domains/URLs OHNE Protokoll erkennen (z. B. "name.blogspot.com.uy").
+     * Verlinkungen mit http(s):// deckt checkUrls ab – hier die nackten Domains,
+     * die typisch in Spam-Namensfeldern stehen. Code-basiert, also robust gegen
+     * eine leere Spam-Wörter-Tabelle.
+     */
+    private function checkBareDomains(string $text): array
+    {
+        $score   = 0;
+        $details = [];
+
+        if (preg_match_all('/\b(?:[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?\.){1,5}[a-z]{2,}\b/i', $text, $m)) {
+            $domains = array_values(array_unique(array_map('strtolower', $m[0])));
+            $count   = count($domains);
+            $base    = min(40, 25 + ($count - 1) * 10);
+            $score  += $base;
+            $details[] = 'Domain/URL ohne Protokoll: '
+                . implode(', ', array_slice($domains, 0, 3)) . ' (+' . $base . ')';
+
+            foreach ($domains as $d) {
+                foreach (self::SPAM_TLDS as $tld) {
+                    if (str_ends_with($d, $tld)) {
+                        $score    += 15;
+                        $details[] = 'Spam-TLD in Domain: ' . $tld . ' (+15)';
+                        break;
+                    }
+                }
+                if (str_contains($d, 'blogspot') || str_contains($d, 'weebly')
+                    || str_contains($d, 'tumblr') || str_contains($d, 'wixsite')
+                ) {
+                    $score    += 15;
+                    $details[] = 'Verdächtiger Free-Hoster in Domain (+15)';
+                }
+            }
+        }
+
+        return ['score' => min(60, $score), 'details' => $details];
+    }
+
+    /**
+     * Krypto-/Investment-Spam-Muster erkennen (BTC/ETH, "for review", Geldbeträge,
+     * Wallet-Begriffe). Ergänzt die DB-Spam-Wörter und greift auch ohne diese.
+     */
+    private function checkCryptoSpam(string $text): array
+    {
+        $patterns = [
+            '/\bbtc\b/i', '/\beth\b/i', '/\busdt\b/i', '/\bbitcoin\b/i', '/\bethereum\b/i',
+            '/\bcrypto\b/i', '/\bwallet\b/i', '/\bbinance\b/i', '/\bblockchain\b/i',
+            '/\bairdrop\b/i', '/\bfor\s+review\b/i',
+            '/\b\d+(?:[.,]\d+)?\s*btc\b/i', '/[\$€]\s?\d{1,3}(?:[.,]\d{3})+/',
+        ];
+
+        $hits = 0;
+        foreach ($patterns as $p) {
+            if (preg_match($p, $text)) {
+                $hits++;
+            }
+        }
+
+        if ($hits === 0) {
+            return ['score' => 0, 'details' => []];
+        }
+
+        $score = min(50, 20 + ($hits - 1) * 12);
+        return [
+            'score'   => $score,
+            'details' => ['Krypto-/Investment-Spam-Muster: ' . $hits . ' Treffer (+' . $score . ')'],
+        ];
     }
 
     /**

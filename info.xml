@@ -8,7 +8,7 @@
     <XMLVersion>100</XMLVersion>
     <MinShopVersion>5.5.0</MinShopVersion>
     <Icon>fa-shield-alt</Icon>
-    <Version>1.0.12</Version>
+    <Version>1.0.13</Version>
     <CreateDate>2026-03-24</CreateDate>
     <Install>
         <Adminmenu>

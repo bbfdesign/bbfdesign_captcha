@@ -3,6 +3,26 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.13 – 2026-06-10
+
+### Behoben (Spam rutschte durch – Registrierung)
+
+Eine Bot-Registrierung mit Krypto-/Domain-Spam im Namensfeld
+(„… 0.487 BTC for Review … yiuyoifjghhf.blogspot.com.uy") kam durch. Zwei Ursachen,
+beide gefixt:
+
+- **Smart-Spamfilter lief nicht für die Registrierung**, weil ohne gespeicherte
+  `form_config`-Zeile (Tabelle nach Update/Reinstall leer) zur Laufzeit nur der
+  Minimal-Default `['honeypot','timing']` griff. Jetzt liefern
+  `CaptchaService::getActiveMethodsForForm`/`getFormConfig` **pro Formulartyp** die
+  vollen Default-Methoden (Registrierung/Kontakt/Bewertung inkl. ALTCHA +
+  Smart-Filter) – robust gegen verlorene Seed-Zeilen.
+- **Smart-Filter erkennt jetzt diesen Inhalt**: Domains/URLs **ohne** `http://`
+  (z. B. `*.blogspot.com.uy`, inkl. Spam-TLD-/Free-Hoster-Bonus) und
+  **Krypto-/Investment-Muster** (BTC/ETH, „for review", Geldbeträge, Wallet). Beide
+  Prüfungen sind code-basiert und greifen auch bei leerer Spam-Wörter-Tabelle.
+  Der konkrete Spam erreicht damit Score ~90 (Schwelle 60) → geblockt.
+
 ## 1.0.12 – 2026-06-10
 
 ### Geändert (Backend-Konsistenz)
