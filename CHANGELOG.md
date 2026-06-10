@@ -3,6 +3,19 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.14 – 2026-06-10
+
+### Geändert (Smart-Filter-Härtung)
+
+- **Weitere Spam-Muster im Smart-Filter** (`checkSpamPhrases`, code-basiert):
+  Pharma (viagra/cialis/kamagra – in einem Weinshop nie legitim, daher hoch
+  gewichtet), SEO-/Marketing-Spam (SEO-Services, Backlinks, „rank your website")
+  und Geld-/Scam-Phrasen (business proposal, „you have won", „dear sir"). Bewusst
+  englischsprachig/hochsignifikant gewählt – legitime deutschsprachige Shop-Kontakte
+  lösen sie praktisch nie aus (getestet: legitime DE-Anfrage Score 0, legitime
+  Domain-Erwähnung 25 < Schwelle 60). Reale Spam-Mails (mit Link/Domain) erreichen
+  über die Kombination die Schwelle.
+
 ## 1.0.13 – 2026-06-10
 
 ### Behoben (Spam rutschte durch – Registrierung)

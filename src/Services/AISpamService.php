@@ -123,6 +123,11 @@ class AISpamService
         $score       += $cryptoResult['score'];
         $details      = array_merge($details, $cryptoResult['details']);
 
+        // 12. Bekannte Spam-Phrasen (Pharma, SEO-/Marketing-, Geld-/Scam-Muster)
+        $phraseResult = $this->checkSpamPhrases($combinedText);
+        $score       += $phraseResult['score'];
+        $details      = array_merge($details, $phraseResult['details']);
+
         // Bewertung
         $thresholdOk         = $this->settings->getInt('ai_threshold_ok', 30);
         $thresholdSuspicious = $this->settings->getInt('ai_threshold_suspicious', 60);
@@ -581,6 +586,36 @@ class AISpamService
             'score'   => $score,
             'details' => ['Krypto-/Investment-Spam-Muster: ' . $hits . ' Treffer (+' . $score . ')'],
         ];
+    }
+
+    /**
+     * Bekannte Spam-Phrasen (Pharma, SEO-/Marketing-, Geld-/Scam-Muster).
+     * Bewusst englischsprachig/hochsignifikant gewählt – legitime deutschsprachige
+     * Shop-Kontakte lösen das praktisch nie aus. Code-basiert (DB-unabhängig).
+     */
+    private function checkSpamPhrases(string $text): array
+    {
+        $patterns = [
+            // Pharma (Wirkstoffnamen in einem Weinshop praktisch nie legitim)
+            '/\b(viagra|cialis|levitra|tadalafil|sildenafil|kamagra)\b/i'                                  => 40,
+            '/\b(online pharmacy|prescription drugs?|pills? online|pain ?killers?)\b/i'                     => 22,
+            // SEO / Marketing
+            '/\b(seo (services?|experts?|company|agency)|backlinks?|guest post|rank your (site|website)|increase (your )?(web ?)?traffic|web ?design services?|digital marketing offer)\b/i' => 24,
+            // Geld / Scam
+            '/\b(business proposal|make money online|work from home|investment opportunity|loan offer|inheritance fund|lottery winner|you have won|claim your (prize|reward))\b/i' => 24,
+            '/\b(dear (sir|madam)|dear friend|i am contacting you regarding)\b/i'                           => 15,
+        ];
+
+        $score   = 0;
+        $details = [];
+        foreach ($patterns as $pattern => $weight) {
+            if (preg_match($pattern, $text)) {
+                $score    += $weight;
+                $details[] = 'Spam-Phrase erkannt (+' . $weight . ')';
+            }
+        }
+
+        return ['score' => min(60, $score), 'details' => $details];
     }
 
     /**
