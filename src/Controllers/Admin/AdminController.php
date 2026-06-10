@@ -467,21 +467,25 @@ class AdminController
         }
         $methods = json_encode(array_values(array_filter($decoded, 'is_string')));
 
+        // WICHTIG: Der Unique-Key ist (form_type, form_identifier). Bei
+        // form_identifier IS NULL greift `ON DUPLICATE KEY UPDATE` NICHT, weil NULL
+        // im Unique-Index als distinct gilt – jeder Speichern würde sonst eine neue
+        // Zeile anlegen (Duplikate → nicht-deterministisches Zurücklesen → Schalter
+        // „springt zurück"). Daher deterministisch per DELETE + INSERT; das räumt
+        // auch bereits doppelt angelegte Zeilen auf.
+        $this->db->queryPrepared(
+            "DELETE FROM `bbf_captcha_form_config` WHERE `form_type` = :type AND `form_identifier` IS NULL",
+            ['type' => $formType]
+        );
         $this->db->queryPrepared(
             "INSERT INTO `bbf_captcha_form_config` (`form_type`, `methods`, `score_threshold`, `action_on_spam`, `is_active`)
-             VALUES (:type, :methods, :threshold, :action, :active)
-             ON DUPLICATE KEY UPDATE `methods` = :methods2, `score_threshold` = :threshold2,
-             `action_on_spam` = :action2, `is_active` = :active2",
+             VALUES (:type, :methods, :threshold, :action, :active)",
             [
-                'type'       => $formType,
-                'methods'    => $methods,
-                'threshold'  => $threshold,
-                'action'     => $actionSpam,
-                'active'     => $isActive,
-                'methods2'   => $methods,
-                'threshold2' => $threshold,
-                'action2'    => $actionSpam,
-                'active2'    => $isActive,
+                'type'      => $formType,
+                'methods'   => $methods,
+                'threshold' => $threshold,
+                'action'    => $actionSpam,
+                'active'    => $isActive,
             ]
         );
 
@@ -513,8 +517,10 @@ class AdminController
      */
     public function getFormConfigsData(): array
     {
+        // ORDER BY id ASC: falls (durch den alten Bug) noch Duplikate je Formular
+        // existieren, gewinnt beim Überschreiben die zuletzt angelegte Zeile.
         $rows = $this->db->queryPrepared(
-            "SELECT * FROM `bbf_captcha_form_config` WHERE `form_identifier` IS NULL",
+            "SELECT * FROM `bbf_captcha_form_config` WHERE `form_identifier` IS NULL ORDER BY `id` ASC",
             [],
             2
         );

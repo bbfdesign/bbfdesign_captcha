@@ -3,6 +3,22 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.15 – 2026-06-10
+
+### Behoben (KRITISCH: Formular-Schalter speicherte nicht)
+
+- **„Aktiv"-Schalter (und Speichern) im Formular-Schutz wurden nicht dauerhaft
+  gespeichert** – beim Hin- und Herklicken sprang der Schalter zurück. Ursache:
+  Der Unique-Key ist `(form_type, form_identifier)`, aber `saveFormConfig` setzte
+  `form_identifier` nicht (= NULL). In MySQL ist `NULL` im Unique-Index *distinct*,
+  daher griff `ON DUPLICATE KEY UPDATE` nicht und **jeder Speichervorgang legte eine
+  neue Zeile an** (Duplikate → nicht-deterministisches Zurücklesen).
+- Fix: `saveFormConfig` speichert jetzt deterministisch per `DELETE` + `INSERT`
+  (genau eine Zeile je Formular; räumt vorhandene Duplikate auf). Lese-Pfade
+  (`getFormConfigsData`, `CaptchaService::getFormConfig`/`getActiveMethodsForForm`)
+  sortieren `ORDER BY id`, sodass auch bei Altbeständen die zuletzt gespeicherte
+  Zeile gewinnt. Der Schalter persistiert nun korrekt.
+
 ## 1.0.14 – 2026-06-10
 
 ### Geändert (Smart-Filter-Härtung)

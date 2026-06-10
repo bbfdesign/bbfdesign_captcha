@@ -71,7 +71,8 @@ class CaptchaService
     {
         $row = $this->db->queryPrepared(
             "SELECT `methods`, `is_active` FROM `bbf_captcha_form_config`
-             WHERE `form_type` = :type AND `form_identifier` IS NULL",
+             WHERE `form_type` = :type AND `form_identifier` IS NULL
+             ORDER BY `id` DESC",
             ['type' => $formType],
             1
         );
@@ -91,7 +92,8 @@ class CaptchaService
     {
         $row = $this->db->queryPrepared(
             "SELECT * FROM `bbf_captcha_form_config`
-             WHERE `form_type` = :type AND `form_identifier` IS NULL",
+             WHERE `form_type` = :type AND `form_identifier` IS NULL
+             ORDER BY `id` DESC",
             ['type' => $formType],
             1
         );
