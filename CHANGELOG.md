@@ -3,6 +3,19 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.18 – 2026-06-10
+
+### Behoben (Formular-Aktiv-Schalter, der eigentliche Bug)
+
+- **Der AKTIV-Schalter im Formular-Schutz speicherte über die UI weiterhin nicht
+  zuverlässig** – Ursache war diesmal das **Frontend** (nicht der Server, der per
+  Direkt-Test nachweislich korrekt persistiert): Das Alpine-Binding
+  `x-model` + `:true-value="1"` + `@change` sendete beim Umschalten einen
+  **veralteten** `is_active`-Wert. Ersetzt durch robustes Binding
+  (`:checked` + `@change`, das `is_active` direkt aus dem Event setzt). Der Schalter
+  persistiert nun zuverlässig. (Der Server-seitige DELETE+INSERT-Fix aus 1.0.15
+  bleibt korrekt.)
+
 ## 1.0.17 – 2026-06-10
 
 ### Neu (Logging-Privacy + Spam-Begründung)

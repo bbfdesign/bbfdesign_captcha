@@ -53,8 +53,8 @@
                             </td>
                             <td>
                                 <label class="bbf-toggle">
-                                    <input type="checkbox" x-model="form.is_active" @change="saveForm(form)"
-                                           :true-value="1" :false-value="0">
+                                    <input type="checkbox" :checked="parseInt(form.is_active) === 1"
+                                           @change="form.is_active = $event.target.checked ? 1 : 0; saveForm(form)">
                                     <span class="bbf-toggle-slider"></span>
                                 </label>
                             </td>
