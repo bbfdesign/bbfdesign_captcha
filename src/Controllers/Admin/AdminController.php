@@ -538,12 +538,15 @@ class AdminController
                     'is_active'       => (int)$row->is_active,
                 ];
             } else {
+                // Konsistent mit der Laufzeit: ohne gespeicherte Zeile behandelt
+                // CaptchaService::getFormConfig das Formular als aktiv (is_active=1).
+                // Das Backend zeigt denselben Zustand, statt fälschlich „aus".
                 $data[] = [
                     'form_type'       => $type,
                     'methods'         => $def['methods'],
                     'score_threshold' => $def['score_threshold'],
                     'action_on_spam'  => $def['action_on_spam'],
-                    'is_active'       => 0,
+                    'is_active'       => 1,
                 ];
             }
         }

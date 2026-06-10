@@ -3,6 +3,17 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.12 – 2026-06-10
+
+### Geändert (Backend-Konsistenz)
+
+- **„Aktiv"-Anzeige im Formular-Schutz konsistent mit der Laufzeit.** Ohne
+  gespeicherte DB-Zeile behandelt `CaptchaService::getFormConfig` ein Formular als
+  aktiv (`is_active=1`) – das Backend zeigt jetzt denselben Zustand, statt
+  unkonfigurierte Formulare fälschlich als „aus" darzustellen. So spiegelt der
+  „Formulare"-Tab den tatsächlichen Schutz wider; einzelne Formulare lassen sich
+  per Schalter deaktivieren (legt eine Zeile mit `is_active=0` an).
+
 ## 1.0.11 – 2026-06-10
 
 ### Behoben (Backend-Robustheit)
