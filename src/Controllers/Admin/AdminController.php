@@ -488,15 +488,72 @@ class AdminController
         return $this->jsonResponse(['success' => true, 'message' => $this->t('form_config_saved', 'Formular-Konfiguration gespeichert')]);
     }
 
-    private function getFormConfigs(): string
+    /**
+     * Standard-Formulartypen mit Default-Konfiguration (identisch zum Install-Seed).
+     */
+    private function defaultFormConfigs(): array
+    {
+        return [
+            'contact'        => ['methods' => '["honeypot","timing","altcha","ai_filter"]', 'score_threshold' => 60, 'action_on_spam' => 'both'],
+            'registration'   => ['methods' => '["honeypot","timing","altcha","ai_filter"]', 'score_threshold' => 60, 'action_on_spam' => 'both'],
+            'newsletter'     => ['methods' => '["honeypot","timing"]',                      'score_threshold' => 50, 'action_on_spam' => 'both'],
+            'review'         => ['methods' => '["honeypot","timing","altcha","ai_filter"]', 'score_threshold' => 60, 'action_on_spam' => 'both'],
+            'checkout'       => ['methods' => '["honeypot","timing"]',                      'score_threshold' => 80, 'action_on_spam' => 'log'],
+            'password_reset' => ['methods' => '["honeypot","timing"]',                      'score_threshold' => 50, 'action_on_spam' => 'both'],
+            'wishlist'       => ['methods' => '["honeypot"]',                               'score_threshold' => 50, 'action_on_spam' => 'log'],
+            'login'          => ['methods' => '["honeypot","timing"]',                      'score_threshold' => 50, 'action_on_spam' => 'both'],
+        ];
+    }
+
+    /**
+     * Robust: IMMER alle Standardformulare liefern – auch wenn die DB-Zeilen durch
+     * ein Plugin-Update/Reinstall verloren gingen. Gespeicherte DB-Werte überschreiben
+     * die Defaults; nicht gespeicherte Formulare sind opt-in inaktiv. Öffentlich, damit
+     * Bootstrap das Vorladen mit derselben Logik machen kann.
+     */
+    public function getFormConfigsData(): array
     {
         $rows = $this->db->queryPrepared(
-            "SELECT * FROM `bbf_captcha_form_config` ORDER BY `form_type` ASC",
+            "SELECT * FROM `bbf_captcha_form_config` WHERE `form_identifier` IS NULL",
             [],
             2
         );
 
-        return $this->jsonResponse(['success' => true, 'data' => is_array($rows) ? $rows : []]);
+        $byType = [];
+        if (is_array($rows)) {
+            foreach ($rows as $row) {
+                $byType[$row->form_type] = $row;
+            }
+        }
+
+        $data = [];
+        foreach ($this->defaultFormConfigs() as $type => $def) {
+            if (isset($byType[$type])) {
+                $row    = $byType[$type];
+                $data[] = [
+                    'form_type'       => $type,
+                    'methods'         => (string)$row->methods,
+                    'score_threshold' => (int)$row->score_threshold,
+                    'action_on_spam'  => (string)$row->action_on_spam,
+                    'is_active'       => (int)$row->is_active,
+                ];
+            } else {
+                $data[] = [
+                    'form_type'       => $type,
+                    'methods'         => $def['methods'],
+                    'score_threshold' => $def['score_threshold'],
+                    'action_on_spam'  => $def['action_on_spam'],
+                    'is_active'       => 0,
+                ];
+            }
+        }
+
+        return $data;
+    }
+
+    private function getFormConfigs(): string
+    {
+        return $this->jsonResponse(['success' => true, 'data' => $this->getFormConfigsData()]);
     }
 
     private function createApiKey(array $request): string

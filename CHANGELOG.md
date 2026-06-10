@@ -3,6 +3,21 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.11 – 2026-06-10
+
+### Behoben (Backend-Robustheit)
+
+- **Formular-Schutz-Tabelle blieb leer**, wenn die DB-Zeilen in
+  `bbf_captcha_form_config` fehlten (z. B. nach einem Plugin-Update/Reinstall –
+  die `down()`-Migration macht `DROP TABLE`, der Install-Seed läuft beim Update
+  nicht erneut). `getFormConfigs` lieferte dann nur die (leeren) DB-Zeilen.
+- Jetzt liefert das Backend **immer alle 8 Standardformulare** (Kontakt,
+  Registrierung, Newsletter, Bewertung, Checkout, Passwort vergessen, Wunschzettel,
+  Login) mit den Default-Konfigurationen; gespeicherte DB-Werte überschreiben die
+  Defaults, nicht gespeicherte Formulare sind opt-in inaktiv. Beim Aktivieren legt
+  `saveFormConfig` die Zeile wieder an. Logik in `getFormConfigsData()`, auch fürs
+  serverseitige Vorladen (kein Leer-Flash, robust gegen AJAX-Fehler).
+
 ## 1.0.10 – 2026-06-10
 
 ### Geändert (Backend-Optik, Phase 2)

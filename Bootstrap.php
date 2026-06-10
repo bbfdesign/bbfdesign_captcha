@@ -177,14 +177,12 @@ class Bootstrap extends Bootstrapper
                 JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
             ));
         } elseif ($page === 'form_protection') {
-            // Formularkonfigurationen serverseitig vorladen
-            $formConfigs = $db->queryPrepared(
-                "SELECT * FROM `bbf_captcha_form_config` ORDER BY `form_type` ASC",
-                [],
-                2
-            );
+            // Formularkonfigurationen serverseitig vorladen – robuste Defaults + DB,
+            // damit die Liste auch ohne/vor dem AJAX (und bei AJAX-Fehler) gefüllt ist.
+            $controller  = new AdminController($plugin, $db, $settings);
+            $formConfigs = $controller->getFormConfigsData();
             $smarty->assign('formConfigsJson', json_encode(
-                is_array($formConfigs) ? $formConfigs : [],
+                $formConfigs,
                 JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
             ));
         }
