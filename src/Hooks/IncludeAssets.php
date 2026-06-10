@@ -41,6 +41,52 @@ class IncludeAssets
             return $html;
         }
 
+        $assets = $this->buildAssets();
+        if ($assets === '') {
+            return $html;
+        }
+
+        // Assets vor </head> einfügen
+        $pos = strripos($html, '</head>');
+        if ($pos !== false) {
+            return substr($html, 0, $pos) . $assets . substr($html, $pos);
+        }
+        // Fallback: An den Anfang
+        return $assets . $html;
+    }
+
+    /**
+     * Assets in ein phpQuery-Dokument injizieren (JTL 5.6/5.7).
+     *
+     * Ab JTL 5.6 übergibt HOOK_SMARTY_OUTPUTFILTER ein phpQuery-Dokument statt
+     * eines HTML-Strings. Hier werden die Assets in <head> eingehängt.
+     */
+    public function injectIntoDocument(object $doc): void
+    {
+        if (!$this->settings->getBool('global_enabled')) {
+            return;
+        }
+        $forms = $doc->find('form');
+        if ($forms->count() === 0) {
+            return;
+        }
+        $assets = $this->buildAssets();
+        if ($assets === '') {
+            return;
+        }
+        $head = $doc->find('head');
+        if ($head->count() > 0) {
+            $head->append($assets);
+        } else {
+            $forms->eq(0)->before($assets);
+        }
+    }
+
+    /**
+     * Den kompletten Asset-Block (CSS/JS + Consent-Konfig) als HTML-String bauen.
+     */
+    public function buildAssets(): string
+    {
         $frontendUrl = $this->plugin->getPaths()->getFrontendURL();
         $assets      = '';
 
@@ -119,15 +165,6 @@ class IncludeAssets
             JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES
         ) . ';</script>' . "\n";
 
-        // Assets vor </head> einfügen
-        $pos = strripos($html, '</head>');
-        if ($pos !== false) {
-            $html = substr($html, 0, $pos) . $assets . substr($html, $pos);
-        } else {
-            // Fallback: An den Anfang des <body>
-            $html = $assets . $html;
-        }
-
-        return $html;
+        return $assets;
     }
 }

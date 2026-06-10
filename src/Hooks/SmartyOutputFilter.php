@@ -50,6 +50,45 @@ class SmartyOutputFilter
     }
 
     /**
+     * Honeypot + Timing in ein phpQuery-Dokument injizieren (JTL 5.6/5.7).
+     *
+     * Ab JTL 5.6 übergibt HOOK_SMARTY_OUTPUTFILTER ein phpQuery-Dokument statt
+     * eines HTML-Strings. Die Felder werden hier per Selektor in jedes <form>
+     * eingehängt (als erste Kinder, entspricht dem String-Verhalten).
+     */
+    public function filterDocument(object $doc): void
+    {
+        if (!$this->settings->getBool('global_enabled')) {
+            return;
+        }
+
+        $honeypotOn = $this->settings->getBool('honeypot_enabled')
+            && $this->settings->getBool('honeypot_inject_all_forms');
+        $timingOn   = $this->settings->getBool('timing_enabled');
+        if (!$honeypotOn && !$timingOn) {
+            return;
+        }
+
+        $forms = $doc->find('form');
+        $count = $forms->count();
+        for ($i = 0; $i < $count; $i++) {
+            $form   = $forms->eq($i);
+            $fields = '';
+
+            if ($timingOn && strpos($form->htmlOuter(), TimingService::getFieldName()) === false) {
+                $fields .= $this->timing->renderField();
+            }
+            if ($honeypotOn) {
+                $fields .= $this->honeypot->renderFields('auto_' . ($i + 1));
+            }
+
+            if ($fields !== '') {
+                $form->prepend($fields);
+            }
+        }
+    }
+
+    /**
      * Timing-Token in alle <form> Tags injizieren
      */
     private function injectTimingTokens(string $html): string

@@ -3,6 +3,27 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.9 – 2026-06-10
+
+### Behoben (KRITISCH, Lauffähigkeit JTL 5.6/5.7)
+
+- **Schutz-Injektion in JTL 5.6/5.7 wiederhergestellt.** `HOOK_SMARTY_OUTPUTFILTER`
+  übergibt seit JTL 5.6 ein **phpQuery-Dokument** (`$args['document']`) statt eines
+  HTML-Strings (`$args['output']`). Der Output-Filter prüfte nur auf `output` und
+  brach in 5.6/5.7 daher **immer ab** – es wurden **keine** Assets, Honeypot- oder
+  Timing-Felder in die Formulare injiziert. Beim Live-Test gegen JTL 5.7.1
+  (weinewald24.de) aufgefallen.
+- Der Listener behandelt jetzt **beide** Übergabeformen: String (`output`, ältere
+  JTL) und phpQuery-Dokument (`document`, 5.6/5.7, Injektion per `head`/`form`-
+  Selektoren). Defensiv gekapselt (`try/catch`): der Filter lässt den Output im
+  Fehlerfall unverändert und kann die Seite nie zerstören.
+- Hintergrund-Relevanz: Ohne Injektion fehlte echten Absendungen das Timing-Token,
+  was bei niedriger Schwelle zu Fehlsperren hätte führen können – mit dem Fix
+  greifen Schutz **und** Fail-open wieder wie vorgesehen.
+
+> Verifikation am echten Shop steht nach Redeploy aus; statisch gegen den
+> 5.7.1-Quellcode (`JTLSmarty::outputFilter`, phpQuery-API) entwickelt, PHP-Lint grün.
+
 ## 1.0.8 – 2026-06-09
 
 ### Behoben (Diagnose)

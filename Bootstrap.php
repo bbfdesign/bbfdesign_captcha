@@ -214,19 +214,33 @@ class Bootstrap extends Bootstrapper
                 return;
             }
 
-            if (!isset($args['output'])) {
-                return;
+            try {
+                $assetHook    = new IncludeAssets($plugin, $this->settingsModel);
+                $outputFilter = new SmartyOutputFilter($this->settingsModel);
+
+                // Älteres JTL: roher HTML-String unter 'output'.
+                if (isset($args['output']) && is_string($args['output'])) {
+                    $html = &$args['output'];
+                    $html = $assetHook->includeIfNeeded($html);
+                    $html = $outputFilter->filter($html);
+                    return;
+                }
+
+                // JTL 5.6/5.7: phpQuery-Dokument unter 'document'
+                // (executeHook(140, ['smarty'=>..., 'document'=>$doc])).
+                if (isset($args['document']) && is_object($args['document'])) {
+                    $assetHook->injectIntoDocument($args['document']);
+                    $outputFilter->filterDocument($args['document']);
+                }
+            } catch (\Throwable $e) {
+                // Der Output-Filter darf die Seite niemals zerstören – im Fehlerfall
+                // bleibt der Output unverändert.
+                if ($this->settingsModel->getBool('debug_mode')) {
+                    Shop::Container()->getLogService()->warning(
+                        'BBF Captcha outputfilter: ' . $e->getMessage()
+                    );
+                }
             }
-
-            $html = &$args['output'];
-
-            // Assets einbinden (nur wenn Formular auf der Seite)
-            $assetHook = new IncludeAssets($plugin, $this->settingsModel);
-            $html = $assetHook->includeIfNeeded($html);
-
-            // Honeypot + Timing in Formulare injizieren
-            $outputFilter = new SmartyOutputFilter($this->settingsModel);
-            $html = $outputFilter->filter($html);
         });
 
         // Kontaktformular
