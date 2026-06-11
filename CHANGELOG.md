@@ -3,6 +3,28 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.20 – 2026-06-11
+
+### Behoben (KRITISCH: Spam-Registrierung wurde nicht geblockt)
+
+Bot-Registrierungen (Krypto-/Domain-Spam im Namensfeld) kamen weiterhin durch –
+das Konto wurde trotz „Spam" angelegt. Zwei zusammenwirkende Ursachen, beide gefixt:
+
+- **Falscher Hook (Konto wurde trotzdem angelegt).** Das Plugin hing nur an
+  `HOOK_REGISTRIEREN_PAGE` (40), der **vor** der Validierung feuert und die
+  Konto-Erstellung nicht verhindern kann. JTL legt das Konto im Block
+  `if ($nReturnValue)` an, und `$nReturnValue` wird **nur** bei
+  `HOOK_REGISTRIEREN_PAGE_REGISTRIEREN_PLAUSI` (41) **per Referenz** übergeben.
+  Neuer Listener auf Hook 41 setzt bei Spam `nReturnValue = false` → **JTL legt das
+  Konto nicht mehr an**. Hook 40 stellt nur noch das Widget bereit (keine
+  Doppel-Protokollierung).
+- **Spam-Inhalt wurde nicht geprüft.** JTL liefert die Registrierungsdaten
+  **verschachtelt** (`register[vorname]`), der Smart-Filter schaute aber nur flach
+  und sah den Spam-Namen gar nicht (Score 0). `AISpamService` zieht die POST-Daten
+  jetzt **rekursiv flach** zusammen – der Name wird gefunden, der konkrete Spam
+  erreicht Score ~90 (Schwelle 60) → geblockt. (Verifiziert.)
+- Fail-open: Ein Fehler im Plausi-Listener blockiert legitime Registrierungen nie.
+
 ## 1.0.19 – 2026-06-10
 
 ### Recht/Lizenz (Drittanbieter-Attribution)

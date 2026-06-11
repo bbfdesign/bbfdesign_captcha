@@ -260,9 +260,38 @@ class Bootstrap extends Bootstrapper
             $this->handleFormHook('contact', $args, $plugin, $db);
         });
 
-        // Registrierung (HOOK_REGISTRIEREN_PAGE = 40)
+        // Registrierung (HOOK_REGISTRIEREN_PAGE = 40) – stellt nur das Widget bereit.
         $dispatcher->listen('shop.hook.' . \HOOK_REGISTRIEREN_PAGE, function (array $args) use ($plugin, $db) {
             $this->handleFormHook('registration', $args, $plugin, $db);
+        });
+
+        // Registrierung WIRKLICH blocken: HOOK_REGISTRIEREN_PAGE_REGISTRIEREN_PLAUSI (41)
+        // übergibt nReturnValue + fehlendeAngaben PER REFERENZ. Nur hier lässt sich die
+        // Konto-Erstellung verhindern (Hook 40 feuert vor der Validierung). Bei Spam
+        // setzen wir nReturnValue=false -> JTL legt das Konto nicht an.
+        $dispatcher->listen('shop.hook.' . \HOOK_REGISTRIEREN_PAGE_REGISTRIEREN_PLAUSI, function (array &$args) use ($plugin, $db) {
+            if ($this->settingsModel === null || !$this->settingsModel->getBool('global_enabled')) {
+                return;
+            }
+            try {
+                $captcha = new \Plugin\bbfdesign_captcha\src\Services\CaptchaService($plugin, $db, $this->settingsModel);
+                $result  = $captcha->validate($_POST, 'registration');
+                if (!$result->isValid()) {
+                    $args['nReturnValue'] = false;
+                    if (isset($args['fehlendeAngaben']) && is_array($args['fehlendeAngaben'])) {
+                        $args['fehlendeAngaben']['bbf_captcha_spam'] = 1;
+                    }
+                    $langVars = $plugin->getLocalization();
+                    $shopLang = $_SESSION['cISOSprache'] ?? 'ger';
+                    $_SESSION['cFehler'] = $langVars->getTranslation('captcha_failed', $shopLang)
+                        ?: 'Sicherheitsprüfung fehlgeschlagen. Bitte versuchen Sie es erneut.';
+                }
+            } catch (\Throwable $e) {
+                // Fail-open: ein Fehler darf legitime Registrierungen nie blockieren.
+                if ($this->settingsModel->getBool('debug_mode')) {
+                    Shop::Container()->getLogService()->warning('BBF Captcha registration plausi: ' . $e->getMessage());
+                }
+            }
         });
 
         // Newsletter (HOOK_NEWSLETTER_PAGE = 36)

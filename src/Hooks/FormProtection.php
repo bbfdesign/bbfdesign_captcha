@@ -46,6 +46,14 @@ class FormProtection
         // Widget-HTML für Templates bereitstellen (GET + POST)
         $this->assignWidget($formType, $args);
 
+        // Registrierung wird über HOOK_REGISTRIEREN_PAGE_REGISTRIEREN_PLAUSI (41)
+        // validiert UND geblockt – nur dort lässt sich die Konto-Erstellung wirklich
+        // verhindern (nReturnValue per Referenz). Hier daher nur das Widget zuweisen,
+        // keine doppelte Validierung/Protokollierung.
+        if ($formType === 'registration') {
+            return;
+        }
+
         // Nur bei POST-Requests validieren
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             return;

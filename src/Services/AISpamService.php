@@ -633,21 +633,27 @@ class AISpamService
             'login'        => [],
         ];
 
+        // WICHTIG: JTL liefert Registrierungs-/Formulardaten oft VERSCHACHTELT
+        // (z.B. $_POST['register']['vorname']). Daher flach zusammenziehen, sonst
+        // wird der Spam-Inhalt (z.B. Name) nicht gesehen.
+        $flat = $this->flattenStrings($postData);
+
         $fields = $textFields[$formType] ?? ['message', 'text', 'comment', 'nachricht'];
         $texts  = [];
 
         foreach ($fields as $field) {
-            if (!empty($postData[$field]) && is_string($postData[$field])) {
-                $texts[] = $postData[$field];
+            if (!empty($flat[$field])) {
+                $texts[] = $flat[$field];
             }
         }
 
         // Generisch: Alle längeren String-Felder prüfen
         if (empty($texts)) {
-            foreach ($postData as $key => $value) {
-                if (is_string($value) && mb_strlen($value) > 20
-                    && !str_contains($key, 'password') && !str_contains($key, 'token')
-                    && !str_contains($key, 'bbf_') && !str_contains($key, 'jtl_')
+            foreach ($flat as $key => $value) {
+                if (mb_strlen($value) > 20
+                    && !str_contains($key, 'password') && !str_contains($key, 'passwort')
+                    && !str_contains($key, 'token') && !str_contains($key, 'bbf_')
+                    && !str_contains($key, 'jtl_') && !str_contains($key, 'hp_')
                 ) {
                     $texts[] = $value;
                 }
@@ -655,6 +661,31 @@ class AISpamService
         }
 
         return implode(' ', $texts);
+    }
+
+    /**
+     * POST-Daten rekursiv zu einer flachen Map (Leaf-Key => String) zusammenziehen.
+     * Bei Kollision gewinnt der längere Wert (echter Inhalt vor Leerfeld).
+     *
+     * @param array<mixed> $data
+     * @param array<string,string> $flat
+     * @return array<string,string>
+     */
+    private function flattenStrings(array $data, array &$flat = []): array
+    {
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $this->flattenStrings($value, $flat);
+            } elseif (is_string($value) || is_numeric($value)) {
+                $k = (string)$key;
+                $v = (string)$value;
+                if (!isset($flat[$k]) || mb_strlen($v) > mb_strlen($flat[$k])) {
+                    $flat[$k] = $v;
+                }
+            }
+        }
+
+        return $flat;
     }
 
     /**
