@@ -46,6 +46,19 @@ class FormProtection
         // Widget-HTML für Templates bereitstellen (GET + POST)
         $this->assignWidget($formType, $args);
 
+        // Theme-unabhängige ALTCHA-Widget-Platzierung vormerken: viele Themes
+        // rendern den {$bbfCaptchaWidget}-Slot nicht (z. B. NOVA-Child), daher
+        // injiziert der SmartyOutputFilter das <altcha-widget> direkt ins passende
+        // Formular. NUR Typen mit ALTCHA als aktiver Methode (Registrierung/
+        // Kontakt/Bewertung) – Checkout, Login und Suche werden per Design nie
+        // erreicht (kein Signatur-Match, kein aktives ALTCHA).
+        if (SmartyOutputFilter::supportsWidgetInjection($formType)) {
+            $widget = $this->captcha->getAltchaWidgetHtml($formType);
+            if ($widget !== '') {
+                SmartyOutputFilter::$pendingAltchaWidgets[$formType] = $widget;
+            }
+        }
+
         // Registrierung wird über HOOK_REGISTRIEREN_PAGE_REGISTRIEREN_PLAUSI (41)
         // validiert UND geblockt – nur dort lässt sich die Konto-Erstellung wirklich
         // verhindern (nReturnValue per Referenz). Hier daher nur das Widget zuweisen,

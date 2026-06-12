@@ -195,6 +195,24 @@ class CaptchaService
     }
 
     /**
+     * NUR das ALTCHA-Widget-HTML für einen Formulartyp – ohne Honeypot/Timing
+     * (die werden separat vom SmartyOutputFilter in alle Formulare injiziert).
+     * Leerer String, wenn ALTCHA für diesen Typ nicht aktiv ist. Wird für die
+     * theme-unabhängige Widget-Platzierung genutzt.
+     */
+    public function getAltchaWidgetHtml(string $formType): string
+    {
+        if (!$this->settings->getBool('global_enabled') || !$this->settings->getBool('altcha_enabled')) {
+            return '';
+        }
+        if (!in_array('altcha', $this->getActiveMethodsForForm($formType), true)) {
+            return '';
+        }
+        $challengeUrl = \JTL\Shop::getURL() . '/bbfdesign-captcha/api/challenge';
+        return $this->getAltcha()->renderWidget($challengeUrl);
+    }
+
+    /**
      * Formular-Submission validieren
      *
      * Prüft alle aktiven Methoden und berechnet einen Gesamtscore.

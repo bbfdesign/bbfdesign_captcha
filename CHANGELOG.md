@@ -3,6 +3,23 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.37 – 2026-06-12
+
+### Hinzugefügt (theme-unabhängige ALTCHA-Widget-Platzierung)
+
+- **Das `<altcha-widget>` wird jetzt automatisch ins passende Formular
+  injiziert** – unabhängig davon, ob das Theme den Slot `{$bbfCaptchaWidget}`
+  rendert (NOVA-Child u. a. tun das nicht). Damit greift der ALTCHA-Schutz
+  endlich auch dort, wo das Widget bisher fehlte.
+- **Sicher per Design — Checkout wird nie getroffen:** Injektion nur für
+  Formulartypen mit ALTCHA als aktiver Methode (Registrierung/Kontakt/Bewertung)
+  UND nur in das Formular mit passendem Signatur-Feld (`pass2`/`nachricht`/
+  `sterne`). Checkout, Login, Warenkorb und Suche haben weder ein aktives ALTCHA
+  noch ein passendes Signatur-Feld → werden nie verändert (Ticketverkauf bleibt
+  unberührt). Idempotent (kein Doppel-Widget, falls ein Theme den Slot doch rendert).
+- Greift in beiden Output-Pfaden (JTL 5.6/5.7 phpQuery-Dokument **und**
+  String-Fallback); Honeypot/Timing-Injektion unverändert.
+
 ## 1.0.36 – 2026-06-12
 
 ### Behoben (ALTCHA-Script `type=module` an der richtigen Stelle)
