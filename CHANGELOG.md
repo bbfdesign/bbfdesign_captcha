@@ -3,6 +3,18 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.27 – 2026-06-12
+
+### Behoben (KRITISCH: /admin/cron 500 durch v1.0.26)
+
+- **Cron-Admin-Seite lief auf 500.** Das in v1.0.26 ergänzte
+  `GET_AVAILABLE_CRONJOBS`-Listener hängte ein Objekt an die Liste der
+  verfügbaren Jobs. JTL 5.7 erwartet dort aber ein `string[]` (jobType-Strings):
+  `cron.tpl` rendert jeden Eintrag direkt als `{$type}`, der Objekt-zu-String-Cast
+  warf einen Fatal → HTTP 500 auf `/admin/cron`. Jetzt wird nur der
+  jobType-String angehängt (wie vom JTL-Core erwartet). Der Job selbst läuft
+  unverändert; `MAP_CRONJOB_TYPE` löst ihn weiterhin korrekt auf.
+
 ## 1.0.26 – 2026-06-12
 
 ### Geändert (Cron & Mail – nativ ins JTL-System integriert)

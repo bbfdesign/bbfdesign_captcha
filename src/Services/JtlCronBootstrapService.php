@@ -53,12 +53,12 @@ final class JtlCronBootstrapService
             if (!isset($args['jobs']) || !is_array($args['jobs'])) {
                 return;
             }
-            foreach ($installer->jobsWithRuntimeSettings() as $type => $meta) {
-                $args['jobs'][] = (object) [
-                    'jobType'   => $type,
-                    'name'      => $meta['name'],
-                    'frequency' => $meta['frequency'],
-                ];
+            // WICHTIG: JTL erwartet hier ein string[] mit jobType-Strings – die
+            // Cron-Admin-Vorlage (cron.tpl) rendert jeden Eintrag direkt als
+            // {$type}. Ein Objekt würde beim String-Cast einen Fatal/500 auf
+            // /admin/cron auslösen. Daher NUR den jobType-String anhängen.
+            foreach (array_keys($installer->jobsWithRuntimeSettings()) as $type) {
+                $args['jobs'][] = (string) $type;
             }
         });
     }
