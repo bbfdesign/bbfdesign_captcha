@@ -208,11 +208,12 @@ class BotDetectorService
         $jsToken = $postData['bbf_js_token'] ?? '';
 
         if (empty($jsToken)) {
-            return [
-                'valid'  => false,
-                'reason' => 'JS-Challenge nicht gelöst (kein JavaScript?)',
-                'score'  => 50,
-            ];
+            // FAIL-OPEN (oberste Regel): ein fehlendes JS-Token heißt "das JS
+            // lief nicht" – das kann bei echten Kunden an Theme/Asset/Timing
+            // liegen und darf eine Anmeldung niemals allein blockieren. Bots
+            // fängt weiterhin Honeypot/Timing/Smart-Filter. Nur ein PRÄSENTES,
+            // aber formal ungültiges Token bleibt ein Manipulationssignal.
+            return ['valid' => true, 'reason' => '', 'score' => 0];
         }
 
         // Token ist ein Hex-Wert → mindestens das Format muss stimmen

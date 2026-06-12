@@ -3,6 +3,25 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.33 – 2026-06-12
+
+### Behoben (KRITISCH – echte Kunden konnten kein Konto anlegen)
+
+- **Fehlende ALTCHA-/JS-Lösung blockierte legitime Registrierungen.** Wenn das
+  ALTCHA-Widget bzw. die JS-Challenge im Browser nicht lief (z. B. weil ein Theme
+  das Widget nicht rendert), kassierte die Anmeldung **ALTCHA-fehlt (+60)** und
+  **JS-Challenge-fehlt (+50)** = 110 ≥ Schwelle 60 → **echte Kunden wurden
+  ausgesperrt** (Live-Vorfall auf bikepark-winterberg.de, mehrere reale Kunden).
+- Beide **„fehlt"-Fälle sind jetzt FAIL-OPEN** (Score 0): eine *fehlende*
+  Client-Lösung ist kein verlässliches Bot-Signal und darf legitime Nutzer nie
+  blockieren (oberste Regel + dokumentierte Fail-open-Grundhaltung). Eine
+  *präsente, aber ungültige/gefälschte* ALTCHA-Lösung bleibt ein Spam-Signal
+  (Score 80). Bots werden weiterhin über Honeypot, Timing und Smart-Spamfilter
+  erkannt.
+- Hinweis: Warum das ALTCHA-Widget auf dem Bikepark-Theme nicht rendert, wird
+  separat untersucht (Wiederherstellung des vollen ALTCHA-Schutzes). Die
+  Kundensicherheit ist mit diesem Fix sofort wiederhergestellt.
+
 ## 1.0.32 – 2026-06-12
 
 ### Geändert (Lizenz)

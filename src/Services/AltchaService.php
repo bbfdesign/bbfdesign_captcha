@@ -140,10 +140,18 @@ class AltchaService
         $payload = $postData[self::FIELD_NAME] ?? '';
 
         if (empty($payload)) {
+            // FAIL-OPEN (oberste Regel: echte Kunden nie aussperren): eine
+            // FEHLENDE Lösung bedeutet "das Widget/JS lief nicht" – z. B. weil
+            // das Theme das ALTCHA-Widget nicht rendert, ein Asset blockiert
+            // wird oder das Formular vor dem Proof-of-Work absendet. Das ist KEIN
+            // verlässliches Bot-Signal und darf legitime Anmeldungen niemals
+            // blockieren. Bots werden weiterhin über Honeypot, Timing und den
+            // Smart-Spamfilter erkannt. Nur eine PRÄSENTE, aber ungültige Lösung
+            // (gefälscht/manipuliert) bleibt ein echtes Spam-Signal.
             return [
-                'valid'  => false,
-                'reason' => 'ALTCHA-Lösung fehlt',
-                'score'  => 60,
+                'valid'  => true,
+                'reason' => '',
+                'score'  => 0,
             ];
         }
 
