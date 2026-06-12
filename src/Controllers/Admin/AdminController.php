@@ -127,6 +127,15 @@ class AdminController
             case 'regenerateHmacKey':
                 return $this->regenerateHmacKey();
 
+            case 'getLicenseStatus':
+                return $this->getLicenseStatus();
+
+            case 'recheckLicense':
+                return $this->recheckLicense();
+
+            case 'saveLicenseConfig':
+                return $this->saveLicenseConfig($request);
+
             default:
                 return $this->jsonResponse([
                     'success' => false,
@@ -238,6 +247,112 @@ class AdminController
             }
         }
         return true;
+    }
+
+    // ─── ForgePush-Lizenz ───────────────────────────────────────────────
+
+    /**
+     * Lizenzstatus für die Anzeige. Liefert NIE Secrets zurück, nur ob sie
+     * gesetzt sind.
+     */
+    private function getLicenseStatus(): string
+    {
+        $service = new \Plugin\bbfdesign_captcha\src\Services\LicenseService($this->db, $this->settings);
+        return $this->jsonResponse([
+            'success' => true,
+            'data'    => $this->licenseStatusPayload($service),
+        ]);
+    }
+
+    /**
+     * Manuelle Sofort-Prüfung gegen ForgePush.
+     */
+    private function recheckLicense(): string
+    {
+        $service = new \Plugin\bbfdesign_captcha\src\Services\LicenseService($this->db, $this->settings);
+        try {
+            $service->check();
+        } catch (\Throwable $e) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => $this->t('license_check_failed', 'Prüfung fehlgeschlagen') . ': ' . $e->getMessage(),
+            ]);
+        }
+        $this->settings->invalidateCache();
+        return $this->jsonResponse([
+            'success' => true,
+            'data'    => $this->licenseStatusPayload($service),
+        ]);
+    }
+
+    /**
+     * Lizenz-Konfiguration speichern. Signing-Secret und License-Key sind
+     * write-only: leere Felder lassen den Bestand unverändert (das Frontend
+     * bekommt die Werte nie zu sehen).
+     */
+    private function saveLicenseConfig(array $request): string
+    {
+        $slug = trim((string)($request['product_slug'] ?? ''));
+        $this->settings->set('forgepush_product_slug', $slug, 'license');
+
+        $secret = trim((string)($request['signing_secret'] ?? ''));
+        if ($secret !== '') {
+            $this->settings->set('forgepush_signing_secret', $secret, 'license');
+        }
+
+        $key = trim((string)($request['license_key'] ?? ''));
+        if ($key !== '') {
+            $this->settings->set('forgepush_license_key', $key, 'license');
+        }
+
+        // Optional: explizites Leeren über Flags (z. B. Key entfernen).
+        if (!empty($request['clear_license_key'])) {
+            $this->settings->set('forgepush_license_key', '', 'license');
+        }
+        if (!empty($request['clear_signing_secret'])) {
+            $this->settings->set('forgepush_signing_secret', '', 'license');
+        }
+
+        $this->settings->invalidateCache();
+
+        $service = new \Plugin\bbfdesign_captcha\src\Services\LicenseService($this->db, $this->settings);
+        // Nach dem Speichern sofort einmal prüfen, damit der Status aktuell ist.
+        try {
+            $service->check();
+        } catch (\Throwable) {
+            // Status-Anzeige bleibt auf letztem Stand; Speichern war trotzdem ok.
+        }
+
+        return $this->jsonResponse([
+            'success' => true,
+            'message' => $this->t('settings_saved', 'Einstellungen gespeichert'),
+            'data'    => $this->licenseStatusPayload($service),
+        ]);
+    }
+
+    /**
+     * Anzeige-Payload des Lizenzstatus (ohne Secrets).
+     *
+     * @return array<string,mixed>
+     */
+    private function licenseStatusPayload(\Plugin\bbfdesign_captcha\src\Services\LicenseService $service): array
+    {
+        $status = $service->getStatus();
+        return [
+            'valid'         => $status['valid'],
+            'verdict'       => $status['verdict'],
+            'pluginMoved'   => $status['pluginMoved'],
+            'checkedAt'     => $status['checkedAt'],
+            'configured'    => $status['configured'],
+            'host'          => $status['host'],
+            'instanceId'    => $status['instanceId'],
+            'hardViolation' => $service->hasHardViolation(),
+            'secretSet'     => $this->settings->get('forgepush_signing_secret') !== ''
+                               || (defined('FORGEPUSH_SIGNING_SECRET') && (string)\FORGEPUSH_SIGNING_SECRET !== ''),
+            'keySet'        => $this->settings->get('forgepush_license_key') !== ''
+                               || (defined('FORGEPUSH_LICENSE_KEY') && (string)\FORGEPUSH_LICENSE_KEY !== ''),
+            'productSlug'   => $this->settings->get('forgepush_product_slug'),
+        ];
     }
 
     private function getSpamLog(array $request): string

@@ -236,6 +236,12 @@ class Bootstrap extends Bootstrapper
         $templatePath = $plugin->getPaths()->getAdminPath() . 'templates/';
 
         $allSettings = $settings->getAll();
+        // Secrets niemals an den Browser geben (DSGVO/Sicherheit). Die
+        // Lizenz-Sektion arbeitet write-only über eigene AJAX-Actions.
+        $publicSettings = $allSettings;
+        foreach (['forgepush_signing_secret', 'forgepush_license_key'] as $secretKey) {
+            unset($publicSettings[$secretKey]);
+        }
         $smarty->assign([
             'plugin'        => $plugin,
             'pluginId'      => $plugin->getPluginID(),
@@ -245,8 +251,8 @@ class Bootstrap extends Bootstrapper
             'adminLang'     => $adminLang,
             'langVars'      => $langVars,
             'pluginVersion' => $plugin->getCurrentVersion(),
-            'settings'      => $allSettings,
-            'settingsJson'  => json_encode($allSettings, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
+            'settings'      => $publicSettings,
+            'settingsJson'  => json_encode($publicSettings, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
         ]);
 
         $templateMap = [

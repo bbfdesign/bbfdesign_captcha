@@ -38,7 +38,7 @@
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
             <label class="bbf-form-label">
                 Auto-Cleanup
-                <div class="bbf-form-help">Bereinigt Logs/Rate-Limits/abgelaufene IP-Blocks automatisch (gedrosselt &uuml;ber den Shop-Traffic, h&ouml;chstens 1&times;/Tag).</div>
+                <div class="bbf-form-help">Bereinigt Logs/Rate-Limits/abgelaufene IP-Blocks automatisch &uuml;ber den nativen JTL-Cron (h&ouml;chstens 1&times;/Tag). Ohne eingerichteten Cron greift ein gedrosselter Fallback &uuml;ber den Shop-Traffic.</div>
             </label>
             <label class="bbf-toggle">
                 <input type="checkbox" {literal}x-model="s.auto_cleanup"{/literal}>
@@ -49,7 +49,7 @@
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
             <label class="bbf-form-label">
                 Cron-Bereinigung (URL)
-                <div class="bbf-form-help">Optional: diese URL per JTL-Cron / Server-Cron (z.&nbsp;B. t&auml;glich) aufrufen, um die Bereinigung exakt zu planen.</div>
+                <div class="bbf-form-help">Optionaler Fallback: Das Plugin registriert bereits einen nativen JTL-Cron-Job (st&uuml;ndlich). Diese URL nur n&ouml;tig, wenn der Shop-Cron nicht l&auml;uft &ndash; dann per Server-Cron aufrufen.</div>
             </label>
             <div>
                 <input type="text" class="bbf-input" readonly onclick="this.select()"
@@ -123,6 +123,72 @@
             <button type="button" class="bbf-btn bbf-btn-primary" {literal}@click="saveAll()"{/literal}>Alle Einstellungen speichern</button>
         </div>
     </div>
+
+    {* ── ForgePush-Lizenz ── *}
+    {literal}
+    <div class="bbf-card" x-init="loadLicense()">
+        <h3 class="bbf-card-title" style="margin-bottom: var(--bbf-spacing-lg);">ForgePush-Lizenz</h3>
+
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md); align-items:center;">
+            <label class="bbf-form-label">Status</label>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <span class="bbf-badge" :class="licenseBadgeClass()" x-text="licenseVerdictLabel()"></span>
+                <span style="font-size:12px; color:var(--bbf-muted);" x-show="lic.checkedAt"
+                      x-text="'zuletzt geprüft: ' + licenseCheckedAgo()"></span>
+            </div>
+        </div>
+
+        <div class="bbf-alert bbf-alert-danger" x-show="lic.hardViolation" x-cloak style="margin-bottom:12px;">
+            Die Lizenzprüfung meldet ein Problem (<span x-text="lic.verdict"></span>). Bitte die Lizenz in ForgePush prüfen.
+            Der Spam-Schutz bleibt aktiv.
+        </div>
+        <div class="bbf-alert bbf-alert-warning" x-show="lic.pluginMoved" x-cloak style="margin-bottom:12px;">
+            ForgePush meldet einen Host-Wechsel dieser Installation
+            (<span x-text="lic.pluginMoved && lic.pluginMoved.fromHost"></span> &rarr;
+            <span x-text="lic.pluginMoved && lic.pluginMoved.toHost"></span>).
+        </div>
+
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">Host / Instanz
+                <div class="bbf-form-help">Werden automatisch ermittelt und persistiert.</div>
+            </label>
+            <div style="font-size:12px; color:var(--bbf-muted);">
+                <div x-text="'Host: ' + (lic.host || '–')"></div>
+                <code x-text="'Instance: ' + (lic.instanceId ? lic.instanceId.substring(0,16)+'…' : '–')"></code>
+            </div>
+        </div>
+
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">Produkt-Slug
+                <div class="bbf-form-help">Optional – nur nötig, wenn dieser Host mehrere Lizenzen hat.</div>
+            </label>
+            <input type="text" class="bbf-input" style="max-width:300px;" placeholder="z. B. bbf-captcha" x-model="licForm.product_slug">
+        </div>
+
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">Signing-Secret
+                <div class="bbf-form-help">Produkt-spezifisches Secret aus ForgePush. Wird nur serverseitig gespeichert und nie wieder angezeigt. Leer lassen = unverändert.</div>
+            </label>
+            <input type="password" class="bbf-input" style="max-width:300px;" autocomplete="new-password"
+                   :placeholder="lic.secretSet ? '•••••••• (gesetzt)' : 'nicht gesetzt'"
+                   x-model="licForm.signing_secret">
+        </div>
+
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">License-Key (optional)
+                <div class="bbf-form-help">Nur falls die Domain-Whitelist nicht reicht. Leer lassen = unverändert.</div>
+            </label>
+            <input type="password" class="bbf-input" style="max-width:300px;" autocomplete="new-password"
+                   :placeholder="lic.keySet ? '•••••••• (gesetzt)' : 'nicht gesetzt'"
+                   x-model="licForm.license_key">
+        </div>
+
+        <div style="margin-top: var(--bbf-spacing-lg); display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="button" class="bbf-btn bbf-btn-primary" @click="saveLicense()" :disabled="licBusy">Speichern &amp; prüfen</button>
+            <button type="button" class="bbf-btn bbf-btn-secondary" @click="recheckLicense()" :disabled="licBusy">Jetzt prüfen</button>
+        </div>
+    </div>
+    {/literal}
 </div>
 
 <script>
@@ -146,6 +212,84 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 email_alert_threshold: sv.email_alert_threshold || 50,
                 email_alert_window: sv.email_alert_window || 60,
                 altcha_hmac_key: sv.altcha_hmac_key || ''
+            },
+
+            // ── ForgePush-Lizenz ──
+            lic: { configured:false, valid:false, verdict:'unknown', checkedAt:0, host:'', instanceId:'', secretSet:false, keySet:false, pluginMoved:null, hardViolation:false, productSlug:'' },
+            licForm: { product_slug:'', signing_secret:'', license_key:'' },
+            licBusy: false,
+
+            loadLicense: function() {
+                var self = this;
+                bbfAdmin.post('getLicenseStatus').then(function(resp) {
+                    if (resp.success && resp.data) {
+                        self.lic = resp.data;
+                        self.licForm.product_slug = resp.data.productSlug || '';
+                    }
+                }).catch(function(){});
+            },
+
+            saveLicense: function() {
+                var self = this;
+                self.licBusy = true;
+                bbfAdmin.post('saveLicenseConfig', {
+                    product_slug: self.licForm.product_slug || '',
+                    signing_secret: self.licForm.signing_secret || '',
+                    license_key: self.licForm.license_key || ''
+                }).then(function(resp) {
+                    self.licBusy = false;
+                    if (resp.success) {
+                        if (resp.data) self.lic = resp.data;
+                        self.licForm.signing_secret = '';
+                        self.licForm.license_key = '';
+                        bbfAdmin.showNotification('Lizenz gespeichert & geprüft', 'success');
+                    } else {
+                        bbfAdmin.showNotification(resp.message || 'Fehler', 'error');
+                    }
+                }).catch(function(){ self.licBusy = false; bbfAdmin.showNotification('Fehler', 'error'); });
+            },
+
+            recheckLicense: function() {
+                var self = this;
+                self.licBusy = true;
+                bbfAdmin.post('recheckLicense').then(function(resp) {
+                    self.licBusy = false;
+                    if (resp.success && resp.data) {
+                        self.lic = resp.data;
+                        bbfAdmin.showNotification('Lizenz geprüft', 'success');
+                    } else {
+                        bbfAdmin.showNotification(resp.message || 'Prüfung fehlgeschlagen', 'error');
+                    }
+                }).catch(function(){ self.licBusy = false; bbfAdmin.showNotification('Fehler', 'error'); });
+            },
+
+            licenseVerdictLabel: function() {
+                var L = {
+                    valid:'Gültig', expired:'Abgelaufen', suspended:'Ausgesetzt', revoked:'Widerrufen',
+                    domain_mismatch:'Domain stimmt nicht', instance_limit_exceeded:'Instanz-Limit überschritten',
+                    unlicensed:'Keine Lizenz zugeordnet', ambiguous_domain:'Domain mehrdeutig',
+                    unconfigured:'Nicht konfiguriert', network_error:'Netzwerkfehler (Cache aktiv)',
+                    unsigned:'Antwort unsigniert', signature_mismatch:'Signaturfehler',
+                    stale_response:'Veraltete Antwort', unknown:'Unbekannt'
+                };
+                return L[this.lic.verdict] || this.lic.verdict || 'Unbekannt';
+            },
+
+            licenseBadgeClass: function() {
+                if (this.lic.valid) return 'bbf-badge-success';
+                if (this.lic.hardViolation) return 'bbf-badge-danger';
+                if (this.lic.verdict === 'unconfigured') return 'bbf-badge-info';
+                return 'bbf-badge-warning';
+            },
+
+            licenseCheckedAgo: function() {
+                if (!this.lic.checkedAt) return '–';
+                var sec = Math.floor(Date.now()/1000) - this.lic.checkedAt;
+                if (sec < 0) sec = 0;
+                if (sec < 60) return 'gerade eben';
+                var min = Math.floor(sec/60); if (min < 60) return 'vor ' + min + ' Min';
+                var hr = Math.floor(min/60);  if (hr < 24)  return 'vor ' + hr + ' Std';
+                return 'vor ' + Math.floor(hr/24) + ' Tg';
             },
 
             saveAll: function() {

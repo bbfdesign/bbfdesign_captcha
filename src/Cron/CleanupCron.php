@@ -9,6 +9,7 @@ use JTL\Cron\JobInterface;
 use JTL\Cron\QueueEntry;
 use JTL\Shop;
 use Plugin\bbfdesign_captcha\src\Models\Setting;
+use Plugin\bbfdesign_captcha\src\Services\LicenseService;
 use Plugin\bbfdesign_captcha\src\Services\SpamLogService;
 
 /**
@@ -47,7 +48,7 @@ final class CleanupCron extends Job
      * Direkt aufrufbar – wird vom nativen JTL-Cron, vom URL-Cron-Fallback und
      * von Tests genutzt.
      *
-     * @return array{wave_checked: bool, cleanup_ran: bool}
+     * @return array{wave_checked: bool, cleanup_ran: bool, license_checked: bool}
      */
     public static function run(): array
     {
@@ -70,7 +71,15 @@ final class CleanupCron extends Job
             self::logWarning('CleanupCron:cleanup', $e->getMessage());
         }
 
-        return ['wave_checked' => true, 'cleanup_ran' => $cleanupRan];
+        // 3) ForgePush-Lizenz-Check (intern auf 12h gedrosselt; nur wenn konfiguriert).
+        $licenseChecked = false;
+        try {
+            $licenseChecked = (new LicenseService($db, $settings))->checkIfDue();
+        } catch (\Throwable $e) {
+            self::logWarning('CleanupCron:license', $e->getMessage());
+        }
+
+        return ['wave_checked' => true, 'cleanup_ran' => $cleanupRan, 'license_checked' => $licenseChecked];
     }
 
     private static function logWarning(string $context, string $message): void

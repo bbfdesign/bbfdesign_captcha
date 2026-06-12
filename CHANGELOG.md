@@ -3,6 +3,35 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.29 – 2026-06-12
+
+### Hinzugefügt (ForgePush-Lizenzsystem)
+
+- **Signierte Lizenzprüfung gegen ForgePush.** Neuer `LicenseService` ruft
+  `POST https://forgepush.bbfdesign.de/api/v1/licenses/check` (Auto-Licensing-by-
+  Domain mit `instanceId` + `host`, optional `productSlug`/`licenseKey`) und
+  verifiziert die Antwort per HMAC-SHA256 über „RAW-Body|X-Signed-At" plus
+  Anti-Replay (±5 min). `instanceId` wird einmalig erzeugt und in den
+  Plugin-Settings persistiert; `serverFingerprint` = SHA-256 über
+  PHP-Version + Server-Software + Hostname.
+- **Robust & live-sicher:** transiente Fehler (Netz/Signatur) → Fail-open über
+  24-h-Cache; klares Negativ-Verdikt (revoked/expired/…) → Fail-closed. Wichtig:
+  Eine ungültige Lizenz **deaktiviert den Spam-Schutz NICHT** – sie wird nur im
+  Backend gemeldet (Enforcement = informativ).
+- **Über den nativen Cron geprüft** (CleanupCron, alle 12 h gedrosselt) – kein
+  Hotpath, kein Blocking beim Seitenaufruf.
+- **Backend-Sektion „ForgePush-Lizenz"** in den Einstellungen: Status-Badge +
+  Verdikt, „zuletzt geprüft", Host/Instance, Host-Wechsel-Hinweis (`pluginMoved`),
+  sowie write-only Felder für Produkt-Slug, Signing-Secret und License-Key
+  („Jetzt prüfen"-Button). **Secrets liegen nie im Repo und werden nie an den
+  Browser ausgeliefert** (Konstante `FORGEPUSH_SIGNING_SECRET` bevorzugt, sonst
+  Setting; aus dem an den Browser gesendeten `settingsJson` herausgefiltert).
+
+### Geändert
+
+- Einstellungs-Hilfetexte zu Auto-Cleanup / Cron-Bereinigung an den nativen
+  JTL-Cron angepasst (vorher „über Shop-Traffic").
+
 ## 1.0.28 – 2026-06-12
 
 ### Behoben (Cron-Frequenz-Einheit)
