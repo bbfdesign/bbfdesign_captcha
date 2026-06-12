@@ -3,6 +3,16 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.22 – 2026-06-12
+
+### Behoben (Backend-UI)
+
+- **CSS-Cache-Bust.** Die Admin-Stylesheets (`admin-base.css`, `admin.css`)
+  werden jetzt mit `?v={Pluginversion}` eingebunden. Bisher luden bestehende
+  Admin-Sitzungen nach einem Update das alte, browsergecachte CSS – neue Styles
+  (z. B. der Off-Canvas-Drawer) erschienen erst nach manuellem Hard-Reload.
+  Mit jedem Versions-Bump zieht der Browser nun automatisch frisches CSS.
+
 ## 1.0.21 – 2026-06-12
 
 ### Geändert (Backend-UI)

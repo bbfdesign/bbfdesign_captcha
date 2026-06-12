@@ -1,5 +1,5 @@
-<link rel="stylesheet" href="{$adminUrl|escape:'html'}css/admin-base.css">
-<link rel="stylesheet" href="{$adminUrl|escape:'html'}css/admin.css">
+<link rel="stylesheet" href="{$adminUrl|escape:'html'}css/admin-base.css?v={$pluginVersion|default:'0'|escape:'url'}">
+<link rel="stylesheet" href="{$adminUrl|escape:'html'}css/admin.css?v={$pluginVersion|default:'0'|escape:'url'}">
 
 <div class="bbf-plugin-page" {literal}x-data="bbfCaptchaAdmin()" x-init="init()"{/literal}>
     <a href="#bbf-main-content" class="bbf-skip-link">Skip to content</a>
