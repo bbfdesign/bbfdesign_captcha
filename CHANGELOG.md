@@ -3,6 +3,17 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.21 – 2026-06-12
+
+### Geändert (Backend-UI)
+
+- **Spam-Log-Detail als Off-Canvas-Drawer.** Die „Eingereichte Daten"-Ansicht
+  wird beim Klick auf „Details" nicht mehr unten an die Seite angehängt, sondern
+  schwebt – wie im Ticket-Plugin – als seitliches Panel von rechts ein. Der
+  Hintergrund wird ausgegraut und weichgezeichnet (Backdrop-Blur). Schließen per
+  ✕-Button, Klick auf den Hintergrund oder Escape-Taste; Seiten-Scroll wird
+  währenddessen gesperrt. Rein kosmetisch, kein Einfluss auf Erkennung/Schutz.
+
 ## 1.0.20 – 2026-06-11
 
 ### Behoben (KRITISCH: Spam-Registrierung wurde nicht geblockt)

@@ -133,40 +133,51 @@
         </div>
     </div>
 
-    {* ── Detail-Ansicht: eingereichte Daten einer abgelehnten Anmeldung ── *}
+    {* ── Off-Canvas Detail: eingereichte Daten einer abgelehnten Anmeldung ── *}
     {literal}
-    <div class="bbf-card" x-show="detailEntry" style="margin-top: var(--bbf-spacing-md);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <strong>Eingereichte Daten
-                <span style="color:var(--bbf-muted); font-weight:400;"
-                      x-text="detailEntry ? '(' + detailEntry.form_type + ' · ' + detailEntry.created_at + ')' : ''"></span>
-            </strong>
-            <button type="button" class="bbf-btn bbf-btn-sm bbf-btn-secondary" @click="detailEntry = null">Schließen</button>
-        </div>
-        <div x-show="detailEntry && detailEntry.reason" class="bbf-alert bbf-alert-warning" style="margin-bottom:12px;">
-            <strong>Begr&uuml;ndung:</strong> <span x-text="detailEntry ? detailEntry.reason : ''"></span>
-        </div>
-        <template x-if="detailEntry && Object.keys(detailEntry.fields).length">
-            <table class="bbf-table" style="width:100%;">
-                <template x-for="key in Object.keys(detailEntry.fields)" :key="key">
-                    <tr>
-                        <td style="width:200px; color:var(--bbf-muted); vertical-align:top;" x-text="key"></td>
-                        <td><code style="white-space:pre-wrap; word-break:break-word;" x-text="detailEntry.fields[key]"></code></td>
-                    </tr>
-                </template>
-            </table>
-        </template>
-        <template x-if="detailEntry && !Object.keys(detailEntry.fields).length">
-            <div style="color:var(--bbf-text-light);">
-                Keine gespeicherten Formulardaten zu diesem Eintrag
-                (erweitertes Logging war evtl. deaktiviert).
+    <div class="bbf-drawer-overlay" x-cloak x-show="detailEntry"
+         x-transition.opacity.duration.220ms
+         x-effect="document.body.style.overflow = detailEntry ? 'hidden' : ''"
+         @keydown.escape.window="detailEntry = null">
+        <button type="button" class="bbf-drawer-backdrop" @click="detailEntry = null" aria-label="Schließen"></button>
+        <aside class="bbf-drawer" role="dialog" aria-modal="true" x-show="detailEntry"
+               x-transition:enter="bbf-drawer-trans" x-transition:enter-start="bbf-drawer-off" x-transition:enter-end="bbf-drawer-on"
+               x-transition:leave="bbf-drawer-trans" x-transition:leave-start="bbf-drawer-on" x-transition:leave-end="bbf-drawer-off">
+            <div class="bbf-drawer-header">
+                <div>
+                    <h3>Eingereichte Daten</h3>
+                    <div class="bbf-drawer-sub"
+                         x-text="detailEntry ? (detailEntry.form_type + ' · ' + detailEntry.created_at) : ''"></div>
+                </div>
+                <button type="button" class="bbf-drawer-close" @click="detailEntry = null" title="Schlie&szlig;en" aria-label="Schlie&szlig;en">&times;</button>
             </div>
-        </template>
-        <div style="margin-top:12px; font-size:12px; color:var(--bbf-muted);">
-            <span x-text="'Methode: ' + (detailEntry ? detailEntry.detection_method : '')"></span> ·
-            <span x-text="'Score: ' + (detailEntry ? detailEntry.spam_score : '')"></span> ·
-            <span x-text="'User-Agent: ' + (detailEntry ? (detailEntry.user_agent || '–') : '')"></span>
-        </div>
+            <div class="bbf-drawer-body">
+                <div x-show="detailEntry && detailEntry.reason" class="bbf-alert bbf-alert-warning" style="margin-bottom:16px;">
+                    <strong>Begr&uuml;ndung:</strong> <span x-text="detailEntry ? detailEntry.reason : ''"></span>
+                </div>
+                <template x-if="detailEntry && Object.keys(detailEntry.fields).length">
+                    <table class="bbf-table" style="width:100%;">
+                        <template x-for="key in Object.keys(detailEntry.fields)" :key="key">
+                            <tr>
+                                <td style="width:170px; color:var(--bbf-muted); vertical-align:top;" x-text="key"></td>
+                                <td><code style="white-space:pre-wrap; word-break:break-word;" x-text="detailEntry.fields[key]"></code></td>
+                            </tr>
+                        </template>
+                    </table>
+                </template>
+                <template x-if="detailEntry && !Object.keys(detailEntry.fields).length">
+                    <div style="color:var(--bbf-text-light);">
+                        Keine gespeicherten Formulardaten zu diesem Eintrag
+                        (erweitertes Logging war evtl. deaktiviert).
+                    </div>
+                </template>
+                <div style="margin-top:16px; padding-top:12px; border-top:1px solid var(--bbf-border-light); font-size:12px; color:var(--bbf-muted);">
+                    <span x-text="'Methode: ' + (detailEntry ? detailEntry.detection_method : '')"></span> &middot;
+                    <span x-text="'Score: ' + (detailEntry ? detailEntry.spam_score : '')"></span> &middot;
+                    <span x-text="'User-Agent: ' + (detailEntry ? (detailEntry.user_agent || '–') : '')"></span>
+                </div>
+            </div>
+        </aside>
     </div>
     {/literal}
 </div>
