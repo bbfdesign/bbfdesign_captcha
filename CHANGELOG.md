@@ -3,6 +3,23 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.38 – 2026-06-12
+
+### Behoben (ALTCHA löst jetzt wirklich automatisch)
+
+- **`auto="onfocus"` statt `onload`.** Das altcha-Script lädt als ES-Modul
+  (deferred) und wertet das server-injizierte `<altcha-widget>` erst nach dem
+  `window.load`-Event auf — ein `onload`-Auto-Trigger verpasst das Event und
+  löste nie (im Test: Widget registriert, aber `bbf_altcha` blieb leer; manuelles
+  `verify()` lieferte sofort eine 324-Zeichen-Lösung). `onfocus` hängt am
+  Formular-Fokus und feuert immer nach dem Upgrade → bis zum Absenden ist die
+  Lösung da.
+- **Konsolen-Fehler behoben:** `bbfdesign-captcha.js` rief `ConsentManager.hasConsent()`
+  auf, auch wenn das Shop-Consent-Objekt diese Methode nicht hat (TypeError, der
+  die Init abbrach). Jetzt zusätzlich auf `typeof … === 'function'` geprüft.
+- **Frontend-Asset-Cache-Bust** (`?v={Pluginversion}`) für CSS/JS, damit Updates
+  ohne Hard-Reload ankommen.
+
 ## 1.0.37 – 2026-06-12
 
 ### Hinzugefügt (theme-unabhängige ALTCHA-Widget-Platzierung)

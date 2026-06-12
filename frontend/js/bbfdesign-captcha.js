@@ -26,7 +26,12 @@
          * Externe Captcha-Scripts nur laden wenn Consent vorhanden
          */
         initConsentListeners: function() {
-            if (typeof ConsentManager === 'undefined') return;
+            // Manche Shops/Consent-Tools definieren ein ConsentManager-Objekt ohne
+            // hasConsent()-Methode → sonst TypeError, der init() abbricht.
+            if (typeof ConsentManager === 'undefined'
+                || typeof ConsentManager.hasConsent !== 'function') {
+                return;
+            }
 
             // Turnstile
             if (ConsentManager.hasConsent('bbfdesign_captcha_turnstile')) {

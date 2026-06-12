@@ -182,13 +182,15 @@ class AltchaService
         $html .= '<altcha-widget'
                 . ' challengeurl="' . htmlspecialchars($challengeUrl, ENT_QUOTES, 'UTF-8') . '"'
                 . ' name="' . self::FIELD_NAME . '"'
-                // auto="onload": Proof-of-Work läuft automatisch beim Laden, ohne
-                // Klick. OHNE dieses Attribut müsste der Nutzer die Checkbox
-                // anklicken – sonst fehlt die Lösung und echte Kunden werden (vor
-                // 1.0.33) geblockt bzw. (ab 1.0.33) ungeschützt durchgewinkt.
-                // Es gibt keine Expiry-Prüfung (nur HMAC), daher ist onload sicher
-                // gegen veraltete Lösungen.
-                . ' auto="onload"'
+                // auto="onfocus": Proof-of-Work läuft automatisch, sobald der
+                // Nutzer das Formular fokussiert – ohne Klick. NICHT "onload":
+                // das altcha-Script wird als ES-Modul deferred geladen und wertet
+                // das (server-injizierte) Element erst nach dem window-load-Event
+                // auf → ein onload-Auto-Trigger verpasst das Event und löst nie.
+                // onfocus hängt am Formular-Fokus (feuert immer nach dem Upgrade);
+                // bis zum Absenden ist die Lösung da. Keine Expiry-Prüfung (nur
+                // HMAC) → keine Staleness-Gefahr.
+                . ' auto="onfocus"'
                 . ' language="de"'
                 . ' hidefooter'
                 . '></altcha-widget>';
