@@ -264,6 +264,9 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
             },
 
             licenseVerdictLabel: function() {
+                if (!this.lic.configured && (this.lic.verdict === 'unknown' || this.lic.verdict === 'unconfigured' || !this.lic.verdict)) {
+                    return 'Nicht konfiguriert';
+                }
                 var L = {
                     valid:'Gültig', expired:'Abgelaufen', suspended:'Ausgesetzt', revoked:'Widerrufen',
                     domain_mismatch:'Domain stimmt nicht', instance_limit_exceeded:'Instanz-Limit überschritten',
@@ -276,6 +279,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
             },
 
             licenseBadgeClass: function() {
+                if (!this.lic.configured) return 'bbf-badge-info';
                 if (this.lic.valid) return 'bbf-badge-success';
                 if (this.lic.hardViolation) return 'bbf-badge-danger';
                 if (this.lic.verdict === 'unconfigured') return 'bbf-badge-info';

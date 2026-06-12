@@ -3,6 +3,13 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.30 – 2026-06-12
+
+### Geändert (Lizenz-UI)
+
+- Lizenz-Status zeigt bei fehlendem Signing-Secret „Nicht konfiguriert"
+  (statt „Unbekannt") mit neutralem Badge.
+
 ## 1.0.29 – 2026-06-12
 
 ### Hinzugefügt (ForgePush-Lizenzsystem)
