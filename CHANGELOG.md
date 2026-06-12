@@ -3,6 +3,27 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.34 – 2026-06-12
+
+### Behoben (Schutz wiederhergestellt – ALTCHA löste nie automatisch)
+
+- **ALTCHA-Widget bekam `auto="onload"`.** Bisher fehlte das Attribut → das
+  Widget rechnete den Proof-of-Work NICHT von selbst, der Nutzer hätte eine
+  Checkbox anklicken müssen. Reale Kunden sendeten daher keine Lösung
+  („ALTCHA-Lösung fehlt") – das war (zusammen mit der JS-Challenge) die Wurzel
+  des Aussperr-Vorfalls. Jetzt löst ALTCHA automatisch beim Laden; echte Kunden
+  haben die Lösung beim Absenden dabei. (Keine Expiry-Prüfung im Code, nur HMAC →
+  `onload` ist sicher gegen veraltete Lösungen.)
+
+### Bekannt/Hinweis
+
+- **JS-Challenge (`bot_js_challenge`) ist totes Feature:** `generateJsChallenge()`
+  wird nirgends injiziert, `validateJsChallenge()` prüft also ein Token, das nie
+  erzeugt wird → „JS-Challenge nicht gelöst" für jeden. Seit 1.0.33 fail-open
+  (Score 0, harmlos). Empfehlung: „JS-Challenge" in den Schutzmethoden
+  deaktivieren (oder Injektion separat nachrüsten). ALTCHA-PoW ist der stärkere,
+  jetzt funktionierende JS-Schutz.
+
 ## 1.0.33 – 2026-06-12
 
 ### Behoben (KRITISCH – echte Kunden konnten kein Konto anlegen)

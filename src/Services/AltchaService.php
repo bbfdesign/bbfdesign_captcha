@@ -182,6 +182,13 @@ class AltchaService
         $html .= '<altcha-widget'
                 . ' challengeurl="' . htmlspecialchars($challengeUrl, ENT_QUOTES, 'UTF-8') . '"'
                 . ' name="' . self::FIELD_NAME . '"'
+                // auto="onload": Proof-of-Work läuft automatisch beim Laden, ohne
+                // Klick. OHNE dieses Attribut müsste der Nutzer die Checkbox
+                // anklicken – sonst fehlt die Lösung und echte Kunden werden (vor
+                // 1.0.33) geblockt bzw. (ab 1.0.33) ungeschützt durchgewinkt.
+                // Es gibt keine Expiry-Prüfung (nur HMAC), daher ist onload sicher
+                // gegen veraltete Lösungen.
+                . ' auto="onload"'
                 . ' language="de"'
                 . ' hidefooter'
                 . '></altcha-widget>';
