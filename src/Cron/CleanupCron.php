@@ -22,8 +22,9 @@ use Plugin\bbfdesign_captcha\src\Services\SpamLogService;
  *  2. Log-Aufbewahrung sowie Rate-Limit- und IP-Block-Cleanup (selbst gedrosselt
  *     auf das eingestellte Intervall, Standard 24 h).
  *
- * Beide Teilaufgaben drosseln sich selbst, daher ist eine kurze Cron-Frequenz
- * (Standard 15 min) unkritisch und sorgt für zeitnahe Wellen-Alarme.
+ * Beide Teilaufgaben drosseln sich selbst, daher ist die Cron-Frequenz
+ * (Standard 1 h, in JTL in Stunden) unkritisch und sorgt für zeitnahe
+ * Wellen-Alarme.
  */
 final class CleanupCron extends Job
 {

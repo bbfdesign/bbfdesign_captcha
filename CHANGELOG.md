@@ -3,6 +3,19 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.28 – 2026-06-12
+
+### Behoben (Cron-Frequenz-Einheit)
+
+- **`frequency` ist in JTL Stunden, nicht Sekunden.** Der Wert 900 wurde als
+  900 Stunden interpretiert (nächster Lauf ~38 Tage in der Zukunft) – der Job
+  wäre faktisch nie gelaufen. Frequenz jetzt auf **1 Stunde** gesetzt (Override:
+  Setting `cron_frequency_hours`, 0 = bei jedem Cron-Lauf, Grenze [0, 168]).
+  Der Installer setzt bei einer Frequenz-Korrektur zusätzlich `nextStart` auf
+  jetzt zurück, damit eine bereits zu weit in die Zukunft geplante Ausführung
+  sofort wieder greift. (Beide Wartungs-Teilaufgaben drosseln sich ohnehin
+  selbst: Wellen-Alarm 1 h, Cleanup 24 h.)
+
 ## 1.0.27 – 2026-06-12
 
 ### Behoben (KRITISCH: /admin/cron 500 durch v1.0.26)

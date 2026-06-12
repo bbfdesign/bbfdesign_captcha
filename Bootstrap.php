@@ -25,10 +25,11 @@ class Bootstrap extends Bootstrapper
     /**
      * Plugin-eigene Jobs für den nativen JTL-Cron.
      *
+     * WICHTIG: `frequency` ist in JTL die Anzahl STUNDEN bis zum nächsten Lauf
+     * (Queue.php: nextStart->modify('+frequency hours'); 0 = bei jedem Cron-Lauf).
      * Die Frequenz wird zur Laufzeit aus den Settings aufgelöst
-     * (siehe JtlCronInstallerService::jobsWithRuntimeSettings). Eine kurze
-     * Frequenz ist unkritisch, da sich Wellen-Alarm (1h) und Cleanup (24h)
-     * jeweils selbst drosseln.
+     * (JtlCronInstallerService::jobsWithRuntimeSettings). 1 h ist unkritisch, da
+     * sich Wellen-Alarm (1h-Cooldown) und Cleanup (24h) ohnehin selbst drosseln.
      *
      * @var array<string, array{class: class-string, name: string, frequency: int}>
      */
@@ -36,7 +37,7 @@ class Bootstrap extends Bootstrapper
         CleanupCron::JOB_TYPE => [
             'class'     => CleanupCron::class,
             'name'      => 'BBF Captcha Wartung (Spam-Welle & Cleanup)',
-            'frequency' => 900,
+            'frequency' => 1,
         ],
     ];
 
