@@ -8,7 +8,7 @@
     <XMLVersion>100</XMLVersion>
     <MinShopVersion>5.5.0</MinShopVersion>
     <Icon>fa-shield-alt</Icon>
-    <Version>1.0.23</Version>
+    <Version>1.0.24</Version>
     <CreateDate>2026-03-24</CreateDate>
     <Install>
         <Adminmenu>
@@ -162,6 +162,51 @@
                 <Name>active_methods</Name>
                 <VariableLocalized iso="GER">Aktive Methoden</VariableLocalized>
                 <VariableLocalized iso="ENG">Active methods</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>kpi_total_checks</Name>
+                <VariableLocalized iso="GER">Erkannt gesamt</VariableLocalized>
+                <VariableLocalized iso="ENG">Detected total</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>kpi_logged</Name>
+                <VariableLocalized iso="GER">Protokolliert</VariableLocalized>
+                <VariableLocalized iso="ENG">Logged</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>kpi_avg_score</Name>
+                <VariableLocalized iso="GER">&#216; Spam-Score</VariableLocalized>
+                <VariableLocalized iso="ENG">Avg. spam score</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>kpi_unique_ips</Name>
+                <VariableLocalized iso="GER">Geblockte IPs</VariableLocalized>
+                <VariableLocalized iso="ENG">Blocked IPs</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>threats_title</Name>
+                <VariableLocalized iso="GER">Bedrohungen</VariableLocalized>
+                <VariableLocalized iso="ENG">Threats</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>threats_subtitle</Name>
+                <VariableLocalized iso="GER">Auff&#228;lligste IPs im Zeitraum</VariableLocalized>
+                <VariableLocalized iso="ENG">Most active IPs in range</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>hourly_title</Name>
+                <VariableLocalized iso="GER">Aktivit&#228;t nach Tageszeit</VariableLocalized>
+                <VariableLocalized iso="ENG">Activity by hour</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>hourly_subtitle</Name>
+                <VariableLocalized iso="GER">Wann Bots am aktivsten sind (0&#8211;23 Uhr)</VariableLocalized>
+                <VariableLocalized iso="ENG">When bots are most active (0&#8211;23h)</VariableLocalized>
+            </Variable>
+            <Variable>
+                <Name>no_threats</Name>
+                <VariableLocalized iso="GER">Keine geblockten IPs im Zeitraum.</VariableLocalized>
+                <VariableLocalized iso="ENG">No blocked IPs in range.</VariableLocalized>
             </Variable>
             <Variable>
                 <Name>spam_history</Name>

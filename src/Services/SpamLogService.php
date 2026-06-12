@@ -60,12 +60,72 @@ class SpamLogService
         $totalCount   = (int)($totalEntries->cnt ?? 0);
         $blockedCount = (int)($blockedTotal->cnt ?? 0);
 
+        $loggedTotal = $this->db->queryPrepared(
+            "SELECT COUNT(*) AS cnt FROM `bbf_captcha_spam_log` WHERE `action_taken` = 'logged'",
+            [],
+            1
+        );
+
+        // Ø Spam-Score und Anzahl eindeutiger geblockter IPs (eine Abfrage)
+        $blockedAgg = $this->db->queryPrepared(
+            "SELECT ROUND(AVG(`spam_score`), 0) AS avg_score, COUNT(DISTINCT `ip_address`) AS ips
+             FROM `bbf_captcha_spam_log` WHERE `action_taken` = 'blocked'",
+            [],
+            1
+        );
+
         return [
             'blocked_today'  => (int)($blockedToday->cnt ?? 0),
             'blocked_total'  => $blockedCount,
+            'logged_total'   => (int)($loggedTotal->cnt ?? 0),
             'total_entries'  => $totalCount,
             'detection_rate' => $totalCount > 0 ? round(($blockedCount / $totalCount) * 100, 1) : 0,
+            'avg_score'      => (int)($blockedAgg->avg_score ?? 0),
+            'unique_ips'     => (int)($blockedAgg->ips ?? 0),
         ];
+    }
+
+    /**
+     * Aktivität nach Tageszeit (0–23 Uhr) – wann Bots am aktivsten sind.
+     * Liefert immer 24 Buckets (fehlende Stunden = 0).
+     */
+    public function getHourlyDistribution(int $days = 30): array
+    {
+        $rows = $this->db->queryPrepared(
+            "SELECT HOUR(`created_at`) AS hour, COUNT(*) AS cnt
+             FROM `bbf_captcha_spam_log`
+             WHERE `created_at` >= DATE_SUB(NOW(), INTERVAL :days DAY)
+             GROUP BY HOUR(`created_at`)",
+            ['days' => $days],
+            2
+        );
+
+        $buckets = array_fill(0, 24, 0);
+        foreach (is_array($rows) ? $rows : [] as $row) {
+            $h = (int)($row->hour ?? -1);
+            if ($h >= 0 && $h <= 23) {
+                $buckets[$h] = (int)($row->cnt ?? 0);
+            }
+        }
+
+        return $buckets;
+    }
+
+    /**
+     * Verteilung nach getroffener Aktion (blocked/logged) im Zeitraum.
+     */
+    public function getActionSplit(int $days = 30): array
+    {
+        $rows = $this->db->queryPrepared(
+            "SELECT `action_taken`, COUNT(*) AS cnt
+             FROM `bbf_captcha_spam_log`
+             WHERE `created_at` >= DATE_SUB(NOW(), INTERVAL :days DAY)
+             GROUP BY `action_taken`",
+            ['days' => $days],
+            2
+        );
+
+        return is_array($rows) ? $rows : [];
     }
 
     /**
@@ -185,7 +245,7 @@ class SpamLogService
     public function getTopBlockedIPs(int $days = 30, int $limit = 10): array
     {
         $rows = $this->db->queryPrepared(
-            "SELECT `ip_address`, COUNT(*) AS cnt
+            "SELECT `ip_address`, COUNT(*) AS cnt, MAX(`created_at`) AS last_seen
              FROM `bbf_captcha_spam_log`
              WHERE `action_taken` = 'blocked'
              AND `created_at` >= DATE_SUB(NOW(), INTERVAL :days DAY)

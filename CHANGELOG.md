@@ -3,6 +3,23 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.24 – 2026-06-12
+
+### Hinzugefügt (Dashboard-Statistik, ALTCHA-Stil)
+
+- **KPI-Strip im ALTCHA-Look:** 8 Kennzahlen mit farbigem Akzentbalken je Karte –
+  Erkannt gesamt, Geblockt, Protokolliert, Heute geblockt, Erkennungsrate,
+  Ø Spam-Score, Geblockte IPs, Aktive Methoden. Alles aus echten Log-Daten.
+- **„Bedrohungen"-Liste:** auffälligste geblockte IPs im Zeitraum mit Trefferzahl
+  und „zuletzt gesehen" als Relativzeit (z. B. „vor 18 Stunden").
+- **Aktivität nach Tageszeit (0–23 Uhr):** neuer Balkenchart, zeigt wann Bots am
+  aktivsten sind (`HOUR(created_at)`-Aggregation).
+- **Range-Wähler (7/30/90) funktioniert jetzt wirklich:** alle zeitraumabhängigen
+  Charts und die Bedrohungsliste werden bei Wechsel neu aufgebaut (vorher No-Op).
+- Neue, günstige SQL-Aggregationen (Ø-Score, eindeutige IPs, Stundenverteilung,
+  Aktions-Split, Top-IPs mit „zuletzt gesehen"). Keine Geo-/Netzwerk-Kacheln –
+  dafür liegen keine echten Daten vor (kein GeoIP); nichts wird erfunden.
+
 ## 1.0.23 – 2026-06-12
 
 ### Behoben (Backend-UI)

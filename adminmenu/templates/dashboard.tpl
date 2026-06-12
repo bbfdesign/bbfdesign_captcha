@@ -1,32 +1,44 @@
 <h2 class="bbf-page-title">{$langVars->getTranslation('nav_dashboard', $adminLang)|default:'Dashboard'|escape:'html'}</h2>
 
-{* ── KPI Cards ── *}
+{* ── KPI Cards (ALTCHA-Stil: farbiger Akzentbalken je Kennzahl) ── *}
 <div class="bbf-stats-grid">
-    <div class="bbf-stat-card">
-        <div class="bbf-stat-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-        <div class="bbf-stat-label">{$langVars->getTranslation('blocked_today', $adminLang)|default:'Blocked today'|escape:'html'}</div>
-        <div class="bbf-stat-value" id="bbf-kpi-blocked-today">{$dashboardData.blocked_today|default:0}</div>
+    <div class="bbf-stat-card bbf-stat-accent-blue">
+        <span class="bbf-stat-bar" aria-hidden="true"></span>
+        <div class="bbf-stat-label">{$langVars->getTranslation('kpi_total_checks', $adminLang)|default:'Detected total'|escape:'html'}</div>
+        <div class="bbf-stat-value" id="bbf-kpi-total">{$dashboardData.total_entries|default:0}</div>
     </div>
-    <div class="bbf-stat-card">
-        <div class="bbf-stat-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        </div>
+    <div class="bbf-stat-card bbf-stat-accent-red">
+        <span class="bbf-stat-bar" aria-hidden="true"></span>
         <div class="bbf-stat-label">{$langVars->getTranslation('blocked_total', $adminLang)|default:'Blocked total'|escape:'html'}</div>
         <div class="bbf-stat-value" id="bbf-kpi-blocked-total">{$dashboardData.blocked_total|default:0}</div>
     </div>
-    <div class="bbf-stat-card">
-        <div class="bbf-stat-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        </div>
+    <div class="bbf-stat-card bbf-stat-accent-amber">
+        <span class="bbf-stat-bar" aria-hidden="true"></span>
+        <div class="bbf-stat-label">{$langVars->getTranslation('kpi_logged', $adminLang)|default:'Logged'|escape:'html'}</div>
+        <div class="bbf-stat-value" id="bbf-kpi-logged-total">{$dashboardData.logged_total|default:0}</div>
+    </div>
+    <div class="bbf-stat-card bbf-stat-accent-pink">
+        <span class="bbf-stat-bar" aria-hidden="true"></span>
+        <div class="bbf-stat-label">{$langVars->getTranslation('blocked_today', $adminLang)|default:'Blocked today'|escape:'html'}</div>
+        <div class="bbf-stat-value" id="bbf-kpi-blocked-today">{$dashboardData.blocked_today|default:0}</div>
+    </div>
+    <div class="bbf-stat-card bbf-stat-accent-green">
+        <span class="bbf-stat-bar" aria-hidden="true"></span>
         <div class="bbf-stat-label">{$langVars->getTranslation('detection_rate', $adminLang)|default:'Detection rate'|escape:'html'}</div>
         <div class="bbf-stat-value" id="bbf-kpi-detection-rate">{$dashboardData.detection_rate|default:0}%</div>
     </div>
-    <div class="bbf-stat-card">
-        <div class="bbf-stat-icon" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        </div>
+    <div class="bbf-stat-card bbf-stat-accent-purple">
+        <span class="bbf-stat-bar" aria-hidden="true"></span>
+        <div class="bbf-stat-label">{$langVars->getTranslation('kpi_avg_score', $adminLang)|default:'Avg. spam score'|escape:'html'}</div>
+        <div class="bbf-stat-value" id="bbf-kpi-avg-score">{$dashboardData.avg_score|default:0}</div>
+    </div>
+    <div class="bbf-stat-card bbf-stat-accent-indigo">
+        <span class="bbf-stat-bar" aria-hidden="true"></span>
+        <div class="bbf-stat-label">{$langVars->getTranslation('kpi_unique_ips', $adminLang)|default:'Blocked IPs'|escape:'html'}</div>
+        <div class="bbf-stat-value" id="bbf-kpi-unique-ips">{$dashboardData.unique_ips|default:0}</div>
+    </div>
+    <div class="bbf-stat-card bbf-stat-accent-teal">
+        <span class="bbf-stat-bar" aria-hidden="true"></span>
         <div class="bbf-stat-label">{$langVars->getTranslation('active_methods', $adminLang)|default:'Active methods'|escape:'html'}</div>
         <div class="bbf-stat-value" id="bbf-kpi-active-methods">{$dashboardData.active_methods|default:0}</div>
     </div>
@@ -98,6 +110,43 @@
     </div>
 </div>
 
+{* ── Aktivität nach Tageszeit + Bedrohungen (ALTCHA-Stil) ── *}
+<div class="bbf-dash-split">
+    <div class="bbf-card">
+        <div class="bbf-card-header">
+            <div>
+                <h3 class="bbf-card-title">{$langVars->getTranslation('hourly_title', $adminLang)|default:'Activity by hour'|escape:'html'}</h3>
+                <div style="font-size: 12px; color: var(--bbf-muted); margin-top: 2px;">{$langVars->getTranslation('hourly_subtitle', $adminLang)|default:'When bots are most active (0&ndash;23h)'|escape:'html'}</div>
+            </div>
+        </div>
+        <div class="bbf-chart-container" style="height: 260px;">
+            <canvas id="bbf-chart-hourly" aria-label="{$langVars->getTranslation('hourly_title', $adminLang)|default:'Activity by hour'|escape:'html'}" role="img"></canvas>
+        </div>
+    </div>
+
+    <div class="bbf-card">
+        <div class="bbf-card-header">
+            <div>
+                <h3 class="bbf-card-title">{$langVars->getTranslation('threats_title', $adminLang)|default:'Threats'|escape:'html'}</h3>
+                <div style="font-size: 12px; color: var(--bbf-muted); margin-top: 2px;">{$langVars->getTranslation('threats_subtitle', $adminLang)|default:'Most active IPs in range'|escape:'html'}</div>
+            </div>
+        </div>
+        <div class="bbf-threats-list" id="bbf-threats-list">
+            {if isset($dashboardData.top_ips) && $dashboardData.top_ips|@count > 0}
+                {foreach $dashboardData.top_ips as $ipRow}
+                <div class="bbf-threat-row">
+                    <span class="bbf-threat-ip">{$ipRow->ip_address|escape:'html'}</span>
+                    <span class="bbf-threat-count bbf-badge bbf-badge-danger">{$ipRow->cnt|escape:'html'}&times;</span>
+                    <span class="bbf-threat-time" data-ts="{$ipRow->last_seen|escape:'html'}">{$ipRow->last_seen|escape:'html'}</span>
+                </div>
+                {/foreach}
+            {else}
+                <div class="bbf-threat-empty">{$langVars->getTranslation('no_threats', $adminLang)|default:'No blocked IPs in range.'|escape:'html'}</div>
+            {/if}
+        </div>
+    </div>
+</div>
+
 {* ── Letzte Spam-Versuche ── *}
 <div class="bbf-card">
     <div class="bbf-card-header">
@@ -150,23 +199,6 @@
     </div>
 </div>
 
-{* ── Top geblockte IPs ── *}
-{if isset($dashboardData.top_ips) && $dashboardData.top_ips|@count > 0}
-<div class="bbf-card">
-    <div class="bbf-card-header">
-        <h3 class="bbf-card-title">Top geblockte IPs (30 Tage)</h3>
-    </div>
-    <div style="display: flex; flex-wrap: wrap; gap: var(--bbf-spacing-sm);">
-        {foreach $dashboardData.top_ips as $ipRow}
-        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--bbf-row-stripe); border-radius: var(--bbf-radius-md); border: 1px solid var(--bbf-border-light);">
-            <code style="font-size: 13px;">{$ipRow->ip_address|escape:'html'}</code>
-            <span class="bbf-badge bbf-badge-danger">{$ipRow->cnt|escape:'html'}</span>
-        </div>
-        {/foreach}
-    </div>
-</div>
-{/if}
-
 {* ── Chart.js + Dashboard JS ── *}
 <script>
 var bbfDashboardData = {$dashboardDataJson nofilter};
@@ -176,10 +208,38 @@ var bbfDashboardData = {$dashboardDataJson nofilter};
 (function() {
     'use strict';
 
+    var PRIMARY = '#db2e87';
+    var PRIMARY_LIGHT = 'rgba(219, 46, 135, 0.1)';
+    var IS_ENG = (window.adminLang === 'eng');
+    var DATE_LOCALE = IS_ENG ? 'en-GB' : 'de-DE';
+    var L = window.bbfLang || {};
+    var METHOD_COLORS = {
+        'honeypot': '#2563eb', 'timing': '#16a34a', 'altcha': '#f59e0b',
+        'ai': '#8b5cf6', 'ai_filter': '#8b5cf6', 'ip': '#dc2626', 'rate': '#ec4899',
+        'recaptcha': '#06b6d4', 'turnstile': '#f97316', 'hcaptcha': '#84cc16', 'bot': '#6366f1'
+    };
+    var METHOD_LABELS = {
+        'honeypot':  L.method_honeypot  || 'Honeypot',
+        'timing':    L.method_timing    || 'Timing',
+        'altcha':    L.method_altcha    || 'ALTCHA',
+        'ai':        L.method_ai        || 'AI filter',
+        'ai_filter': L.method_ai        || 'AI filter',
+        'ip':        'IP', 'rate': 'Rate limit', 'recaptcha': 'reCAPTCHA',
+        'turnstile': 'Turnstile', 'hcaptcha': 'hCaptcha', 'bot': 'Bot detection'
+    };
+    var FORM_LABELS = {
+        'contact':        L.form_contact        || 'Contact',
+        'registration':   L.form_registration   || 'Registration',
+        'newsletter':     L.form_newsletter     || 'Newsletter',
+        'review':         L.form_review         || 'Reviews',
+        'checkout':       L.form_checkout        || 'Checkout',
+        'login':          L.form_login          || 'Login',
+        'password_reset': L.form_password_reset || 'Password',
+        'wishlist':       L.form_wishlist       || 'Wishlist'
+    };
+
     var bbfDashboard = {
-        historyChart: null,
-        methodsChart: null,
-        formsChart: null,
+        charts: { history: null, methods: null, forms: null, hourly: null },
         currentRange: 30,
 
         setRange: function(days, evt) {
@@ -199,236 +259,220 @@ var bbfDashboardData = {$dashboardDataJson nofilter};
         loadDashboardData: function(days) {
             bbfAdmin.post('getDashboardData', { days: days }).then(function(resp) {
                 if (resp.success && resp.data) {
-                    bbfDashboard.updateCharts(resp.data);
+                    bbfDashboard.render(resp.data);
                 }
             });
         },
 
-        updateCharts: function(data) {
-            // Wird in Phase 6 mit echten Chart-Updates implementiert
+        // Erstaufbau und Re-Render (Range-Wechsel) teilen sich denselben Pfad.
+        render: function(data) {
+            if (typeof Chart === 'undefined') return;
+            this.buildHistory(data);
+            this.buildMethods(data);
+            this.buildForms(data);
+            this.buildHourly(data);
+            this.renderThreats(data.top_ips || []);
+        },
+
+        // Rückwärtskompatibler Alias der früheren API.
+        updateCharts: function(data) { this.render(data); },
+
+        destroy: function(key) {
+            if (this.charts[key]) { this.charts[key].destroy(); this.charts[key] = null; }
+        },
+
+        buildHistory: function(data) {
+            var labels = datesForRange(this.currentRange);
+            var values = labels.map(function() { return 0; });
+            if (data.spam_history && data.spam_history.length > 0) {
+                var map = {};
+                data.spam_history.forEach(function(row) {
+                    var key = new Date(row.date).toLocaleDateString(DATE_LOCALE, { day: '2-digit', month: '2-digit' });
+                    map[key] = (map[key] || 0) + parseInt(row.cnt, 10);
+                });
+                values = labels.map(function(l) { return map[l] || 0; });
+            }
+            var ctx = document.getElementById('bbf-chart-history');
+            if (!ctx) return;
+            this.destroy('history');
+            this.charts.history = new Chart(ctx, {
+                type: 'line',
+                data: { labels: labels, datasets: [{
+                    label: IS_ENG ? 'Blocked' : 'Geblockt', data: values,
+                    borderColor: PRIMARY, backgroundColor: PRIMARY_LIGHT, fill: true,
+                    tension: 0.4, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4
+                }] },
+                options: lineOpts()
+            });
+        },
+
+        buildMethods: function(data) {
+            var labels = [], values = [], colors = [];
+            if (data.method_distribution && data.method_distribution.length > 0) {
+                data.method_distribution.forEach(function(row) {
+                    labels.push(METHOD_LABELS[row.detection_method] || row.detection_method);
+                    values.push(parseInt(row.cnt, 10));
+                    colors.push(METHOD_COLORS[row.detection_method] || '#94a3b8');
+                });
+            } else {
+                labels = [IS_ENG ? 'No data' : 'Keine Daten']; values = [1]; colors = ['#e5e7eb'];
+            }
+            var ctx = document.getElementById('bbf-chart-methods');
+            if (!ctx) return;
+            this.destroy('methods');
+            this.charts.methods = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+                options: donutOpts()
+            });
+        },
+
+        buildForms: function(data) {
+            var labels = [], values = [];
+            if (data.top_forms && data.top_forms.length > 0) {
+                data.top_forms.forEach(function(row) {
+                    labels.push(FORM_LABELS[row.form_type] || row.form_type);
+                    values.push(parseInt(row.cnt, 10));
+                });
+            } else {
+                labels = [IS_ENG ? 'No data' : 'Keine Daten']; values = [0];
+            }
+            var ctx = document.getElementById('bbf-chart-forms');
+            if (!ctx) return;
+            this.destroy('forms');
+            this.charts.forms = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: labels, datasets: [{
+                    data: values, backgroundColor: PRIMARY_LIGHT, borderColor: PRIMARY,
+                    borderWidth: 1, borderRadius: 4
+                }] },
+                options: hbarOpts()
+            });
+        },
+
+        buildHourly: function(data) {
+            var src = data.hourly_distribution || [];
+            var values = [], labels = [];
+            for (var h = 0; h < 24; h++) {
+                values.push(parseInt(src[h] != null ? src[h] : 0, 10) || 0);
+                labels.push((h < 10 ? '0' : '') + h);
+            }
+            var ctx = document.getElementById('bbf-chart-hourly');
+            if (!ctx) return;
+            this.destroy('hourly');
+            this.charts.hourly = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: labels, datasets: [{
+                    data: values, backgroundColor: PRIMARY_LIGHT, borderColor: PRIMARY,
+                    borderWidth: 1, borderRadius: 3
+                }] },
+                options: vbarOpts()
+            });
+        },
+
+        renderThreats: function(topIps) {
+            var box = document.getElementById('bbf-threats-list');
+            if (!box) return;
+            if (!topIps || !topIps.length) {
+                box.innerHTML = '<div class="bbf-threat-empty">'
+                    + (L.no_threats || (IS_ENG ? 'No blocked IPs in range.' : 'Keine geblockten IPs im Zeitraum.'))
+                    + '</div>';
+                return;
+            }
+            var html = '';
+            topIps.forEach(function(row) {
+                var ip = String(row.ip_address || '');
+                var cnt = parseInt(row.cnt, 10) || 0;
+                var ts = row.last_seen || '';
+                html += '<div class="bbf-threat-row">'
+                     +  '<span class="bbf-threat-ip">' + escapeHtml(ip) + '</span>'
+                     +  '<span class="bbf-threat-count bbf-badge bbf-badge-danger">' + cnt + '×</span>'
+                     +  '<span class="bbf-threat-time" data-ts="' + escapeHtml(ts) + '">' + escapeHtml(timeAgo(ts)) + '</span>'
+                     +  '</div>';
+            });
+            box.innerHTML = html;
+        },
+
+        applyTimeAgo: function() {
+            document.querySelectorAll('#bbf-threats-list .bbf-threat-time[data-ts]').forEach(function(el) {
+                var ts = el.getAttribute('data-ts');
+                if (ts) el.textContent = timeAgo(ts);
+            });
         }
     };
 
     window.bbfDashboard = bbfDashboard;
 
-    // Chart.js wird lokal geladen (kein CDN, kein Consent-Problem im Admin)
-    if (typeof Chart === 'undefined') {
-        var script = document.createElement('script');
-        script.src = adminUrl + 'js/vendor/chart.umd.min.js';
-        script.onload = function() { initDashboardCharts(); };
-        document.head.appendChild(script);
-    } else {
-        initDashboardCharts();
-    }
-
-    function initDashboardCharts() {
-        if (typeof Chart === 'undefined') return;
-
-        var data = window.bbfDashboardData || {};
-        var primaryColor = '#db2e87';
-        var primaryLight = 'rgba(219, 46, 135, 0.1)';
-        var methodColors = {
-            'honeypot': '#2563eb',
-            'timing': '#16a34a',
-            'altcha': '#f59e0b',
-            'ai': '#8b5cf6',
-            'ai_filter': '#8b5cf6',
-            'ip': '#dc2626',
-            'rate': '#ec4899',
-            'recaptcha': '#06b6d4',
-            'turnstile': '#f97316',
-            'hcaptcha': '#84cc16',
-            'bot': '#6366f1'
-        };
-        var L = window.bbfLang || {};
-        var methodLabels = {
-            'honeypot':  L.method_honeypot  || 'Honeypot',
-            'timing':    L.method_timing    || 'Timing',
-            'altcha':    L.method_altcha    || 'ALTCHA',
-            'ai':        L.method_ai        || 'AI filter',
-            'ai_filter': L.method_ai        || 'AI filter',
-            'ip':        'IP',
-            'rate':      'Rate limit',
-            'recaptcha': 'reCAPTCHA',
-            'turnstile': 'Turnstile',
-            'hcaptcha':  'hCaptcha',
-            'bot':       'Bot detection'
-        };
-        var formLabels = {
-            'contact':        L.form_contact        || 'Contact',
-            'registration':   L.form_registration   || 'Registration',
-            'newsletter':     L.form_newsletter     || 'Newsletter',
-            'review':         L.form_review         || 'Reviews',
-            'checkout':       L.form_checkout       || 'Checkout',
-            'login':          L.form_login          || 'Login',
-            'password_reset': L.form_password_reset || 'Password',
-            'wishlist':       L.form_wishlist       || 'Wishlist'
-        };
-
-        // Build history data from server data
-        var historyLabels = getDatesForRange(30);
-        var historyData = generateEmptyData(30);
-        var dateLocale = (window.adminLang === 'eng') ? 'en-GB' : 'de-DE';
-        if (data.spam_history && data.spam_history.length > 0) {
-            var dateMap = {};
-            data.spam_history.forEach(function(row) {
-                var dateKey = new Date(row.date).toLocaleDateString(dateLocale, { day: '2-digit', month: '2-digit' });
-                dateMap[dateKey] = (dateMap[dateKey] || 0) + parseInt(row.cnt);
-            });
-            historyData = historyLabels.map(function(label) {
-                return dateMap[label] || 0;
-            });
-        }
-
-        // Spam History Chart
-        var historyCtx = document.getElementById('bbf-chart-history');
-        if (historyCtx) {
-            bbfDashboard.historyChart = new Chart(historyCtx, {
-                type: 'line',
-                data: {
-                    labels: historyLabels,
-                    datasets: [{
-                        label: 'Geblockt',
-                        data: historyData,
-                        borderColor: primaryColor,
-                        backgroundColor: primaryLight,
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        pointHoverRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { font: { size: 11 }, maxTicksLimit: 8 }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(0,0,0,0.05)' },
-                            ticks: { font: { size: 11 } }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Methods Donut Chart – from server data
-        var mLabels = [];
-        var mData = [];
-        var mColors = [];
-        if (data.method_distribution && data.method_distribution.length > 0) {
-            data.method_distribution.forEach(function(row) {
-                mLabels.push(methodLabels[row.detection_method] || row.detection_method);
-                mData.push(parseInt(row.cnt));
-                mColors.push(methodColors[row.detection_method] || '#94a3b8');
-            });
-        } else {
-            mLabels = ['Keine Daten'];
-            mData = [1];
-            mColors = ['#e5e7eb'];
-        }
-
-        var methodsCtx = document.getElementById('bbf-chart-methods');
-        if (methodsCtx) {
-            bbfDashboard.methodsChart = new Chart(methodsCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: mLabels,
-                    datasets: [{
-                        data: mData,
-                        backgroundColor: mColors,
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '65%',
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { font: { size: 11 }, padding: 12, usePointStyle: true }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Top Forms Bar Chart – from server data
-        var fLabels = [];
-        var fData = [];
-        if (data.top_forms && data.top_forms.length > 0) {
-            data.top_forms.forEach(function(row) {
-                fLabels.push(formLabels[row.form_type] || row.form_type);
-                fData.push(parseInt(row.cnt));
-            });
-        } else {
-            fLabels = ['Keine Daten'];
-            fData = [0];
-        }
-
-        var formsCtx = document.getElementById('bbf-chart-forms');
-        if (formsCtx) {
-            bbfDashboard.formsChart = new Chart(formsCtx, {
-                type: 'bar',
-                data: {
-                    labels: fLabels,
-                    datasets: [{
-                        data: fData,
-                        backgroundColor: primaryLight,
-                        borderColor: primaryColor,
-                        borderWidth: 1,
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(0,0,0,0.05)' },
-                            ticks: { font: { size: 11 } }
-                        },
-                        y: {
-                            grid: { display: false },
-                            ticks: { font: { size: 11 } }
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    function getDatesForRange(days) {
-        var dates = [];
-        var loc = (window.adminLang === 'eng') ? 'en-GB' : 'de-DE';
+    // ── Helfer ───────────────────────────────────────────────
+    function datesForRange(days) {
+        var out = [];
         for (var i = days - 1; i >= 0; i--) {
             var d = new Date();
             d.setDate(d.getDate() - i);
-            dates.push(d.toLocaleDateString(loc, { day: '2-digit', month: '2-digit' }));
+            out.push(d.toLocaleDateString(DATE_LOCALE, { day: '2-digit', month: '2-digit' }));
         }
-        return dates;
+        return out;
     }
 
-    function generateEmptyData(count) {
-        var data = [];
-        for (var i = 0; i < count; i++) {
-            data.push(0);
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function(c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
+    function timeAgo(ts) {
+        if (!ts) return '';
+        var d = new Date(String(ts).replace(' ', 'T'));
+        if (isNaN(d.getTime())) return String(ts);
+        var sec = Math.floor((Date.now() - d.getTime()) / 1000);
+        if (sec < 0) sec = 0;
+        if (sec < 60) return IS_ENG ? 'just now' : 'gerade eben';
+        function unit(n, eng, ger1, gerN) {
+            return IS_ENG ? (n + ' ' + eng + (n === 1 ? '' : 's') + ' ago')
+                          : ('vor ' + n + ' ' + (n === 1 ? ger1 : gerN));
         }
-        return data;
+        var min = Math.floor(sec / 60); if (min < 60) return unit(min, 'minute', 'Minute', 'Minuten');
+        var hr = Math.floor(min / 60);  if (hr < 24)  return unit(hr, 'hour', 'Stunde', 'Stunden');
+        var day = Math.floor(hr / 24);  if (day < 30) return unit(day, 'day', 'Tag', 'Tagen');
+        var mon = Math.floor(day / 30); return unit(mon, 'month', 'Monat', 'Monaten');
+    }
+
+    function lineOpts() {
+        return { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+            scales: { x: { grid: { display: false }, ticks: { font: { size: 11 }, maxTicksLimit: 8 } },
+                      y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 11 } } } } };
+    }
+    function donutOpts() {
+        return { responsive: true, maintainAspectRatio: false, cutout: '65%',
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12, usePointStyle: true } } } };
+    }
+    function hbarOpts() {
+        return { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 11 } } },
+                      y: { grid: { display: false }, ticks: { font: { size: 11 } } } } };
+    }
+    function vbarOpts() {
+        return { responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false },
+                tooltip: { callbacks: { title: function(items) { return items[0].label + ':00'; } } } },
+            scales: { x: { grid: { display: false }, ticks: { font: { size: 10 }, maxTicksLimit: 12 } },
+                      y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 11 }, precision: 0 } } } };
+    }
+
+    // ── Boot: Chart.js lokal laden (kein CDN, kein Consent-Problem) ──
+    if (typeof Chart === 'undefined') {
+        var script = document.createElement('script');
+        script.src = adminUrl + 'js/vendor/chart.umd.min.js';
+        script.onload = boot;
+        document.head.appendChild(script);
+    } else {
+        boot();
+    }
+
+    function boot() {
+        bbfDashboard.render(window.bbfDashboardData || {});
+        // Server-gerenderte Bedrohungszeiten ins "vor X" umschreiben (falls Chart fehlt).
+        bbfDashboard.applyTimeAgo();
     }
 })();
 {/literal}

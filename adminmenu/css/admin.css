@@ -348,6 +348,84 @@ body #content_wrapper {
     opacity: 0.3;
 }
 
+/* ALTCHA-Stil: farbiger Akzentbalken über jeder Kennzahl */
+.bbf-stat-card {
+    position: relative;
+}
+
+.bbf-stat-bar {
+    display: block;
+    width: 100%;
+    height: 4px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+    background: var(--bbf-primary);
+}
+
+.bbf-stat-accent-blue   .bbf-stat-bar { background: #2563eb; }
+.bbf-stat-accent-red    .bbf-stat-bar { background: #dc2626; }
+.bbf-stat-accent-amber  .bbf-stat-bar { background: #f59e0b; }
+.bbf-stat-accent-pink   .bbf-stat-bar { background: var(--bbf-primary); }
+.bbf-stat-accent-green  .bbf-stat-bar { background: #16a34a; }
+.bbf-stat-accent-purple .bbf-stat-bar { background: #8b5cf6; }
+.bbf-stat-accent-indigo .bbf-stat-bar { background: #6366f1; }
+.bbf-stat-accent-teal   .bbf-stat-bar { background: #0d9488; }
+
+/* ═══════════════════════════════════════════════════════════
+   Bedrohungsliste (Top geblockte IPs, ALTCHA-Stil)
+   ═══════════════════════════════════════════════════════════ */
+
+.bbf-threats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bbf-threat-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--bbf-border-light);
+    border-radius: var(--bbf-radius-md);
+    background: var(--bbf-bg-card);
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.bbf-threat-row:hover {
+    background: var(--bbf-bg-hover);
+    border-color: var(--bbf-border);
+}
+
+.bbf-threat-ip {
+    font-family: var(--bbf-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    font-size: 13px;
+    color: var(--bbf-text-dark);
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bbf-threat-count {
+    flex: 0 0 auto;
+}
+
+.bbf-threat-time {
+    flex: 0 0 auto;
+    font-size: 12px;
+    color: var(--bbf-muted);
+    white-space: nowrap;
+}
+
+.bbf-threat-empty {
+    padding: 24px 12px;
+    text-align: center;
+    color: var(--bbf-text-light);
+    font-size: 13px;
+}
+
 /* ═══════════════════════════════════════════════════════════
    Content Cards
    ═══════════════════════════════════════════════════════════ */
@@ -386,6 +464,18 @@ body #content_wrapper {
     grid-template-columns: 2fr 1fr 1fr;
     gap: var(--bbf-spacing-md);
     margin-bottom: var(--bbf-spacing-lg);
+}
+
+/* Zweispaltige Dashboard-Zeile (Chart + Bedrohungsliste) */
+.bbf-dash-split {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--bbf-spacing-md);
+    margin-bottom: var(--bbf-spacing-lg);
+}
+
+@media (max-width: 992px) {
+    .bbf-dash-split { grid-template-columns: 1fr; }
 }
 
 .bbf-chart-container {

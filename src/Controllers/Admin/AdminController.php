@@ -167,13 +167,19 @@ class AdminController
         return [
             'blocked_today'       => $kpis['blocked_today'],
             'blocked_total'       => $kpis['blocked_total'],
+            'logged_total'        => $kpis['logged_total'],
+            'total_entries'       => $kpis['total_entries'],
             'detection_rate'      => $kpis['detection_rate'],
+            'avg_score'           => $kpis['avg_score'],
+            'unique_ips'          => $kpis['unique_ips'],
             'active_methods'      => $activeMethods,
             'trend'               => $trend,
             'spam_history'        => $logService->getSpamHistory($days),
             'method_distribution' => $logService->getMethodDistribution($days),
             'top_forms'           => $logService->getTopForms($days),
-            'top_ips'             => $logService->getTopBlockedIPs($days, 5),
+            'hourly_distribution' => $logService->getHourlyDistribution($days),
+            'action_split'        => $logService->getActionSplit($days),
+            'top_ips'             => $logService->getTopBlockedIPs($days, 8),
             'recent_spam'         => $logService->getRecentSpam(20),
         ];
     }
