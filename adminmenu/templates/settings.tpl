@@ -139,8 +139,9 @@
         </div>
 
         <div class="bbf-alert bbf-alert-danger" x-show="lic.hardViolation" x-cloak style="margin-bottom:12px;">
-            Die Lizenzprüfung meldet ein Problem (<span x-text="lic.verdict"></span>). Bitte die Lizenz in ForgePush prüfen.
-            Der Spam-Schutz bleibt aktiv.
+            Die Lizenzprüfung meldet ein klares Negativ-Verdikt (<span x-text="lic.verdict"></span>).
+            Der Spam-Schutz ist deshalb derzeit <strong>deaktiviert</strong> (Fail-closed). Bitte die
+            Lizenz in ForgePush prüfen; nach Behebung reaktiviert sich der Schutz beim nächsten Check automatisch.
         </div>
         <div class="bbf-alert bbf-alert-warning" x-show="lic.pluginMoved" x-cloak style="margin-bottom:12px;">
             ForgePush meldet einen Host-Wechsel dieser Installation

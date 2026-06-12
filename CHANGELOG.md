@@ -3,6 +3,23 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.31 – 2026-06-12
+
+### Geändert (Lizenz-Enforcement nach ForgePush-Vorgabe)
+
+- **Fail-closed bei klarem Negativ-Verdikt.** Wie von ForgePush vorgegeben
+  deaktiviert ein hartes Lizenz-Verdikt (revoked/expired/suspended/
+  domain_mismatch/instance_limit_exceeded) den Spam-Schutz: die Schutz-Hooks
+  (Widget-/Honeypot-Injektion, Registrierungs-Block, Formular-Validierung)
+  greifen dann nicht mehr. Der gecachte Verdikt wird im Hotpath nur als Setting
+  gelesen (kein Netz-Call); der Cron prüft weiter, sodass sich der Schutz nach
+  Behebung automatisch reaktiviert.
+- **Bewusst NICHT betroffen (Fail-open):** „unkonfiguriert" (kein Secret) und
+  transiente Fehler (Netz/Signatur, 24-h-Kulanz) lassen den Schutz aktiv – Shops
+  ohne hinterlegte Lizenz werden also nicht abgeschaltet.
+- Hinweis in der Lizenz-Sektion entsprechend angepasst (Schutz „deaktiviert"
+  statt „bleibt aktiv").
+
 ## 1.0.30 – 2026-06-12
 
 ### Geändert (Lizenz-UI)

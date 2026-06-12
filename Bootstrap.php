@@ -21,6 +21,7 @@ class Bootstrap extends Bootstrapper
 {
     private ?Setting $settingsModel = null;
     private ?FormProtection $formProtection = null;
+    private ?bool $licenseBlocked = null;
 
     /**
      * Plugin-eigene Jobs für den nativen JTL-Cron.
@@ -313,7 +314,7 @@ class Bootstrap extends Bootstrapper
         // Smarty Output Filter – Honeypot/Timing injizieren + Assets einbinden
         // WICHTIG: $args['output'] ist eine Referenz auf den Smarty-Output (nicht 'original'!)
         $dispatcher->listen('shop.hook.' . \HOOK_SMARTY_OUTPUTFILTER, function (array &$args) use ($plugin) {
-            if ($this->settingsModel === null || !$this->settingsModel->getBool('global_enabled')) {
+            if (!$this->protectionActive()) {
                 return;
             }
 
@@ -361,7 +362,7 @@ class Bootstrap extends Bootstrapper
         // Konto-Erstellung verhindern (Hook 40 feuert vor der Validierung). Bei Spam
         // setzen wir nReturnValue=false -> JTL legt das Konto nicht an.
         $dispatcher->listen('shop.hook.' . \HOOK_REGISTRIEREN_PAGE_REGISTRIEREN_PLAUSI, function (array &$args) use ($plugin, $db) {
-            if ($this->settingsModel === null || !$this->settingsModel->getBool('global_enabled')) {
+            if (!$this->protectionActive()) {
                 return;
             }
             try {
@@ -440,7 +441,7 @@ class Bootstrap extends Bootstrapper
      */
     private function handleFormHook(string $formType, array $args, $plugin, $db): void
     {
-        if ($this->settingsModel === null || !$this->settingsModel->getBool('global_enabled')) {
+        if (!$this->protectionActive()) {
             return;
         }
 
@@ -449,6 +450,40 @@ class Bootstrap extends Bootstrapper
         }
 
         $this->formProtection->handleFormHook($formType, $args);
+    }
+
+    /**
+     * Ist der Schutz aktiv? = globaler Schalter AN UND keine harte
+     * Lizenzverletzung. Fail-closed greift – wie von ForgePush vorgegeben – nur
+     * bei klarem Negativ-Verdikt (revoked/expired/suspended/domain_mismatch/
+     * instance_limit_exceeded). Bei „unkonfiguriert" oder transienten Fehlern
+     * (Fail-open) bleibt der Schutz aktiv.
+     */
+    private function protectionActive(): bool
+    {
+        if ($this->settingsModel === null || !$this->settingsModel->getBool('global_enabled')) {
+            return false;
+        }
+        return !$this->licenseBlocksProtection();
+    }
+
+    /**
+     * True nur bei gecachtem harten Lizenz-Negativ-Verdikt. Liest nur ein
+     * Setting (kein Netz-Call im Hotpath) und wird pro Request gecacht.
+     * Im Zweifel (Fehler) → false, damit der Schutz nie versehentlich kippt.
+     */
+    private function licenseBlocksProtection(): bool
+    {
+        if ($this->licenseBlocked === null) {
+            try {
+                $db = Shop::Container()->getDB();
+                $this->licenseBlocked = (new \Plugin\bbfdesign_captcha\src\Services\LicenseService($db, $this->settingsModel))
+                    ->hasHardViolation();
+            } catch (\Throwable) {
+                $this->licenseBlocked = false;
+            }
+        }
+        return $this->licenseBlocked;
     }
 
     /**
