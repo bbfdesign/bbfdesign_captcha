@@ -3,6 +3,16 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.25 – 2026-06-12
+
+### Behoben (Dashboard-Statistik)
+
+- **Deutsche Beschriftungen sofort sichtbar.** Die neuen KPI-/Karten-Labels
+  (Erkannt gesamt, Protokolliert, Ø Spam-Score, Geblockte IPs, Bedrohungen,
+  Aktivität nach Tageszeit) nutzen jetzt deutsche Fallback-Texte. Vorher standen
+  sie bis zum nächsten Plugin-Locale-Import auf Englisch, weil neue
+  Sprachvariablen erst beim JTL-Update in die DB importiert werden.
+
 ## 1.0.24 – 2026-06-12
 
 ### Hinzugefügt (Dashboard-Statistik, ALTCHA-Stil)

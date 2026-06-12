@@ -4,7 +4,7 @@
 <div class="bbf-stats-grid">
     <div class="bbf-stat-card bbf-stat-accent-blue">
         <span class="bbf-stat-bar" aria-hidden="true"></span>
-        <div class="bbf-stat-label">{$langVars->getTranslation('kpi_total_checks', $adminLang)|default:'Detected total'|escape:'html'}</div>
+        <div class="bbf-stat-label">{$langVars->getTranslation('kpi_total_checks', $adminLang)|default:'Erkannt gesamt'|escape:'html'}</div>
         <div class="bbf-stat-value" id="bbf-kpi-total">{$dashboardData.total_entries|default:0}</div>
     </div>
     <div class="bbf-stat-card bbf-stat-accent-red">
@@ -14,7 +14,7 @@
     </div>
     <div class="bbf-stat-card bbf-stat-accent-amber">
         <span class="bbf-stat-bar" aria-hidden="true"></span>
-        <div class="bbf-stat-label">{$langVars->getTranslation('kpi_logged', $adminLang)|default:'Logged'|escape:'html'}</div>
+        <div class="bbf-stat-label">{$langVars->getTranslation('kpi_logged', $adminLang)|default:'Protokolliert'|escape:'html'}</div>
         <div class="bbf-stat-value" id="bbf-kpi-logged-total">{$dashboardData.logged_total|default:0}</div>
     </div>
     <div class="bbf-stat-card bbf-stat-accent-pink">
@@ -29,12 +29,12 @@
     </div>
     <div class="bbf-stat-card bbf-stat-accent-purple">
         <span class="bbf-stat-bar" aria-hidden="true"></span>
-        <div class="bbf-stat-label">{$langVars->getTranslation('kpi_avg_score', $adminLang)|default:'Avg. spam score'|escape:'html'}</div>
+        <div class="bbf-stat-label">{$langVars->getTranslation('kpi_avg_score', $adminLang)|default:'Ø Spam-Score'|escape:'html'}</div>
         <div class="bbf-stat-value" id="bbf-kpi-avg-score">{$dashboardData.avg_score|default:0}</div>
     </div>
     <div class="bbf-stat-card bbf-stat-accent-indigo">
         <span class="bbf-stat-bar" aria-hidden="true"></span>
-        <div class="bbf-stat-label">{$langVars->getTranslation('kpi_unique_ips', $adminLang)|default:'Blocked IPs'|escape:'html'}</div>
+        <div class="bbf-stat-label">{$langVars->getTranslation('kpi_unique_ips', $adminLang)|default:'Geblockte IPs'|escape:'html'}</div>
         <div class="bbf-stat-value" id="bbf-kpi-unique-ips">{$dashboardData.unique_ips|default:0}</div>
     </div>
     <div class="bbf-stat-card bbf-stat-accent-teal">
@@ -115,8 +115,8 @@
     <div class="bbf-card">
         <div class="bbf-card-header">
             <div>
-                <h3 class="bbf-card-title">{$langVars->getTranslation('hourly_title', $adminLang)|default:'Activity by hour'|escape:'html'}</h3>
-                <div style="font-size: 12px; color: var(--bbf-muted); margin-top: 2px;">{$langVars->getTranslation('hourly_subtitle', $adminLang)|default:'When bots are most active (0&ndash;23h)'|escape:'html'}</div>
+                <h3 class="bbf-card-title">{$langVars->getTranslation('hourly_title', $adminLang)|default:'Aktivität nach Tageszeit'|escape:'html'}</h3>
+                <div style="font-size: 12px; color: var(--bbf-muted); margin-top: 2px;">{$langVars->getTranslation('hourly_subtitle', $adminLang)|default:'Wann Bots am aktivsten sind (0–23 Uhr)'|escape:'html'}</div>
             </div>
         </div>
         <div class="bbf-chart-container" style="height: 260px;">
@@ -127,8 +127,8 @@
     <div class="bbf-card">
         <div class="bbf-card-header">
             <div>
-                <h3 class="bbf-card-title">{$langVars->getTranslation('threats_title', $adminLang)|default:'Threats'|escape:'html'}</h3>
-                <div style="font-size: 12px; color: var(--bbf-muted); margin-top: 2px;">{$langVars->getTranslation('threats_subtitle', $adminLang)|default:'Most active IPs in range'|escape:'html'}</div>
+                <h3 class="bbf-card-title">{$langVars->getTranslation('threats_title', $adminLang)|default:'Bedrohungen'|escape:'html'}</h3>
+                <div style="font-size: 12px; color: var(--bbf-muted); margin-top: 2px;">{$langVars->getTranslation('threats_subtitle', $adminLang)|default:'Auffälligste IPs im Zeitraum'|escape:'html'}</div>
             </div>
         </div>
         <div class="bbf-threats-list" id="bbf-threats-list">
@@ -141,7 +141,7 @@
                 </div>
                 {/foreach}
             {else}
-                <div class="bbf-threat-empty">{$langVars->getTranslation('no_threats', $adminLang)|default:'No blocked IPs in range.'|escape:'html'}</div>
+                <div class="bbf-threat-empty">{$langVars->getTranslation('no_threats', $adminLang)|default:'Keine geblockten IPs im Zeitraum.'|escape:'html'}</div>
             {/if}
         </div>
     </div>
