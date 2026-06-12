@@ -3,6 +3,29 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.26 – 2026-06-12
+
+### Geändert (Cron & Mail – nativ ins JTL-System integriert)
+
+- **Nativer JTL-Cron statt Pseudo-Cron.** Wartung (Spam-Wellen-Alarm + Log-/
+  Rate-Limit-/IP-Block-Bereinigung) läuft jetzt als echter JTL-Cron-Job
+  (`bbf_captcha_maintenance`, Standard alle 15 min) über das Shop-Cron-System.
+  Registrierung wie im Ticket-Plugin über `Event::MAP_CRONJOB_TYPE` /
+  `GET_AVAILABLE_CRONJOBS`; der `tcron`-Eintrag wird bei Install/Update **und**
+  idempotent beim Boot angelegt (Git-Deploys lösen keine Update-Routine aus) und
+  bei Deinstallation wieder entfernt. Neue Klassen: `src/Cron/CleanupCron.php`,
+  `src/Services/JtlCronInstallerService.php`, `src/Services/JtlCronBootstrapService.php`.
+  Beide Teilaufgaben drosseln sich selbst (Welle 1 h, Cleanup 24 h).
+- **Mailversand über das Shop-Mailsystem.** Die Spam-Wellen-Benachrichtigung
+  geht jetzt über `\JTL\Mail\Mailer` (HTML-Mail, Absender aus der Shop-Konfig)
+  statt über das nackte PHP-`mail()`. Damit greifen die im Shop konfigurierten
+  Versandeinstellungen (SMTP etc.) korrekt.
+- **Dashboard entlastet:** Cleanup und Wellen-Alarm laufen nicht mehr synchron
+  beim Dashboard-Load (kein Mailversand mehr in einem Admin-AJAX-Request).
+- **URL-Cron-Fallback** (`…/api/v1/cron?token=…`) ruft jetzt denselben Einstieg
+  (`CleanupCron::run()`) wie der native Cron; der gedrosselte Traffic-Fallback im
+  Boot bleibt für Shops ohne eingerichteten Cron erhalten.
+
 ## 1.0.25 – 2026-06-12
 
 ### Behoben (Dashboard-Statistik)

@@ -81,9 +81,10 @@ class CaptchaAPIController
             if (session_status() === PHP_SESSION_ACTIVE) {
                 session_write_close();
             }
-            $logService = new \Plugin\bbfdesign_captcha\src\Services\SpamLogService($this->db, $this->settings);
-            $cleaned    = $logService->runScheduledCleanup();
-            $this->sendJson(['status' => 'ok', 'cleaned' => $cleaned, 'timestamp' => time()]);
+            // URL-Cron-Fallback: identische Arbeit wie der native JTL-Cron
+            // (Spam-Wellen-Alarm + gedrosselte Bereinigung) über denselben Einstieg.
+            $result = \Plugin\bbfdesign_captcha\src\Cron\CleanupCron::run();
+            $this->sendJson(['status' => 'ok', 'result' => $result, 'timestamp' => time()]);
             return;
         }
 

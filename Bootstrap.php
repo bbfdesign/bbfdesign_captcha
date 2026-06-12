@@ -13,11 +13,32 @@ use Plugin\bbfdesign_captcha\src\Models\Setting;
 use Plugin\bbfdesign_captcha\src\Hooks\FormProtection;
 use Plugin\bbfdesign_captcha\src\Hooks\SmartyOutputFilter;
 use Plugin\bbfdesign_captcha\src\Hooks\IncludeAssets;
+use Plugin\bbfdesign_captcha\src\Cron\CleanupCron;
+use Plugin\bbfdesign_captcha\src\Services\JtlCronBootstrapService;
+use Plugin\bbfdesign_captcha\src\Services\JtlCronInstallerService;
 
 class Bootstrap extends Bootstrapper
 {
     private ?Setting $settingsModel = null;
     private ?FormProtection $formProtection = null;
+
+    /**
+     * Plugin-eigene Jobs für den nativen JTL-Cron.
+     *
+     * Die Frequenz wird zur Laufzeit aus den Settings aufgelöst
+     * (siehe JtlCronInstallerService::jobsWithRuntimeSettings). Eine kurze
+     * Frequenz ist unkritisch, da sich Wellen-Alarm (1h) und Cleanup (24h)
+     * jeweils selbst drosseln.
+     *
+     * @var array<string, array{class: class-string, name: string, frequency: int}>
+     */
+    private const CRON_JOBS = [
+        CleanupCron::JOB_TYPE => [
+            'class'     => CleanupCron::class,
+            'name'      => 'BBF Captcha Wartung (Spam-Welle & Cleanup)',
+            'frequency' => 900,
+        ],
+    ];
 
     public function boot(Dispatcher $dispatcher): void
     {
@@ -28,13 +49,19 @@ class Bootstrap extends Bootstrapper
             $db     = Shop::Container()->getDB();
             $this->settingsModel = new Setting($db);
 
-            // Cron-Token für den Bereinigungs-Endpoint sicherstellen (auch Bestand).
+            // Cron-Token für den URL-Cron-Endpoint sicherstellen (auch Bestand).
             if (empty($this->settingsModel->get('cron_token'))) {
                 $this->settingsModel->set('cron_token', bin2hex(random_bytes(16)));
             }
 
-            // Selbstbereinigung der Logs (gedrosselt, höchstens 1×/Intervall) –
-            // läuft über normalen Traffic, auch ohne eingerichteten Cron.
+            // Nativen JTL-Cron anbinden – unbedingt (auch im Cron-/Backend-Kontext,
+            // damit der Cron-Runner den jobType auf unsere Klasse mappen kann).
+            $this->registerCronEvents($dispatcher);
+            $this->ensureCronJobsInstalled();
+
+            // Fallback ohne eingerichteten Cron: gedrosselte Selbstbereinigung über
+            // normalen Traffic (höchstens 1×/Intervall). Mit nativem Cron ist das
+            // redundant, schadet aber nicht und hält Shops ohne Cron sauber.
             (new \Plugin\bbfdesign_captcha\src\Services\SpamLogService($db, $this->settingsModel))->runIfDue();
 
             // Frontend: Hooks + API-Routen registrieren
@@ -130,10 +157,67 @@ class Bootstrap extends Bootstrapper
             $settings->set('altcha_hmac_rotated_at', date('Y-m-d H:i:s'));
         }
 
-        // Cron-Token für den Bereinigungs-Endpoint
+        // Cron-Token für den URL-Cron-Endpoint
         if (empty($settings->get('cron_token'))) {
             $settings->set('cron_token', bin2hex(random_bytes(16)));
         }
+
+        // Nativen JTL-Cron-Job in tcron eintragen.
+        $this->installCronJobs();
+    }
+
+    public function updated($oldVersion, $newVersion): void
+    {
+        parent::updated($oldVersion, $newVersion);
+        // Cron-Job-Metadaten (Name/Frequenz) bei Update idempotent angleichen.
+        $this->installCronJobs();
+    }
+
+    public function uninstalled(bool $deleteData = true): void
+    {
+        // Cron-Job sauber entfernen (tcron + laufende tjobqueue-Einträge).
+        $this->removeCronJobs();
+        parent::uninstalled($deleteData);
+    }
+
+    // ─── Nativer JTL-Cron ───────────────────────────────────────────────
+
+    private static function cronInstaller(): JtlCronInstallerService
+    {
+        return new JtlCronInstallerService(Shop::Container()->getDB(), self::CRON_JOBS);
+    }
+
+    private static function cronBootstrap(Dispatcher $dispatcher): JtlCronBootstrapService
+    {
+        return new JtlCronBootstrapService($dispatcher, self::cronInstaller(), self::CRON_JOBS);
+    }
+
+    /**
+     * Hängt den Plugin-Job an den nativen JTL-Cron. JTL fragt unbekannte
+     * jobType-Werte über MAP_CRONJOB_TYPE ab; dort liefern wir die Job-Klasse.
+     */
+    private function registerCronEvents(Dispatcher $dispatcher): void
+    {
+        self::cronBootstrap($dispatcher)->registerEvents();
+    }
+
+    /**
+     * Git-Deploys führen keine Plugin-Update-Routine aus. Deshalb reparieren wir
+     * fehlende tcron-Zeilen beim Boot idempotent, aber nur einmal pro PHP-Prozess.
+     */
+    private function ensureCronJobsInstalled(): void
+    {
+        self::cronBootstrap(Dispatcher::getInstance())->ensureInstalledOnce();
+    }
+
+    private function installCronJobs(): void
+    {
+        self::cronInstaller()->install();
+    }
+
+    private function removeCronJobs(): void
+    {
+        self::cronInstaller()->remove();
     }
 
     /**

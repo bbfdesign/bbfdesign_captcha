@@ -307,7 +307,7 @@ class SpamLogService
     }
 
     /**
-     * Spam-Welle E-Mail senden
+     * Spam-Welle-Benachrichtigung über das native JTL-Shop-Mailsystem senden.
      */
     private function sendSpamWaveEmail(string $to, int $blockedCount, int $window): void
     {
@@ -317,30 +317,91 @@ class SpamLogService
         $subject = '[' . $shopName . '] Spam-Welle erkannt – ' . $blockedCount . ' Blocks';
 
         $topIPs = $this->getTopBlockedIPs(1, 5); // Letzte 24h, Top 5
-        $ipList = '';
+        $rows   = '';
         foreach ($topIPs as $ip) {
-            $ipList .= '  - ' . $ip->ip_address . ' (' . $ip->cnt . ' Versuche)' . "\n";
+            $rows .= '<tr>'
+                  . '<td style="padding:4px 16px 4px 0;font-family:monospace;border-bottom:1px solid #f0f0f0;">'
+                  . htmlspecialchars((string)($ip->ip_address ?? ''), ENT_QUOTES, 'UTF-8') . '</td>'
+                  . '<td style="padding:4px 0;color:#dc2626;border-bottom:1px solid #f0f0f0;">'
+                  . (int)($ip->cnt ?? 0) . ' Versuche</td>'
+                  . '</tr>';
+        }
+        if ($rows === '') {
+            $rows = '<tr><td colspan="2" style="padding:4px 0;color:#888;">(keine Daten)</td></tr>';
         }
 
-        $body = "Spam-Welle erkannt!\n\n"
-              . "Shop: " . $shopName . "\n"
-              . "URL: " . $shopUrl . "\n\n"
-              . "Es wurden " . $blockedCount . " Spam-Versuche in den letzten " . $window . " Minuten geblockt.\n\n"
-              . "Top geblockte IPs:\n"
-              . ($ipList ?: "  (keine Daten)\n")
-              . "\n"
-              . "Empfehlung:\n"
-              . "- Prüfen Sie das Spam-Log im Plugin-Admin\n"
-              . "- Erhöhen Sie ggf. den ALTCHA-Schwierigkeitsgrad\n"
-              . "- Aktivieren Sie zusätzliche Schutzmethoden\n\n"
-              . "Diese E-Mail wird maximal 1x pro Stunde versendet.\n"
-              . "---\n"
-              . "BBF Captcha & Spam-Schutz Plugin";
+        $esc      = static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+        $html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#1f2430;max-width:560px;">'
+              . '<h2 style="color:#db2e87;margin:0 0 12px;">Spam-Welle erkannt</h2>'
+              . '<p style="margin:0 0 16px;">Im Shop <strong>' . $esc($shopName) . '</strong> wurden '
+              . '<strong>' . $blockedCount . '</strong> Spam-Versuche in den letzten '
+              . '<strong>' . $window . ' Minuten</strong> geblockt.</p>'
+              . '<table style="border-collapse:collapse;margin:0 0 16px;width:100%;max-width:480px;">'
+              . '<thead><tr>'
+              . '<th style="text-align:left;padding:0 16px 6px 0;border-bottom:2px solid #e5e7eb;">IP-Adresse</th>'
+              . '<th style="text-align:left;padding:0 0 6px;border-bottom:2px solid #e5e7eb;">Treffer</th>'
+              . '</tr></thead><tbody>' . $rows . '</tbody></table>'
+              . '<p style="margin:0 0 4px;font-weight:bold;">Empfehlung</p>'
+              . '<ul style="margin:0 0 16px;padding-left:18px;">'
+              . '<li>Spam-Log im Plugin-Admin pr&uuml;fen</li>'
+              . '<li>ALTCHA-Schwierigkeitsgrad ggf. erh&ouml;hen</li>'
+              . '<li>Zus&auml;tzliche Schutzmethoden aktivieren</li>'
+              . '</ul>'
+              . '<p style="margin:0;color:#888;font-size:12px;">'
+              . '<a href="' . $esc($shopUrl) . '" style="color:#db2e87;">' . $esc($shopUrl) . '</a><br>'
+              . 'Diese Benachrichtigung wird h&ouml;chstens einmal pro Stunde versendet &middot; BBF Captcha &amp; Spam-Schutz'
+              . '</p></div>';
 
-        $headers = 'From: ' . $shopName . ' <noreply@' . parse_url($shopUrl, PHP_URL_HOST) . '>' . "\r\n"
-                 . 'Content-Type: text/plain; charset=UTF-8' . "\r\n";
+        $this->sendViaShopMailer($to, $subject, $html);
+    }
 
-        @mail($to, $subject, $body, $headers);
+    /**
+     * Versendet eine HTML-Mail über das native JTL-Shop-Mailsystem
+     * (\JTL\Mail\Mailer) – kein PHP-mail() mehr. Absender stammt aus der
+     * Shop-Konfiguration (Master-Absender). Fehler werden nur geloggt; ein
+     * fehlgeschlagener Versand darf nichts kippen (Fail-open).
+     *
+     * Orientiert an der Mailversand-Umsetzung des BBF-Ticket-Plugins.
+     */
+    private function sendViaShopMailer(string $to, string $subject, string $html): bool
+    {
+        if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        try {
+            $mailer = \JTL\Shop::Container()->get(\JTL\Mail\Mailer::class);
+
+            $fromMail = trim((string)(\JTL\Shop::getSettingValue(\CONF_EMAILS, 'email_master_absender') ?? ''));
+            $fromName = trim((string)(\JTL\Shop::getSettingValue(\CONF_EMAILS, 'email_master_absender_name') ?? ''));
+            if ($fromName === '') {
+                $fromName = trim((string)(\JTL\Shop::getSettingValue(\CONF_GLOBAL, 'global_shopname') ?? ''));
+            }
+
+            $mail = new \JTL\Mail\Mail\Mail();
+            $mail->setToMail($to);
+            $mail->setSubject($subject);
+            // JTL rendert freie Mail-Bodys über Smarty – Inline-CSS mit {…} würde
+            // sonst als Template-Tag interpretiert. {literal} erhält das HTML.
+            $mail->setBodyHTML('{literal}' . $html . '{/literal}');
+            if ($fromMail !== '' && filter_var($fromMail, FILTER_VALIDATE_EMAIL)) {
+                $mail->setFromMail($fromMail);
+            }
+            if ($fromName !== '') {
+                $mail->setFromName($fromName);
+            }
+
+            return $mailer->send($mail) !== false;
+        } catch (\Throwable $e) {
+            try {
+                \JTL\Shop::Container()->getLogService()->warning(
+                    'BBF Captcha Mailversand fehlgeschlagen: ' . $e->getMessage()
+                );
+            } catch (\Throwable) {
+                // bewusst still
+            }
+            return false;
+        }
     }
 
     // ─── Cleanup ────────────────────────────────────────────

@@ -158,11 +158,9 @@ class AdminController
             }
         }
 
-        // Auto-Cleanup ausführen (Pseudo-Cron)
-        $logService->cleanup();
-
-        // Spam-Welle prüfen
-        $logService->checkSpamWaveAlert();
+        // Cleanup und Spam-Wellen-Alarm laufen jetzt über den nativen JTL-Cron
+        // (CleanupCron) bzw. den gedrosselten Boot-Fallback – nicht mehr synchron
+        // beim Dashboard-Load (kein Mailversand mehr in einem Admin-AJAX-Request).
 
         return [
             'blocked_today'       => $kpis['blocked_today'],
