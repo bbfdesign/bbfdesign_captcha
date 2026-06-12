@@ -135,14 +135,11 @@
 
     {* ── Off-Canvas Detail: eingereichte Daten einer abgelehnten Anmeldung ── *}
     {literal}
-    <div class="bbf-drawer-overlay" x-cloak x-show="detailEntry"
-         x-transition.opacity.duration.220ms
+    <div class="bbf-drawer-overlay" :class="{ 'is-open': detailEntry }"
          x-effect="document.body.style.overflow = detailEntry ? 'hidden' : ''"
          @keydown.escape.window="detailEntry = null">
         <button type="button" class="bbf-drawer-backdrop" @click="detailEntry = null" aria-label="Schließen"></button>
-        <aside class="bbf-drawer" role="dialog" aria-modal="true" x-show="detailEntry"
-               x-transition:enter="bbf-drawer-trans" x-transition:enter-start="bbf-drawer-off" x-transition:enter-end="bbf-drawer-on"
-               x-transition:leave="bbf-drawer-trans" x-transition:leave-start="bbf-drawer-on" x-transition:leave-end="bbf-drawer-off">
+        <aside class="bbf-drawer" role="dialog" aria-modal="true">
             <div class="bbf-drawer-header">
                 <div>
                     <h3>Eingereichte Daten</h3>

@@ -3,6 +3,16 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.23 – 2026-06-12
+
+### Behoben (Backend-UI)
+
+- **Drawer-Einblendung lief nicht.** Die Off-Canvas-Animation hing im
+  Startzustand fest (verschachteltes Alpine `x-show`+`x-transition` auf
+  derselben Bedingung kam von `enter-start` nie zu `enter-end`). Die
+  Ein-/Ausblendung läuft jetzt rein über eine CSS-Klasse (`.is-open`):
+  Backdrop blendet ein, Panel slidet zuverlässig von rechts herein.
+
 ## 1.0.22 – 2026-06-12
 
 ### Behoben (Backend-UI)
