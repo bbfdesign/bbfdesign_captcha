@@ -108,12 +108,16 @@ class IncludeAssets
                  . htmlspecialchars($frontendUrl . 'js/bbfdesign-captcha.js', ENT_QUOTES, 'UTF-8')
                  . '" async defer></script>' . "\n";
 
-        // ALTCHA Widget JS (self-hosted → kein Consent nötig)
+        // ALTCHA Widget JS (self-hosted → kein Consent nötig).
+        // WICHTIG: altcha.min.js ist ein ES-Modul (registriert das Custom-Element
+        // <altcha-widget>). Als klassisches <script async defer> wird die
+        // Modul-Syntax nicht ausgeführt → das Element registriert nie → das
+        // Widget bleibt tot. Daher type="module" (Module sind per Default deferred).
         if ($this->settings->getBool('altcha_enabled')) {
             $altchaJs = $frontendUrl . 'js/vendor/altcha.min.js';
-            $assets  .= '<script src="'
+            $assets  .= '<script type="module" src="'
                       . htmlspecialchars($altchaJs, ENT_QUOTES, 'UTF-8')
-                      . '" async defer></script>' . "\n";
+                      . '"></script>' . "\n";
         }
 
         // Externe Captcha-Scripts: NUR bei Consent laden!

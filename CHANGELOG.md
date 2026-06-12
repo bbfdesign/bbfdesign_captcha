@@ -3,6 +3,27 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.36 – 2026-06-12
+
+### Behoben (ALTCHA-Script `type=module` an der richtigen Stelle)
+
+- Der tatsächlich ausgelieferte ALTCHA-Script-Tag stammt aus `IncludeAssets`
+  (nicht aus dem ungenutzten `AltchaService::getWidgetScriptTag`). Dort wird
+  `altcha.min.js` jetzt mit `type="module"` eingebunden, damit sich das
+  Custom-Element registriert (1.0.35 hatte die Änderung nur in der ungenutzten
+  Methode → ohne Wirkung).
+
+### Wichtige Erkenntnis (ALTCHA hat nie funktioniert)
+
+- Auf **keinem** Theme (auch nicht im Standard-Theme von weinewald24) wird das
+  `<altcha-widget>`-Element ins Formular gerendert — der Slot `{$bbfCaptchaWidget}`
+  existiert in den Theme-Templates nicht. ALTCHA war damit **auf allen Shops
+  faktisch inaktiv**; „ALTCHA-Lösung fehlt" kam IMMER. Erst der Fail-open-Fix
+  (1.0.33) verhindert, dass das echte Kunden blockt. Das tatsächliche Aktivieren
+  von ALTCHA erfordert die **theme-unabhängige Injektion des Widgets in die
+  richtigen Formulare** (Login/Registrierung/Kontakt — **ohne Checkout!**) und
+  wird als getesteter Folgeschritt umgesetzt.
+
 ## 1.0.35 – 2026-06-12
 
 ### Behoben (ALTCHA-Script als ES-Modul laden)
