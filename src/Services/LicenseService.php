@@ -33,6 +33,8 @@ use Plugin\bbfdesign_captcha\src\Models\Setting;
 final class LicenseService
 {
     private const ENDPOINT        = 'https://forgepush.bbfdesign.de/api/v1/licenses/check';
+    /** Produkt-Slug dieses Plugins in ForgePush (Disambiguator, kein Secret). */
+    private const DEFAULT_PRODUCT_SLUG = 'bbfcaptcha';
     private const FAIL_OPEN_TTL   = 86400;  // 24 h Kulanz bei transienten Fehlern
     private const CHECK_INTERVAL  = 43200;  // 12 h zwischen zwei Cron-Checks
     private const HTTP_TIMEOUT     = 8;
@@ -117,7 +119,8 @@ final class LicenseService
         if (defined('FORGEPUSH_PRODUCT_SLUG') && (string)\FORGEPUSH_PRODUCT_SLUG !== '') {
             return (string)\FORGEPUSH_PRODUCT_SLUG;
         }
-        return $this->settings->get('forgepush_product_slug');
+        $slug = $this->settings->get('forgepush_product_slug');
+        return $slug !== '' ? $slug : self::DEFAULT_PRODUCT_SLUG;
     }
 
     /** Ohne Signing-Secret lässt sich die Antwort nicht verifizieren → unkonfiguriert. */

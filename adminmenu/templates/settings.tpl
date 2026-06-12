@@ -161,9 +161,9 @@
 
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
             <label class="bbf-form-label">Produkt-Slug
-                <div class="bbf-form-help">Optional – nur nötig, wenn dieser Host mehrere Lizenzen hat.</div>
+                <div class="bbf-form-help">Standard für dieses Plugin: <code>bbfcaptcha</code>. Nur überschreiben, wenn nötig.</div>
             </label>
-            <input type="text" class="bbf-input" style="max-width:300px;" placeholder="z. B. bbf-captcha" x-model="licForm.product_slug">
+            <input type="text" class="bbf-input" style="max-width:300px;" placeholder="bbfcaptcha (Standard)" x-model="licForm.product_slug">
         </div>
 
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">

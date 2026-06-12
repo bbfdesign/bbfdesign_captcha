@@ -3,6 +3,14 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.32 – 2026-06-12
+
+### Geändert (Lizenz)
+
+- Produkt-Slug `bbfcaptcha` als Default hinterlegt (kein Secret). Damit muss im
+  Backend nur noch das Signing-Secret eingetragen werden; der Slug wird
+  automatisch mitgeschickt (überschreibbar via Setting/Konstante).
+
 ## 1.0.31 – 2026-06-12
 
 ### Geändert (Lizenz-Enforcement nach ForgePush-Vorgabe)
