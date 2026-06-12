@@ -202,8 +202,13 @@ class AltchaService
      */
     public function getWidgetScriptTag(string $frontendUrl): string
     {
-        return '<script src="' . htmlspecialchars($frontendUrl . 'js/vendor/altcha.min.js', ENT_QUOTES, 'UTF-8')
-             . '" async defer></script>';
+        // WICHTIG: altcha.min.js ist ein ES-Modul (enthält customElements.define).
+        // Als klassisches <script> wird die Modul-Syntax nicht ausgeführt → das
+        // Custom-Element <altcha-widget> registriert nie und das Widget bleibt
+        // tot. Daher type="module" (Module sind per Default deferred).
+        return '<script type="module" src="'
+             . htmlspecialchars($frontendUrl . 'js/vendor/altcha.min.js', ENT_QUOTES, 'UTF-8')
+             . '"></script>';
     }
 
     /**

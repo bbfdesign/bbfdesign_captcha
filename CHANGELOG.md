@@ -3,6 +3,27 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.35 – 2026-06-12
+
+### Behoben (ALTCHA-Script als ES-Modul laden)
+
+- **`altcha.min.js` wird jetzt mit `type="module"` eingebunden.** Die Datei ist
+  ein ES-Modul (registriert `customElements.define('altcha-widget')`); als
+  klassisches `<script>` wurde die Modul-Syntax nicht ausgeführt → das
+  Custom-Element registrierte nie → das ALTCHA-Widget blieb tot. Mit `type=module`
+  registriert sich das Element; in Verbindung mit `auto="onload"` (1.0.34) löst
+  das Widget dann automatisch.
+
+### Offen (separat, mit Test)
+
+- **Theme-unabhängige Widget-Platzierung:** Auf Themes, die den Slot
+  `{$bbfCaptchaWidget}` NICHT rendern (z. B. NOVA-Child auf Bikepark), erscheint
+  das `<altcha-widget>` gar nicht im Formular → ALTCHA kann dort (noch) nicht
+  greifen (Schutz bleibt durch Honeypot/Timing/Smart-Filter; Kunden werden dank
+  Fail-open NICHT geblockt). Die automatische Injektion in die *richtigen*
+  Formulare (Login/Registrierung/Kontakt) ist bewusst als getesteter Folgeschritt
+  ausgelagert (Frontend-Injektion darf Formular-Rendering nicht brechen).
+
 ## 1.0.34 – 2026-06-12
 
 ### Behoben (Schutz wiederhergestellt – ALTCHA löste nie automatisch)
