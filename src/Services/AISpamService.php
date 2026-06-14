@@ -53,6 +53,38 @@ class AISpamService
      *
      * @return array{score: int, details: array, verdict: string}
      */
+    /**
+     * Eingaben gegen Unicode-Evasion härten: NFKC-Normalisierung (macht
+     * Kompatibilitäts-/Confusable-Formen kanonisch) + Entfernen unsichtbarer
+     * „Format"-Zeichen (Zero-Width-Space/Joiner, Word-Joiner U+2060, BOM, Soft-
+     * Hyphen, Bidi-Steuerzeichen). So matchen Domain-/Phrasen-Regex wieder, auch
+     * wenn ein Spammer Muster mit unsichtbaren Zeichen zerstückelt.
+     */
+    private function normalizeForAnalysis(string $s): string
+    {
+        if ($s === '') {
+            return $s;
+        }
+        if (class_exists('\Normalizer')) {
+            $n = \Normalizer::normalize($s, \Normalizer::FORM_KC);
+            if (is_string($n) && $n !== '') {
+                $s = $n;
+            }
+        }
+        // Unicode-Kategorie Cf (Format) = u. a. U+200B–200D, U+2060–2064, U+FEFF,
+        // U+00AD, Bidi-Steuerzeichen. Plus explizite Zero-Width-/Bidi-Ranges als
+        // Fallback, falls \p{Cf} eine Variante nicht abdeckt.
+        $cleaned = preg_replace('/\p{Cf}/u', '', $s);
+        if (is_string($cleaned)) {
+            $s = $cleaned;
+        }
+        $cleaned = preg_replace('/[\x{200B}-\x{200F}\x{202A}-\x{202E}\x{2060}-\x{2064}\x{FEFF}\x{00AD}\x{180E}]/u', '', $s);
+        if (is_string($cleaned)) {
+            $s = $cleaned;
+        }
+        return $s;
+    }
+
     public function analyze(string $text, ?string $email = null, ?string $name = null): array
     {
         $score   = 0;
@@ -61,6 +93,12 @@ class AISpamService
         if (empty(trim($text)) && empty($email) && empty($name)) {
             return ['score' => 0, 'details' => [], 'verdict' => 'OK'];
         }
+
+        // ANTI-EVASION: Spammer zerstückeln Muster mit unsichtbaren Unicode-Zeichen
+        // (z. B. Word-Joiner U+2060 in "iuhgjklll⁠.blogspot⁠.lu"), damit Domain-/
+        // Phrasen-Regex nicht mehr matchen. Vor JEDER Prüfung normalisieren.
+        $text = $this->normalizeForAnalysis($text);
+        $name = $name !== null ? $this->normalizeForAnalysis($name) : null;
 
         $combinedText = trim($text . ' ' . ($name ?? ''));
 
@@ -547,14 +585,18 @@ class AISpamService
                 }
                 if (str_contains($d, 'blogspot') || str_contains($d, 'weebly')
                     || str_contains($d, 'tumblr') || str_contains($d, 'wixsite')
+                    || str_contains($d, 'wordpress.com') || str_contains($d, 'sites.google')
                 ) {
-                    $score    += 15;
-                    $details[] = 'Verdächtiger Free-Hoster in Domain (+15)';
+                    // Free-Hoster-Domains (blogspot & Co.) sind in Shop-Formularen
+                    // praktisch immer Spam – stark gewichten, damit eine solche
+                    // Domain allein die Schwelle erreicht (vorher +15 → blieb unter 60).
+                    $score    += 40;
+                    $details[] = 'Verdächtiger Free-Hoster in Domain (+40)';
                 }
             }
         }
 
-        return ['score' => min(60, $score), 'details' => $details];
+        return ['score' => min(75, $score), 'details' => $details];
     }
 
     /**

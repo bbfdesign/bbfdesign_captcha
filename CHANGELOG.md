@@ -3,6 +3,24 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.40 – 2026-06-12
+
+### Behoben (KRITISCH: Smart-Filter per Unicode-Evasion ausgehebelt → Spam-Konten)
+
+- **Anti-Evasion / Unicode-Normalisierung.** Spammer zerstückeln Muster mit
+  unsichtbaren Unicode-Zeichen (z. B. Word-Joiner U+2060 in
+  „iuhgjklll⁠.blogspot⁠.lu"), sodass die Domain-/Phrasen-Regex des Smart-Filters
+  **gar nicht mehr greifen** → Score 0 → durchgewunken (Live-Vorfall weinewald24,
+  Spam-Konto angelegt). `AISpamService::analyze()` normalisiert Eingaben jetzt vor
+  jeder Prüfung: NFKC + Entfernen aller unsichtbaren „Format"-Zeichen
+  (`\p{Cf}`, Zero-Width/Joiner/Bidi/BOM/Soft-Hyphen). Isoliert verifiziert:
+  derselbe Spam-Name ohne Norm = 0, mit Norm = 65 (≥ Schwelle 60) → geblockt;
+  echte Namen (Hans-Peter, Maria José, J.Robert, Dr.Schmidt) bleiben < 60.
+- **Free-Hoster stärker gewichtet:** Domains wie blogspot/weebly/tumblr/wixsite/
+  wordpress.com/sites.google sind in Shop-Formularen praktisch immer Spam →
+  Penalty von +15 auf +40 (Cap 75), damit eine solche Domain allein die Schwelle
+  erreicht.
+
 ## 1.0.39 – 2026-06-12
 
 ### Behoben (KRITISCH: Lizenz schaltete den Spam-Schutz ab → Spam-Konten)
