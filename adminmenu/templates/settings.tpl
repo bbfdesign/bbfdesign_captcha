@@ -140,8 +140,8 @@
 
         <div class="bbf-alert bbf-alert-danger" x-show="lic.hardViolation" x-cloak style="margin-bottom:12px;">
             Die Lizenzprüfung meldet ein klares Negativ-Verdikt (<span x-text="lic.verdict"></span>).
-            Der Spam-Schutz ist deshalb derzeit <strong>deaktiviert</strong> (Fail-closed). Bitte die
-            Lizenz in ForgePush prüfen; nach Behebung reaktiviert sich der Schutz beim nächsten Check automatisch.
+            Bitte die Lizenz in ForgePush prüfen. <strong>Der Spam-Schutz bleibt aktiv</strong> –
+            eine Lizenzsache schaltet den Schutz bewusst nicht ab (sonst würde der Shop mit Spam geflutet).
         </div>
         <div class="bbf-alert bbf-alert-warning" x-show="lic.pluginMoved" x-cloak style="margin-bottom:12px;">
             ForgePush meldet einen Host-Wechsel dieser Installation

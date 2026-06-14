@@ -3,6 +3,22 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.39 – 2026-06-12
+
+### Behoben (KRITISCH: Lizenz schaltete den Spam-Schutz ab → Spam-Konten)
+
+- **Der Lizenzstatus deaktiviert den Spam-Schutz NICHT mehr.** Das in 1.0.31
+  eingeführte Fail-closed-Enforcement schaltete bei einem harten Verdikt
+  (z. B. `domain_mismatch`, wenn die Shop-Domain nicht in den `allowedDomains`
+  der Lizenz steht) den GESAMTEN Schutz ab — inkl. Registrierungs-, Login- und
+  Formular-Sperre. Folge: der Shop wurde mit Spam-Konten geflutet
+  (Live-Vorfall weinewald24). Das ist für ein Anti-Spam-Plugin grundfalsch:
+  eine Lizenzsache darf den Betreiber nie mit Spam bestrafen.
+- `protectionActive()` prüft jetzt NUR noch den globalen Schalter. Lizenzprobleme
+  werden ausschließlich im Backend als Hinweis angezeigt (informativ), niemals
+  durch Schutz-Abschaltung erzwungen. Damit ist der Schutz wieder unabhängig vom
+  Lizenzstatus aktiv.
+
 ## 1.0.38 – 2026-06-12
 
 ### Behoben (ALTCHA löst jetzt wirklich automatisch)

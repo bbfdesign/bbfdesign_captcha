@@ -21,7 +21,6 @@ class Bootstrap extends Bootstrapper
 {
     private ?Setting $settingsModel = null;
     private ?FormProtection $formProtection = null;
-    private ?bool $licenseBlocked = null;
 
     /**
      * Plugin-eigene Jobs für den nativen JTL-Cron.
@@ -453,37 +452,20 @@ class Bootstrap extends Bootstrapper
     }
 
     /**
-     * Ist der Schutz aktiv? = globaler Schalter AN UND keine harte
-     * Lizenzverletzung. Fail-closed greift – wie von ForgePush vorgegeben – nur
-     * bei klarem Negativ-Verdikt (revoked/expired/suspended/domain_mismatch/
-     * instance_limit_exceeded). Bei „unkonfiguriert" oder transienten Fehlern
-     * (Fail-open) bleibt der Schutz aktiv.
+     * Ist der Schutz aktiv? = NUR der globale Schalter.
+     *
+     * WICHTIG: Der Lizenzstatus deaktiviert den Spam-Schutz BEWUSST NICHT mehr.
+     * Ein Anti-Spam-/Captcha-Plugin muss IMMER schützen — eine Lizenzverletzung
+     * darf niemals dazu führen, dass der Shop mit Spam geflutet wird (das schadet
+     * dem Betreiber statt die Lizenz durchzusetzen, und genau das ist live
+     * passiert: ein domain_mismatch-Verdikt hatte den Reg-/Login-/Formularschutz
+     * abgeschaltet → Spam-Konten). Lizenzprobleme werden ausschließlich im Backend
+     * als Hinweis angezeigt (LicenseService::hasHardViolation für die Anzeige),
+     * NICHT durch Schutz-Abschaltung erzwungen.
      */
     private function protectionActive(): bool
     {
-        if ($this->settingsModel === null || !$this->settingsModel->getBool('global_enabled')) {
-            return false;
-        }
-        return !$this->licenseBlocksProtection();
-    }
-
-    /**
-     * True nur bei gecachtem harten Lizenz-Negativ-Verdikt. Liest nur ein
-     * Setting (kein Netz-Call im Hotpath) und wird pro Request gecacht.
-     * Im Zweifel (Fehler) → false, damit der Schutz nie versehentlich kippt.
-     */
-    private function licenseBlocksProtection(): bool
-    {
-        if ($this->licenseBlocked === null) {
-            try {
-                $db = Shop::Container()->getDB();
-                $this->licenseBlocked = (new \Plugin\bbfdesign_captcha\src\Services\LicenseService($db, $this->settingsModel))
-                    ->hasHardViolation();
-            } catch (\Throwable) {
-                $this->licenseBlocked = false;
-            }
-        }
-        return $this->licenseBlocked;
+        return $this->settingsModel !== null && $this->settingsModel->getBool('global_enabled');
     }
 
     /**
