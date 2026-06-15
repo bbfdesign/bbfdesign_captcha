@@ -136,6 +136,11 @@ class AISpamService
         $score        += $garbageResult['score'];
         $details       = array_merge($details, $garbageResult['details']);
 
+        // 6b. Bot-Token (verschachtelte Buchstaben/Ziffern, z. B. NARETGR117051NERTYTRY)
+        $tokenResult = $this->checkGibberishTokens($combinedText);
+        $score      += $tokenResult['score'];
+        $details     = array_merge($details, $tokenResult['details']);
+
         // 7. Wiederholungsmuster
         $repResult = $this->checkRepetitions($combinedText);
         $score    += $repResult['score'];
@@ -460,6 +465,26 @@ class AISpamService
                     'details' => ['Verdächtige Email-Domain: ' . $domain . ' (+25)'],
                 ];
             }
+        }
+
+        return ['score' => 0, 'details' => []];
+    }
+
+    /**
+     * Bot-generierte „Tokens" erkennen: GROSSBUCHSTABEN mit eingebetteten Ziffern,
+     * z. B. „NARETGR117051NERTYTRY" / „MERTYHR117051MARTHHDF". Solche Buchstaben-
+     * Ziffern-Buchstaben-Cluster (jeweils mehrere Zeichen, durchgängig groß) kommen
+     * in echten Namen/Nachrichten praktisch nie vor → starkes Spam-Signal.
+     * Bewusst eng gefasst (4+ Großbuchst. · 3+ Ziffern · 4+ Großbuchst.), um echte
+     * Eingaben (Bestellnummern mit Leerzeichen, „iPhone13", „COVID19") nicht zu treffen.
+     */
+    private function checkGibberishTokens(string $text): array
+    {
+        if (preg_match('/[A-ZÄÖÜ]{4,}\d{3,}[A-ZÄÖÜ]{4,}/u', $text)) {
+            return [
+                'score'   => 45,
+                'details' => ['Bot-Token (Buchstaben/Ziffern-Mischung in Großschrift) (+45)'],
+            ];
         }
 
         return ['score' => 0, 'details' => []];

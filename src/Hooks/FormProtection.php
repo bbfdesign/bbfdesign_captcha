@@ -59,11 +59,13 @@ class FormProtection
             }
         }
 
-        // Registrierung wird über HOOK_REGISTRIEREN_PAGE_REGISTRIEREN_PLAUSI (41)
-        // validiert UND geblockt – nur dort lässt sich die Konto-Erstellung wirklich
-        // verhindern (nReturnValue per Referenz). Hier daher nur das Widget zuweisen,
-        // keine doppelte Validierung/Protokollierung.
-        if ($formType === 'registration') {
+        // Registrierung UND Kontakt werden über ihren jeweiligen PLAUSI-Hook
+        // validiert UND geblockt (Registrierung: …REGISTRIEREN_PLAUSI/nReturnValue;
+        // Kontakt: HOOK_KONTAKT_PAGE_PLAUSI/jtl_hp_input). Nur dort lässt sich der
+        // Vorgang wirklich verhindern – HOOK_REGISTRIEREN_PAGE/HOOK_KONTAKT_PAGE
+        // feuern zu spät. Hier daher nur das Widget zuweisen, keine (doppelte,
+        // wirkungslose) Validierung/Protokollierung.
+        if ($formType === 'registration' || $formType === 'contact') {
             return;
         }
 

@@ -346,10 +346,36 @@ class Bootstrap extends Bootstrapper
             }
         });
 
-        // Kontaktformular
+        // Kontaktformular (HOOK_KONTAKT_PAGE) – stellt nur das Widget bereit.
+        // Achtung: dieser Hook feuert ERST NACH dem Mailversand (ContactController
+        // sendet in assignForms, bevor HOOK_KONTAKT_PAGE läuft) → hier NICHT blocken.
         $dispatcher->listen('shop.hook.' . \HOOK_KONTAKT_PAGE, function (array $args) use ($plugin, $db) {
             $this->handleFormHook('contact', $args, $plugin, $db);
         });
+
+        // Kontakt-Spam WIRKLICH blocken: HOOK_KONTAKT_PAGE_PLAUSI feuert in
+        // ContactController::assignForms VOR dem Versand (Z. „if ($ok && honeypot===false) … editMessage()").
+        // Der Hook übergibt keine Referenz-Args, aber wir können bei Spam JTLs eigenen
+        // Kontakt-Honeypot setzen ($_POST['jtl_hp_input']) → Form::honeypotWasFilledOut()
+        // wird true → JTL überspringt den Versand sauber (wie bei einem Bot), ohne 500.
+        if (defined('HOOK_KONTAKT_PAGE_PLAUSI')) {
+            $dispatcher->listen('shop.hook.' . \HOOK_KONTAKT_PAGE_PLAUSI, function (array $args) use ($plugin, $db) {
+                if (!$this->protectionActive()) {
+                    return;
+                }
+                try {
+                    $captcha = new \Plugin\bbfdesign_captcha\src\Services\CaptchaService($plugin, $db, $this->settingsModel);
+                    if (!$captcha->validate($_POST, 'contact')->isValid()) {
+                        $_POST['jtl_hp_input'] = '1'; // JTL-Kontakt-Honeypot → Versand wird übersprungen
+                    }
+                } catch (\Throwable $e) {
+                    // Fail-open: ein Fehler darf legitime Kontaktanfragen nie blockieren.
+                    if ($this->settingsModel !== null && $this->settingsModel->getBool('debug_mode')) {
+                        Shop::Container()->getLogService()->warning('BBF Captcha kontakt plausi: ' . $e->getMessage());
+                    }
+                }
+            });
+        }
 
         // Registrierung (HOOK_REGISTRIEREN_PAGE = 40) – stellt nur das Widget bereit.
         $dispatcher->listen('shop.hook.' . \HOOK_REGISTRIEREN_PAGE, function (array $args) use ($plugin, $db) {

@@ -3,6 +3,27 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.41 – 2026-06-15
+
+### Behoben (KRITISCH: Kontaktformular-Spam kam immer durch)
+
+- **Kontakt-Sperre griff zu spät.** Der JTL-`ContactController` versendet die
+  Kontakt-Mail in `assignForms()` (`Form::editMessage()`), und erst DANACH feuert
+  `HOOK_KONTAKT_PAGE` — der Hook, an dem das Plugin hing. Die Mail war also raus,
+  bevor das Plugin überhaupt prüfte → Kontakt-Spam konnte NIE geblockt werden.
+  Neuer Listener auf **`HOOK_KONTAKT_PAGE_PLAUSI`** (feuert VOR dem Versand):
+  bei Spam wird JTLs eigener Kontakt-Honeypot `$_POST['jtl_hp_input']` gesetzt →
+  `Form::honeypotWasFilledOut()` = true → JTL überspringt den Versand sauber
+  (wie bei einem Bot), ohne 500/Exception. Fail-open: nur bei erkanntem Spam.
+  `FormProtection` validiert Kontakt am alten Seiten-Hook nicht mehr (wirkungslos).
+- **Bot-Token-Gibberish erkannt.** Namen/Nachrichten wie
+  „NARETGR117051NERTYTRY" / „MERTYHR117051MARTHHDF" (GROSSBUCHSTABEN mit
+  eingebetteten Ziffern) wurden vom Smart-Filter nicht erfasst (Score ~30).
+  Neuer Check `checkGibberishTokens` (+45) für das Muster
+  `[A-Z]{4,}\d{3,}[A-Z]{4,}`. Verifiziert: der echte Spam erreicht jetzt 60
+  (Token +45, Caps +15) → geblockt; echte Eingaben (iPhone13Pro, COVID19,
+  Bestellung 2026, Müller, Anne-Marie) lösen den Check NICHT aus.
+
 ## 1.0.40 – 2026-06-12
 
 ### Behoben (KRITISCH: Smart-Filter per Unicode-Evasion ausgehebelt → Spam-Konten)
