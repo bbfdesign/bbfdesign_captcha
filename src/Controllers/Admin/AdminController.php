@@ -149,45 +149,105 @@ class AdminController
      */
     public function getDashboardData(int $days = 30): array
     {
-        $logService = new \Plugin\bbfdesign_captcha\src\Services\SpamLogService($this->db, $this->settings);
+        // Aktive Methoden zählen (rein settings-basiert, unabhängig von der DB →
+        // auch im Fehlerfall korrekt).
+        $activeMethods = $this->countActiveMethods();
 
-        $kpis  = $logService->getKPIs();
-        $trend = $logService->getTrend();
+        // Frischinstallation: Bis die Migration die Tabelle `bbf_captcha_spam_log`
+        // angelegt hat, würden die KPI-/Chart-Queries eine SQL-Exception werfen →
+        // das Backend antwortet dann mit HTTP 500 ("Verbindungsfehler"). Fail-safe:
+        // ein leeres (genulltes) Dashboard ausliefern statt zu crashen; die Ursache
+        // wird ins Shop-Log geschrieben.
+        try {
+            $logService = new \Plugin\bbfdesign_captcha\src\Services\SpamLogService($this->db, $this->settings);
 
-        // Aktive Methoden zählen
+            $kpis  = $logService->getKPIs();
+            $trend = $logService->getTrend();
+
+            // Cleanup und Spam-Wellen-Alarm laufen jetzt über den nativen JTL-Cron
+            // (CleanupCron) bzw. den gedrosselten Boot-Fallback – nicht mehr synchron
+            // beim Dashboard-Load (kein Mailversand mehr in einem Admin-AJAX-Request).
+
+            return [
+                'blocked_today'       => $kpis['blocked_today'],
+                'blocked_total'       => $kpis['blocked_total'],
+                'logged_total'        => $kpis['logged_total'],
+                'total_entries'       => $kpis['total_entries'],
+                'detection_rate'      => $kpis['detection_rate'],
+                'avg_score'           => $kpis['avg_score'],
+                'unique_ips'          => $kpis['unique_ips'],
+                'active_methods'      => $activeMethods,
+                'trend'               => $trend,
+                'spam_history'        => $logService->getSpamHistory($days),
+                'method_distribution' => $logService->getMethodDistribution($days),
+                'top_forms'           => $logService->getTopForms($days),
+                'hourly_distribution' => $logService->getHourlyDistribution($days),
+                'action_split'        => $logService->getActionSplit($days),
+                'top_ips'             => $logService->getTopBlockedIPs($days, 8),
+                'recent_spam'         => $logService->getRecentSpam(20),
+            ];
+        } catch (\Throwable $e) {
+            try {
+                \JTL\Shop::Container()->getLogService()->warning(
+                    'BBF Captcha Dashboard (Fallback, evtl. Frischinstallation/Migration ausstehend): ' . $e->getMessage()
+                );
+            } catch (\Throwable) {
+                // Logging darf das Dashboard nie zusätzlich brechen.
+            }
+
+            return $this->emptyDashboardData($activeMethods);
+        }
+    }
+
+    /**
+     * Zählt die aktiven Schutzmethoden (settings-basiert, DB-unabhängig).
+     */
+    private function countActiveMethods(): int
+    {
         $methodKeys = [
             'honeypot_enabled', 'timing_enabled', 'altcha_enabled',
             'turnstile_enabled', 'recaptcha_enabled', 'friendly_captcha_enabled',
             'hcaptcha_enabled', 'ai_filter_enabled',
         ];
-        $activeMethods = 0;
+        $count = 0;
         foreach ($methodKeys as $key) {
             if ($this->settings->getBool($key)) {
-                $activeMethods++;
+                $count++;
             }
         }
 
-        // Cleanup und Spam-Wellen-Alarm laufen jetzt über den nativen JTL-Cron
-        // (CleanupCron) bzw. den gedrosselten Boot-Fallback – nicht mehr synchron
-        // beim Dashboard-Load (kein Mailversand mehr in einem Admin-AJAX-Request).
+        return $count;
+    }
 
+    /**
+     * Genulltes Dashboard für den Fail-safe-Fall (Tabelle noch nicht vorhanden o. ä.).
+     * Hält exakt dieselbe Struktur wie der Normalpfad, damit das Frontend nie auf
+     * fehlende Schlüssel läuft.
+     */
+    private function emptyDashboardData(int $activeMethods): array
+    {
         return [
-            'blocked_today'       => $kpis['blocked_today'],
-            'blocked_total'       => $kpis['blocked_total'],
-            'logged_total'        => $kpis['logged_total'],
-            'total_entries'       => $kpis['total_entries'],
-            'detection_rate'      => $kpis['detection_rate'],
-            'avg_score'           => $kpis['avg_score'],
-            'unique_ips'          => $kpis['unique_ips'],
+            'blocked_today'       => 0,
+            'blocked_total'       => 0,
+            'logged_total'        => 0,
+            'total_entries'       => 0,
+            'detection_rate'      => 0,
+            'avg_score'           => 0,
+            'unique_ips'          => 0,
             'active_methods'      => $activeMethods,
-            'trend'               => $trend,
-            'spam_history'        => $logService->getSpamHistory($days),
-            'method_distribution' => $logService->getMethodDistribution($days),
-            'top_forms'           => $logService->getTopForms($days),
-            'hourly_distribution' => $logService->getHourlyDistribution($days),
-            'action_split'        => $logService->getActionSplit($days),
-            'top_ips'             => $logService->getTopBlockedIPs($days, 8),
-            'recent_spam'         => $logService->getRecentSpam(20),
+            'trend'               => [
+                'current_week'   => 0,
+                'previous_week'  => 0,
+                'change_percent' => 0,
+                'direction'      => 'stable',
+            ],
+            'spam_history'        => [],
+            'method_distribution' => [],
+            'top_forms'           => [],
+            'hourly_distribution' => array_fill(0, 24, 0),
+            'action_split'        => [],
+            'top_ips'             => [],
+            'recent_spam'         => [],
         ];
     }
 

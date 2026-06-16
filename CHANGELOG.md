@@ -3,6 +3,20 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.44 – 2026-06-16
+
+### Behoben (Frischinstallation: „Verbindungsfehler (500)" im Backend-Dashboard)
+
+- Bei einer **Frischinstallation** warf das Backend-Dashboard `Verbindungsfehler
+  (500)`: der erste Admin-AJAX-Call lief, **bevor die Migration die Tabelle
+  `bbf_captcha_spam_log` angelegt** hatte → die KPI-/Chart-Queries warfen eine
+  SQL-Exception → HTTP 500. Nach Abschluss der Migration verschwand der Fehler
+  von selbst, beim Ersteinstieg sah man ihn aber. `getDashboardData()` ist jetzt
+  **fail-safe**: schlägt ein DB-Zugriff fehl (Tabelle fehlt o. ä.), wird ein
+  leeres, vollständig strukturiertes Dashboard (alle KPIs 0) ausgeliefert statt
+  eines 500; die Ursache landet im Shop-Log. Die Zählung der aktiven Methoden
+  ist settings-basiert und bleibt auch im Fallback korrekt.
+
 ## 1.0.43 – 2026-06-16
 
 ### Verbessert (LLM-Zweitprüfung erkennt jetzt auch Spam-Namen)
