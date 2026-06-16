@@ -751,6 +751,7 @@ class AISpamService
         // JTL-Standard Feldnamen
         $textFields = [
             'contact'      => ['nachricht', 'cNachricht', 'message', 'kommentar'],
+            'withdrawal'   => ['withdrawal_comment', 'withdrawal_name', 'withdrawal_order'],
             'registration' => ['cVorname', 'cNachname', 'vorname', 'nachname'],
             'newsletter'   => ['cEmail', 'email'],
             'review'       => ['cText', 'cTitel', 'text', 'title', 'bewertung'],

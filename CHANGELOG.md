@@ -3,6 +3,30 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.45 – 2026-06-16
+
+### Neu: Widerrufsformular-Schutz (JTL 5.7) + native JTL-Captcha-Integration
+
+- **Widerrufsformular (neu in 5.7) wird jetzt geschützt.** Der `WithdrawalController`
+  versendet eine Mail (`MAILTEMPLATE_WIDERRUFSFORMULAR`) und war damit spambar,
+  hat aber keinen eigenen Plausi-Hook (`HOOK_SEITE_PAGE` feuert erst nach dem
+  Versand). Neuer Listener an `HOOK_ROUTER_PRE_DISPATCH` (feuert vor dem
+  Controller): erkennt die Widerruf-POST, fährt den Schutz (Honeypot/Timing/
+  Smart-Filter; ALTCHA fail-open) und setzt bei Spam JTLs eigenen Honeypot
+  (`jtl_hp_input`) → der Versand wird sauber übersprungen. Neuer Formtyp
+  `withdrawal` (Default-Methoden + Textfeld-Mapping `withdrawal_name/_comment/_order`).
+  Fail-open: ein echter Widerruf wird nie blockiert.
+- **Native JTL-Captcha-Integration (optional, Standard AUS).** Neuer
+  `JtlCaptchaAdapter` (implementiert `CaptchaServiceInterface`); ist das Setting
+  `native_captcha_integration` aktiv, bindet das Bootstrap BBF Captcha als
+  shopweiten Captcha-Dienst in den Container. Damit greift BBF überall, wo JTL
+  (oder ein Fremd-Plugin) `Form::validateCaptcha()` nutzt und die jeweilige
+  Captcha-Abfrage im Shop aktiv ist (Kontakt, Widerruf, Registrierung,
+  Passwort …) – ein zentraler Punkt statt vieler Einzel-Hooks. Fail-open: der
+  Adapter blockt nie allein und liefert bei jedem Fehler „gültig"; ein
+  Bind-Fehler lässt JTLs Standard-Captcha unangetastet. Neuer Backend-Toggle
+  unter Einstellungen → „Formular-Abdeckung".
+
 ## 1.0.44 – 2026-06-16
 
 ### Behoben (Frischinstallation: „Verbindungsfehler (500)" im Backend-Dashboard)

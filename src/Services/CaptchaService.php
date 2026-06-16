@@ -55,6 +55,8 @@ class CaptchaService
             'registration'   => ['methods' => ['honeypot', 'timing', 'altcha', 'ai_filter'], 'score_threshold' => 60, 'action_on_spam' => 'both'],
             'newsletter'     => ['methods' => ['honeypot', 'timing'],                        'score_threshold' => 50, 'action_on_spam' => 'both'],
             'review'         => ['methods' => ['honeypot', 'timing', 'altcha', 'ai_filter'], 'score_threshold' => 60, 'action_on_spam' => 'both'],
+            'withdrawal'     => ['methods' => ['honeypot', 'timing', 'altcha', 'ai_filter'], 'score_threshold' => 60, 'action_on_spam' => 'both'],
+            'native'         => ['methods' => ['honeypot', 'timing', 'altcha', 'ai_filter'], 'score_threshold' => 60, 'action_on_spam' => 'both'],
             'checkout'       => ['methods' => ['honeypot', 'timing'],                        'score_threshold' => 80, 'action_on_spam' => 'log'],
             'password_reset' => ['methods' => ['honeypot', 'timing'],                        'score_threshold' => 50, 'action_on_spam' => 'both'],
             'wishlist'       => ['methods' => ['honeypot'],                                  'score_threshold' => 50, 'action_on_spam' => 'log'],

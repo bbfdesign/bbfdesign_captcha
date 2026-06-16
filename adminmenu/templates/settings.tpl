@@ -80,6 +80,20 @@
         </div>
 
         <hr style="border-color: var(--bbf-border-light); margin: var(--bbf-spacing-lg) 0;">
+        <h3 class="bbf-card-title" style="margin-bottom: var(--bbf-spacing-lg);">Formular-Abdeckung</h3>
+
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">
+                Native JTL-Captcha-Integration
+                <div class="bbf-form-help">Registriert BBF Captcha als shopweiten JTL-Captcha-Dienst. Dann sch&uuml;tzt es zus&auml;tzlich das <strong>Widerrufsformular</strong> (neu in 5.7) und alle Core- sowie Fremd-Plugin-Formulare, die JTLs Captcha-Abfrage nutzen &ndash; &uuml;berall dort, wo im Shop die jeweilige Captcha-Abfrage (z.&nbsp;B. <code>kontakt_abfragen_captcha</code>, <code>widerruf_abfragen_captcha</code>) aktiv ist. Fail-open (sperrt nie echte Kunden aus). <strong>Standard: aus</strong> &ndash; bitte zuerst auf einem Test-/Staging-Shop pr&uuml;fen.</div>
+            </label>
+            <label class="bbf-toggle">
+                <input type="checkbox" {literal}x-model="s.native_captcha_integration"{/literal}>
+                <span class="bbf-toggle-slider"></span>
+            </label>
+        </div>
+
+        <hr style="border-color: var(--bbf-border-light); margin: var(--bbf-spacing-lg) 0;">
         <h3 class="bbf-card-title" style="margin-bottom: var(--bbf-spacing-lg);">E-Mail-Benachrichtigung bei Spam-Welle</h3>
 
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
@@ -212,6 +226,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 email_alert_address: sv.email_alert_address || '',
                 email_alert_threshold: sv.email_alert_threshold || 50,
                 email_alert_window: sv.email_alert_window || 60,
+                native_captcha_integration: sv.native_captcha_integration === '1',
                 altcha_hmac_key: sv.altcha_hmac_key || ''
             },
 

@@ -69,6 +69,7 @@ class Bootstrap extends Bootstrapper
             if (Shop::isFrontend()) {
                 $this->registerFrontendHooks($dispatcher);
                 $this->registerApiRoutes($dispatcher);
+                $this->registerNativeCaptcha($plugin, $db);
             }
         } catch (\Throwable $e) {
             Shop::Container()->getLogService()->error(
@@ -451,6 +452,37 @@ class Bootstrap extends Bootstrapper
             }
         });
 
+        // Widerrufsformular (NEU in JTL 5.7, WithdrawalController). Es hat KEINEN
+        // eigenen Plausi-Hook (HOOK_SEITE_PAGE feuert erst NACH dem Mailversand),
+        // versendet aber eine Mail (MAILTEMPLATE_WIDERRUFSFORMULAR) und ist damit
+        // spambar. Der Controller prüft vor dem Versand Form::honeypotWasFilledOut().
+        // Wir greifen daher am HOOK_ROUTER_PRE_DISPATCH (feuert VOR dem Controller)
+        // an: erkennen die Widerruf-POST anhand der Felder, fahren den Smart-Filter
+        // und setzen bei Spam JTLs eigenen Honeypot → der Versand wird übersprungen.
+        $dispatcher->listen('shop.hook.' . \HOOK_ROUTER_PRE_DISPATCH, function (array $args) use ($plugin, $db) {
+            if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+                return;
+            }
+            // Widerruf-Formular eindeutig identifizieren (submit-Flag + typisches Feld)
+            if ((int)($_POST['withdrawal'] ?? 0) !== 1 || !isset($_POST['withdrawal_email'])) {
+                return;
+            }
+            if (!$this->protectionActive()) {
+                return;
+            }
+            try {
+                $captcha = new \Plugin\bbfdesign_captcha\src\Services\CaptchaService($plugin, $db, $this->settingsModel);
+                if (!$captcha->validate($_POST, 'withdrawal')->isValid()) {
+                    $_POST['jtl_hp_input'] = '1'; // JTL-Honeypot → Widerruf-Versand wird übersprungen
+                }
+            } catch (\Throwable $e) {
+                // Fail-open: ein Fehler darf einen echten Widerruf nie blockieren.
+                if ($this->settingsModel !== null && $this->settingsModel->getBool('debug_mode')) {
+                    Shop::Container()->getLogService()->warning('BBF Captcha withdrawal pre-dispatch: ' . $e->getMessage());
+                }
+            }
+        });
+
         // Consent Manager Integration
         $dispatcher->listen('shop.hook.' . \CONSENT_MANAGER_GET_ACTIVE_ITEMS, function (array $args) use ($plugin) {
             if ($this->settingsModel === null) {
@@ -459,6 +491,44 @@ class Bootstrap extends Bootstrapper
             $consentService = new \Plugin\bbfdesign_captcha\src\Services\ConsentService($plugin, $this->settingsModel);
             $consentService->registerConsentItems($args);
         });
+    }
+
+    /**
+     * Registriert BBF Captcha als NATIVEN JTL-Captcha-Dienst (Container-Override).
+     *
+     * Damit übernimmt BBF den nativen Captcha-Pfad shopweit – überall wo JTL
+     * (oder ein Fremd-Plugin) `Shop::Container()->getCaptchaService()` bzw.
+     * `Form::validateCaptcha()` aufruft und das jeweilige `*_abfragen_captcha`-
+     * Shop-Setting aktiv ist (Kontakt, Widerruf, Registrierung, Passwort …).
+     *
+     * Standardmäßig AUS (`native_captcha_integration`), damit das Shop-Verhalten
+     * unverändert bleibt, bis der Betreiber es bewusst aktiviert und testet.
+     * Fail-open: Der Adapter blockt nie allein und gibt bei jedem Fehler "gültig"
+     * zurück; ein Fehler beim Binden lässt JTLs Standard-Captcha unangetastet.
+     */
+    private function registerNativeCaptcha($plugin, $db): void
+    {
+        if ($this->settingsModel === null
+            || !$this->settingsModel->getBool('global_enabled')
+            || !$this->settingsModel->getBool('native_captcha_integration')
+        ) {
+            return;
+        }
+
+        try {
+            $settings = $this->settingsModel;
+            Shop::Container()->setSingleton(
+                \JTL\Services\JTL\CaptchaServiceInterface::class,
+                static function () use ($plugin, $db, $settings) {
+                    return new \Plugin\bbfdesign_captcha\src\Services\JtlCaptchaAdapter($plugin, $db, $settings);
+                }
+            );
+        } catch (\Throwable $e) {
+            // Bind-Fehler darf den Shop nie brechen → JTL-Standard-Captcha bleibt aktiv.
+            if ($this->settingsModel->getBool('debug_mode')) {
+                Shop::Container()->getLogService()->warning('BBF Captcha native bind: ' . $e->getMessage());
+            }
+        }
     }
 
     /**
