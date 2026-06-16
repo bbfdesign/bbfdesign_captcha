@@ -217,8 +217,11 @@ class AISpamService
         $threshold = $this->settings->getInt('ai_threshold_suspicious', 60);
 
         // Optionale LLM-Zweitpruefung: ueberschreibt das Urteil des Scoring-Filters,
-        // wenn aktiviert und (je nach Setting) nur im Grenzbereich.
-        $llmVerdict = $this->maybeLlmCheck($text, $result['score']);
+        // wenn aktiviert und (je nach Setting) nur im Grenzbereich. Das LLM bekommt
+        // denselben kombinierten Text wie die Heuristik (Nachricht + Name), damit
+        // auch Gibberish-/Spam-Namen erkannt werden, nicht nur der Nachrichtentext.
+        $llmText    = trim($text . ' ' . (string)($name ?? ''));
+        $llmVerdict = $this->maybeLlmCheck($llmText, $result['score']);
         if ($llmVerdict !== null) {
             if ($llmVerdict['spam']) {
                 // Fail-open: Die LLM-Zweitprüfung darf NIE allein blockieren – eine

@@ -3,6 +3,17 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.43 – 2026-06-16
+
+### Verbessert (LLM-Zweitprüfung erkennt jetzt auch Spam-Namen)
+
+- Die optionale LLM-Zweitprüfung bekommt jetzt denselben kombinierten Text wie
+  der regelbasierte Filter (**Nachricht + Name**), nicht nur den Nachrichtentext.
+  Damit erkennt sie auch Gibberish-/Spam-Namen (vgl. Kontakt-Spam #1), bei denen
+  das eigentliche Signal im Absendernamen steckt. Unverändert fail-open: das LLM
+  blockt nie allein (nur mit heuristischer Korroboration ≥ „verdächtig"), und ein
+  LLM-„kein Spam" hebt einen Borderline-Block auf — echte Kunden bleiben sicher.
+
 ## 1.0.42 – 2026-06-16
 
 ### Behoben (Kontakt-Spam: kohärenter B2B-Akquise-Pitch kam durch)
