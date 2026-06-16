@@ -171,6 +171,11 @@ class AISpamService
         $score       += $phraseResult['score'];
         $details      = array_merge($details, $phraseResult['details']);
 
+        // 13. B2B-Kaltakquise / Outsourcing-Spam (kohärenter Pitch, oft englisch)
+        $solicitResult = $this->checkSolicitation($combinedText);
+        $score        += $solicitResult['score'];
+        $details       = array_merge($details, $solicitResult['details']);
+
         // Bewertung
         $thresholdOk         = $this->settings->getInt('ai_threshold_ok', 30);
         $thresholdSuspicious = $this->settings->getInt('ai_threshold_suspicious', 60);
@@ -484,6 +489,56 @@ class AISpamService
             return [
                 'score'   => 45,
                 'details' => ['Bot-Token (Buchstaben/Ziffern-Mischung in Großschrift) (+45)'],
+            ];
+        }
+
+        return ['score' => 0, 'details' => []];
+    }
+
+    /**
+     * B2B-Kaltakquise / Outsourcing-/Agentur-Spam.
+     *
+     * Diese kohärenten (meist englischen) Verkaufs-Pitches umgehen die übrigen
+     * Heuristiken (kein Gibberish, kein Caps, normale Länge). Sie haben aber sehr
+     * spezifische Akquise-Marker, die in echten Kundenanfragen an einen Shop quasi
+     * nie gemeinsam auftreten. Wertung nach Anzahl unterschiedlicher Treffer:
+     * ab 3 Markern → +60 (sperrt), 2 → +25 (braucht weitere Korroboration).
+     */
+    private function checkSolicitation(string $text): array
+    {
+        $t = mb_strtolower($text, 'UTF-8');
+
+        $markers = [
+            'remote support', 'remote team', 'dedicated team', 'dedicated developer', 'dedicated resource',
+            'virtual assistant', 'our services include', 'our support services', 'we provide', 'we offer',
+            'we specialize', 'we can help you', 'engagement model', 'per hour', '/hr', 'hourly rate',
+            'schedule a meeting', 'schedule a short meeting', 'schedule a call', 'possible collaboration',
+            'explore collaboration', 'business opportunity', 'business proposal', 'store maintenance',
+            'order processing', 'marketplace management', 'data entry', 'bookkeeping', 'content writing',
+            'shopify', 'woocommerce', 'magento', 'reply us on', 'reply us at', 'get back to us',
+            'grow your business', 'grow your sales', 'increase your sales', 'increase your revenue',
+            'boost your', 'rank your website', 'first page of google', 'seo service', 'link building',
+            'lead generation', 'outsourc', 'white label', 'web development services', 'app development services',
+        ];
+
+        $hits = [];
+        foreach ($markers as $m) {
+            if (mb_strpos($t, $m) !== false) {
+                $hits[] = $m;
+            }
+        }
+        $count = count($hits);
+
+        if ($count >= 3) {
+            return [
+                'score'   => 60,
+                'details' => ['B2B-Kaltakquise/Outsourcing-Spam (' . $count . ' Marker: ' . implode(', ', array_slice($hits, 0, 5)) . ') (+60)'],
+            ];
+        }
+        if ($count === 2) {
+            return [
+                'score'   => 25,
+                'details' => ['Mögliche Kaltakquise-Phrasen (2: ' . implode(', ', $hits) . ') (+25)'],
             ];
         }
 

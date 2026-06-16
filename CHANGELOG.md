@@ -3,6 +3,24 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.42 – 2026-06-16
+
+### Behoben (Kontakt-Spam: kohärenter B2B-Akquise-Pitch kam durch)
+
+- **B2B-Kaltakquise/Outsourcing-Spam erkannt.** Kohärente, gut formulierte
+  (meist englische) Verkaufs-Pitches („We provide dedicated remote support
+  teams … engagement models starting from $9/hr … schedule a short meeting to
+  explore possible collaboration … Reply us on …") umgingen alle bisherigen
+  Heuristiken: kein Gibberish, keine Großschrift, normale Länge, keine
+  Free-Hoster-Domain. Neuer Check `checkSolicitation` zählt sehr spezifische
+  Akquise-Marker (remote support/team, our services include, we provide/offer,
+  engagement model, $X/hr, schedule a meeting, marketplace management, data
+  entry, bookkeeping, shopify/woocommerce/magento, reply us on, grow your
+  sales, seo service, outsourc …). Ab **3 unterschiedlichen Markern → +60**
+  (sperrt), 2 → +25. Verifiziert: der echte Pitch trifft 17 Marker → +60
+  (zzgl. +25 für die im Text genannte Domain); legitime Anfragen lösen NICHT
+  aus (DE-Weinkauf, DE-Gastro-B2B-Anfrage, EN-Tourist-Versandfrage = je 0).
+
 ## 1.0.41 – 2026-06-15
 
 ### Behoben (KRITISCH: Kontaktformular-Spam kam immer durch)
