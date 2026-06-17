@@ -3,6 +3,16 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.46 – 2026-06-17
+
+### Behoben
+- **Live-500 / fail-closed im Router-Hook:** `parse_url($uri, PHP_URL_PATH)`
+  liefert bei kaputten Request-URIs `false`; das `?? $requestUri` fing nur `null`
+  ab → `$requestPath` wurde `bool` → `str_starts_with()` warf einen `TypeError`
+  (Uncaught, 500) im `HOOK_ROUTER_PRE_DISPATCH` — also auf JEDEM Request mit
+  ungültiger URI (Bot-/Scanner-Traffic). Jetzt wird `$requestPath` hart auf einen
+  String gezwungen → Hook bleibt fail-open, keine 500 mehr.
+
 ## 1.0.45 – 2026-06-16
 
 ### Neu: Widerrufsformular-Schutz (JTL 5.7) + native JTL-Captcha-Integration

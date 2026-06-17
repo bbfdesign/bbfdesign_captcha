@@ -572,9 +572,13 @@ class Bootstrap extends Bootstrapper
         $plugin = $this->getPlugin();
 
         $dispatcher->listen('shop.hook.' . \HOOK_ROUTER_PRE_DISPATCH, function (array $args) use ($plugin) {
-            $requestUri = $_SERVER['REQUEST_URI'] ?? '';
-            // Nur Pfad (ohne Query/Host) für den Präfix-Vergleich
-            $requestPath = parse_url($requestUri, PHP_URL_PATH) ?? $requestUri;
+            $requestUri = (string)($_SERVER['REQUEST_URI'] ?? '');
+            // Nur Pfad (ohne Query/Host) für den Präfix-Vergleich.
+            // parse_url() liefert bei kaputten URIs FALSE (nicht null) → das ??
+            // fing das nicht ab → $requestPath wurde bool → str_starts_with()
+            // warf einen TypeError (Live-500, fail-closed). Hart auf string zwingen.
+            $parsedPath  = parse_url($requestUri, PHP_URL_PATH);
+            $requestPath = (is_string($parsedPath) && $parsedPath !== '') ? $parsedPath : $requestUri;
             $basePath    = '/bbfdesign-captcha/api/';
 
             // Strikter Präfix-Match am Anfang des Pfades (verhindert URL-Hijack via Subpfad)
