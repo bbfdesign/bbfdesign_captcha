@@ -141,6 +141,12 @@ class AISpamService
         $score      += $tokenResult['score'];
         $details     = array_merge($details, $tokenResult['details']);
 
+        // 6c. Zufalls-Token in Misch-Schreibweise (Bot-Namen/-Texte ohne Ziffern,
+        //     z. B. "qYQbYkHwdpEmyqjXugxIBCuP", "bFEDhpHiIcwDgVJHwzifB")
+        $randomResult = $this->checkRandomGibberish($combinedText);
+        $score       += $randomResult['score'];
+        $details      = array_merge($details, $randomResult['details']);
+
         // 7. Wiederholungsmuster
         $repResult = $this->checkRepetitions($combinedText);
         $score    += $repResult['score'];
@@ -493,6 +499,60 @@ class AISpamService
                 'score'   => 45,
                 'details' => ['Bot-Token (Buchstaben/Ziffern-Mischung in Großschrift) (+45)'],
             ];
+        }
+
+        return ['score' => 0, 'details' => []];
+    }
+
+    /**
+     * Rein zufällige Buchstaben-Tokens in Misch-Schreibweise (Bot-generierte
+     * Namen/Texte ohne Ziffern, z. B. "qYQbYkHwdpEmyqjXugxIBCuP",
+     * "bFEDhpHiIcwDgVJHwzifB", "VfIGYAckGGlRfDcbqFerG").
+     *
+     * Erkennungsmerkmal: ein langes Einzel-Token mit vielen INTERNEN Groß-/
+     * Kleinwechseln UND einem hohen Großbuchstaben-Anteil, wie er nur bei
+     * Zufallsstrings auftritt. Die Schwellen sind bewusst hoch gewählt
+     * (≥ 12 Buchstaben, ≥ 4 Wechsel, Großbuchstaben-Anteil ≥ 40 %), damit echte
+     * Namen ("Müller", "Anne-Marie", "McDonald") und CamelCase-Komposita
+     * ("PayPalZahlung", "GeForceRTX") NICHT erkannt werden – Bot-Tokens liegen
+     * bei 42–57 % Großbuchstaben, echte Komposita nur bei ~15–25 %.
+     */
+    private function checkRandomGibberish(string $text): array
+    {
+        foreach (preg_split('/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY) ?: [] as $token) {
+            // Nur Buchstaben betrachten (Ziffern/Sonderzeichen decken andere Checks ab)
+            $letters = preg_replace('/[^A-Za-zÄÖÜäöüß]/u', '', $token) ?? '';
+            $len     = mb_strlen($letters, 'UTF-8');
+            if ($len < 12) {
+                continue;
+            }
+
+            $chars       = preg_split('//u', $letters, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+            $transitions = 0;
+            $upperCount  = 0;
+            for ($i = 0, $n = count($chars); $i < $n; $i++) {
+                $cur      = $chars[$i];
+                $curUpper = ($cur === mb_strtoupper($cur, 'UTF-8') && $cur !== mb_strtolower($cur, 'UTF-8'));
+                if ($curUpper) {
+                    $upperCount++;
+                }
+                if ($i > 0) {
+                    $prev      = $chars[$i - 1];
+                    $prevUpper = ($prev === mb_strtoupper($prev, 'UTF-8') && $prev !== mb_strtolower($prev, 'UTF-8'));
+                    if ($prevUpper !== $curUpper) {
+                        $transitions++;
+                    }
+                }
+            }
+
+            $upperRatio = $len > 0 ? $upperCount / $len : 0.0;
+            if ($transitions >= 4 && $upperRatio >= 0.40) {
+                return [
+                    'score'   => 60,
+                    'details' => ['Zufalls-Token (Misch-Schreibweise, ' . $transitions . ' Wechsel, '
+                        . round($upperRatio * 100) . '% Großbuchstaben): "' . mb_substr($token, 0, 24, 'UTF-8') . '" (+60)'],
+                ];
+            }
         }
 
         return ['score' => 0, 'details' => []];

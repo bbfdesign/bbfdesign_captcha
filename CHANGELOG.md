@@ -3,6 +3,23 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.47 – 2026-06-19
+
+### Behoben (Spam-Welle mit Zufalls-Tokens kam durch – Kontakt, Widerruf, Registrierung)
+
+- **Rein zufällige Buchstaben-Tokens in Misch-Schreibweise werden jetzt erkannt.**
+  Eine Bot-Welle nutzte Namen/Texte wie „qYQbYkHwdpEmyqjXugxIBCuP",
+  „bFEDhpHiIcwDgVJHwzifB", „VfIGYAckGGlRfDcbqFerG" – ohne Ziffern, ohne Domain,
+  ohne bekannte Spam-Wörter, daher von allen bisherigen Checks unentdeckt
+  (Registrierungen, Kontakt- und Widerruf-Mails kamen durch). Neuer Check
+  `checkRandomGibberish` (+60): erkennt lange Einzel-Tokens (≥ 12 Buchstaben) mit
+  vielen internen Groß-/Kleinwechseln (≥ 4) UND hohem Großbuchstaben-Anteil
+  (≥ 40 %). Verifiziert: alle Tokens der Welle → geblockt; echte Namen und
+  CamelCase-Komposita (Müller, Anne-Marie, McDonald, PayPalZahlung,
+  PayPalSofortzahlung, GeForceRTXGrafik, DHLPaketVersand, WIDERRUFSBELEHRUNG)
+  lösen NICHT aus (Bot-Tokens haben 42–57 % Großbuchstaben, echte Komposita nur
+  ~15–25 %). Greift formularübergreifend (Registrierung, Kontakt, Widerruf …).
+
 ## 1.0.46 – 2026-06-17
 
 ### Behoben
