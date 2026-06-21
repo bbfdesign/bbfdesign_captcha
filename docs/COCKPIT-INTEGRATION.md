@@ -19,12 +19,18 @@
   vorgerückt (Retry beim nächsten Lauf). Läuft gedrosselt über den nativen Cron.
 - Gated: nur wenn `cockpit_enabled` + `cockpit_endpoint` + `cockpit_secret` gesetzt.
 
-### 2. `RemoteRulesetService` (geplant, Inkrement 2)
-- `GET {endpoint}/api/v1/ruleset?since=<v>`, Signatur verifizieren, lokal cachen.
-- **Interpreter** wendet deklarative Felder an (kein Remote-Code):
-  `thresholds` → Form-Schwellen; `tokenHeuristics` → `checkRandomGibberish`-Parameter;
-  `blockedEmailDomains`/`phrases` → `AISpamService`; `ipBlocklist` → `IPEntry`.
-- **fail-safe:** Cockpit nicht erreichbar → letztes gültiges Ruleset weiter nutzen.
+### 2. `RemoteRulesetService` (umgesetzt, Inkrement 2 – v1.0.49)
+- `GET {endpoint}/api/v1/ruleset?since=<v>`; Integrität per HMAC verifiziert
+  (Header `X-Ruleset-Signature` über den Rohbody, Shop-Secret); lokal gecacht;
+  gedrosselt (stündlich) im Boot-/Cron-Pfad.
+- **Interpreter** wendet deklarative Felder an (kein Remote-Code), je mit
+  Sicherheits-Klammer gegen Fehl-Rulesets:
+  `tokenHeuristics` → `checkRandomGibberish` (minLen ≥ 8 / Wechsel ≥ 2 / Upper 0–1);
+  `thresholds` → `CaptchaService::getFormConfig` (20–200);
+  `blockedEmailDomains` + `phrases` → `AISpamService::checkRulesetLists` (Phrase ≤ 60).
+- **fail-safe:** Cockpit nicht erreichbar / Signatur ungültig → letztes gültiges
+  Ruleset bzw. Defaults bleiben aktiv. Greift nur bei aktiver Cockpit-Integration.
+- `ipBlocklist` → `IPEntry`: **offen** (Folge-Inkrement).
 - Damit wirken neue zentrale Erkenntnisse **ohne Plugin-Update**.
 
 ## Settings (Default AUS)

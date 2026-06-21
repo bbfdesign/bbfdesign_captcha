@@ -101,21 +101,33 @@ class CaptchaService
         );
 
         if ($row === null) {
-            $def = $this->defaultConfigForForm($formType);
-            return [
+            $def    = $this->defaultConfigForForm($formType);
+            $config = [
                 'methods'         => $def['methods'],
                 'score_threshold' => $def['score_threshold'],
                 'action_on_spam'  => $def['action_on_spam'],
                 'is_active'       => 1,
             ];
+        } else {
+            $config = [
+                'methods'         => json_decode($row->methods ?? '[]', true) ?: ['honeypot', 'timing'],
+                'score_threshold' => (int)($row->score_threshold ?? 60),
+                'action_on_spam'  => $row->action_on_spam ?? 'both',
+                'is_active'       => (int)($row->is_active ?? 1),
+            ];
         }
 
-        return [
-            'methods'         => json_decode($row->methods ?? '[]', true) ?: ['honeypot', 'timing'],
-            'score_threshold' => (int)($row->score_threshold ?? 60),
-            'action_on_spam'  => $row->action_on_spam ?? 'both',
-            'is_active'       => (int)($row->is_active ?? 1),
-        ];
+        // Schwelle ggf. zentral aus dem Cockpit-Ruleset übersteuern (ohne Update).
+        // Sicherheits-Klammer 20..200, damit ein falsches Ruleset nie alles blockt.
+        $thresholds = RemoteRulesetService::cached($this->settings)['thresholds'] ?? [];
+        if (is_array($thresholds) && isset($thresholds[$formType])) {
+            $t = (int)$thresholds[$formType];
+            if ($t >= 20 && $t <= 200) {
+                $config['score_threshold'] = $t;
+            }
+        }
+
+        return $config;
     }
 
     /**

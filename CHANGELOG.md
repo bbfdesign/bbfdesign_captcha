@@ -3,6 +3,27 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.49 – 2026-06-21
+
+### Neu: zentrales Ruleset vom CaptchaCockpit anwenden – ohne Plugin-Update (Default AUS)
+
+- **`RemoteRulesetService`**: zieht das signierte, deklarative Regelwerk vom Cockpit
+  (`GET /api/v1/ruleset`), verifiziert die Integrität per HMAC (Header
+  `X-Ruleset-Signature` über den Rohbody, Shop-Secret) und cached es lokal.
+  Gedrosselt (stündlich) über den Boot-/Cron-Pfad. **fail-safe**: ist das Cockpit
+  nicht erreichbar oder die Signatur ungültig, bleibt das letzte gültige Ruleset
+  bzw. die eingebauten Defaults aktiv – ein Fehler schwächt den Schutz nie.
+- **Interpreter** (wirkt nur bei aktiver Cockpit-Integration; reine DATEN, kein Code):
+  - `tokenHeuristics` → Parameter von `checkRandomGibberish` (minLen/minTransitions/minUpperRatio)
+  - `thresholds` → Score-Schwelle pro Formulartyp (`CaptchaService::getFormConfig`)
+  - `blockedEmailDomains` + `phrases` → additive Treffer im Smart-Filter
+  - **Sicherheits-Klammern** gegen ein fehlerhaftes Ruleset: minLen ≥ 8, Wechsel ≥ 2,
+    Upper-Ratio 0–1, Schwelle 20–200, Phrasen-Score 0–60 → ein falsches Ruleset kann
+    NIE legitime Kunden aussperren (verifiziert).
+- Damit härtet eine zentral erkannte Bot-Welle alle Shops, **ohne dass das Plugin
+  aktualisiert werden muss**. Default AUS (nur mit `cockpit_enabled` + Endpoint +
+  Secret). Doku: `docs/COCKPIT-INTEGRATION.md`.
+
 ## 1.0.48 – 2026-06-21
 
 ### Neu: Anbindung an CaptchaCockpit (zentrale Erkennung) – Telemetrie, Default AUS

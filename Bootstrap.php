@@ -69,6 +69,10 @@ class Bootstrap extends Bootstrapper
             // DSGVO-minimiert). Gedrosselt; sendet nur, wenn konfiguriert.
             (new \Plugin\bbfdesign_captcha\src\Services\CockpitTelemetryService($db, $this->settingsModel))->runIfDue();
 
+            // Zentrales Ruleset vom Cockpit ziehen (Default AUS, fail-safe). Wendet
+            // Schwellen/Token-Heuristik/Listen ohne Plugin-Update an.
+            (new \Plugin\bbfdesign_captcha\src\Services\RemoteRulesetService($db, $this->settingsModel))->pullIfDue();
+
             // Frontend: Hooks + API-Routen registrieren
             if (Shop::isFrontend()) {
                 $this->registerFrontendHooks($dispatcher);

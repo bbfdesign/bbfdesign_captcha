@@ -182,6 +182,12 @@ class AISpamService
         $score        += $solicitResult['score'];
         $details       = array_merge($details, $solicitResult['details']);
 
+        // 14. Zentrale Listen aus dem Cockpit-Ruleset (Domain-Blocklist + Phrasen),
+        //     additiv und ohne Plugin-Update aktualisierbar.
+        $rulesetResult = $this->checkRulesetLists($combinedText, $email);
+        $score        += $rulesetResult['score'];
+        $details       = array_merge($details, $rulesetResult['details']);
+
         // Bewertung
         $thresholdOk         = $this->settings->getInt('ai_threshold_ok', 30);
         $thresholdSuspicious = $this->settings->getInt('ai_threshold_suspicious', 60);
@@ -519,11 +525,22 @@ class AISpamService
      */
     private function checkRandomGibberish(string $text): array
     {
+        // Parameter ggf. zentral aus dem Cockpit-Ruleset übersteuern (ohne Update).
+        // Sicherheits-Klammern: ein falsches/zu scharfes Ruleset darf NIE dazu führen,
+        // dass legitime Eingaben blockiert werden (minLen ≥ 8, Wechsel ≥ 2, Anteil 0–1).
+        $th       = RemoteRulesetService::cached($this->settings)['tokenHeuristics'] ?? [];
+        $minLen   = is_array($th) ? max(8, (int)($th['minLen'] ?? 12)) : 12;
+        $minTrans = is_array($th) ? max(2, (int)($th['minTransitions'] ?? 4)) : 4;
+        $minUpper = is_array($th) ? (float)($th['minUpperRatio'] ?? 0.40) : 0.40;
+        if ($minUpper <= 0.0 || $minUpper > 1.0) {
+            $minUpper = 0.40;
+        }
+
         foreach (preg_split('/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY) ?: [] as $token) {
             // Nur Buchstaben betrachten (Ziffern/Sonderzeichen decken andere Checks ab)
             $letters = preg_replace('/[^A-Za-zÄÖÜäöüß]/u', '', $token) ?? '';
             $len     = mb_strlen($letters, 'UTF-8');
-            if ($len < 12) {
+            if ($len < $minLen) {
                 continue;
             }
 
@@ -546,7 +563,7 @@ class AISpamService
             }
 
             $upperRatio = $len > 0 ? $upperCount / $len : 0.0;
-            if ($transitions >= 4 && $upperRatio >= 0.40) {
+            if ($transitions >= $minTrans && $upperRatio >= $minUpper) {
                 return [
                     'score'   => 60,
                     'details' => ['Zufalls-Token (Misch-Schreibweise, ' . $transitions . ' Wechsel, '
@@ -556,6 +573,54 @@ class AISpamService
         }
 
         return ['score' => 0, 'details' => []];
+    }
+
+    /**
+     * Wendet zentrale Listen aus dem Cockpit-Ruleset an (additiv, ohne Plugin-Update):
+     * - blockedEmailDomains: exakte E-Mail-Domain-Treffer
+     * - phrases: [{pattern, score}] – Teilstring-Treffer im Text
+     * Greift nur, wenn die Cockpit-Integration aktiv ist und ein Ruleset gecacht ist.
+     */
+    private function checkRulesetLists(string $text, ?string $email): array
+    {
+        $rs = RemoteRulesetService::cached($this->settings);
+        if ($rs === []) {
+            return ['score' => 0, 'details' => []];
+        }
+
+        $score   = 0;
+        $details = [];
+
+        $domains = $rs['blockedEmailDomains'] ?? [];
+        if (is_array($domains) && $domains !== [] && $email !== null && str_contains($email, '@')) {
+            $emailDomain = strtolower(trim(substr($email, strrpos($email, '@') + 1)));
+            foreach ($domains as $d) {
+                if (strtolower(trim((string)$d)) === $emailDomain && $emailDomain !== '') {
+                    $score    += 60;
+                    $details[] = 'Cockpit-Blockliste: E-Mail-Domain "' . $emailDomain . '" (+60)';
+                    break;
+                }
+            }
+        }
+
+        $phrases = $rs['phrases'] ?? [];
+        if (is_array($phrases) && $phrases !== []) {
+            $lower = mb_strtolower($text, 'UTF-8');
+            foreach ($phrases as $p) {
+                $pattern = is_array($p) ? (string)($p['pattern'] ?? '') : (string)$p;
+                if ($pattern === '') {
+                    continue;
+                }
+                // Sicherheits-Klammer: einzelne Phrase max. +60.
+                $pScore = is_array($p) ? max(0, min(60, (int)($p['score'] ?? 20))) : 20;
+                if (str_contains($lower, mb_strtolower($pattern, 'UTF-8'))) {
+                    $score    += $pScore;
+                    $details[] = 'Cockpit-Phrase: "' . mb_substr($pattern, 0, 40, 'UTF-8') . '" (+' . $pScore . ')';
+                }
+            }
+        }
+
+        return ['score' => $score, 'details' => $details];
     }
 
     /**
