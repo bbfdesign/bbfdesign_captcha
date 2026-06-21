@@ -65,6 +65,10 @@ class Bootstrap extends Bootstrapper
             // redundant, schadet aber nicht und hält Shops ohne Cron sauber.
             (new \Plugin\bbfdesign_captcha\src\Services\SpamLogService($db, $this->settingsModel))->runIfDue();
 
+            // Zentrale Telemetrie ans CaptchaCockpit (Default AUS, fail-open,
+            // DSGVO-minimiert). Gedrosselt; sendet nur, wenn konfiguriert.
+            (new \Plugin\bbfdesign_captcha\src\Services\CockpitTelemetryService($db, $this->settingsModel))->runIfDue();
+
             // Frontend: Hooks + API-Routen registrieren
             if (Shop::isFrontend()) {
                 $this->registerFrontendHooks($dispatcher);
@@ -240,7 +244,7 @@ class Bootstrap extends Bootstrapper
         // Secrets niemals an den Browser geben (DSGVO/Sicherheit). Die
         // Lizenz-Sektion arbeitet write-only über eigene AJAX-Actions.
         $publicSettings = $allSettings;
-        foreach (['forgepush_signing_secret', 'forgepush_license_key'] as $secretKey) {
+        foreach (['forgepush_signing_secret', 'forgepush_license_key', 'cockpit_secret', 'cockpit_pepper'] as $secretKey) {
             unset($publicSettings[$secretKey]);
         }
         $smarty->assign([

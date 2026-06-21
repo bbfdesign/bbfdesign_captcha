@@ -3,6 +3,27 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.48 – 2026-06-21
+
+### Neu: Anbindung an CaptchaCockpit (zentrale Erkennung) – Telemetrie, Default AUS
+
+- **`CockpitTelemetryService`**: meldet Spam-Log-Ereignisse DSGVO-minimiert an das
+  zentrale CaptchaCockpit (`captchacockpit.bbfdesign.de`), damit Bot-Wellen
+  shopübergreifend erkannt und zentral bekämpft werden können – ohne dass jedes
+  Plugin einzeln aktualisiert werden muss. Übermittelt werden **ausschließlich
+  pseudonyme/aggregierte Merkmale**: `ipHash` (HMAC, keine Klar-IP),
+  `contentFp`/`contentShape` (Hash + abstrakte Merkmale, kein Klartext), nur die
+  E-Mail-**Domain**, Score, Aktion, Erkennungsmethode. Batches HMAC-signiert,
+  gedrosselt über den Boot-/Cron-Pfad, **fail-open** (Cursor rückt nur bei Erfolg;
+  Cockpit-Ausfall schwächt den Schutz nicht).
+- **Standard AUS**: greift nur mit gesetztem `cockpit_enabled` + Endpoint + Secret
+  (Aktivierung nur mit AVV). Neue Backend-Karte „Zentrale Erkennung (CaptchaCockpit)"
+  unter Einstellungen (Toggle, Endpoint, write-only Secret, optionales anonymes
+  IP-Präfix). `cockpit_secret`/`cockpit_pepper` werden aus den Frontend-Settings
+  gefiltert (kein Leak).
+- Vorbereitung für Inkrement 2 (`RemoteRulesetService`): zentrale Regeln/Blocklisten
+  werden künftig gezogen und ohne Plugin-Update angewandt. Doku: `docs/COCKPIT-INTEGRATION.md`.
+
 ## 1.0.47 – 2026-06-19
 
 ### Behoben (Spam-Welle mit Zufalls-Tokens kam durch – Kontakt, Widerruf, Registrierung)

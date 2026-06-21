@@ -94,6 +94,41 @@
         </div>
 
         <hr style="border-color: var(--bbf-border-light); margin: var(--bbf-spacing-lg) 0;">
+        <h3 class="bbf-card-title" style="margin-bottom: var(--bbf-spacing-lg);">Zentrale Erkennung (CaptchaCockpit)</h3>
+
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">
+                Telemetrie an Cockpit senden
+                <div class="bbf-form-help">Meldet <strong>anonymisierte</strong> Spam-Ereignisse (keine Klar-IP, keine Klartext-Inhalte, keine vollst&auml;ndigen E-Mail-Adressen) an das zentrale CaptchaCockpit, damit Bot-Wellen shop&uuml;bergreifend erkannt werden. <strong>Standard: aus</strong> &ndash; Aktivierung nur mit AVV. Bei Ausfall des Cockpits bleibt der Schutz unver&auml;ndert (fail-open).</div>
+            </label>
+            <label class="bbf-toggle">
+                <input type="checkbox" {literal}x-model="s.cockpit_enabled"{/literal}>
+                <span class="bbf-toggle-slider"></span>
+            </label>
+        </div>
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">Cockpit-Endpoint</label>
+            <input type="url" class="bbf-input" style="max-width: 420px;" placeholder="https://captchacockpit.bbfdesign.de" {literal}x-model="s.cockpit_endpoint"{/literal}>
+        </div>
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">
+                Shared-Secret
+                <div class="bbf-form-help">Wird nur server&shy;seitig gespeichert (nie im Frontend angezeigt). Leer lassen, um das bestehende Secret zu behalten.</div>
+            </label>
+            <input type="password" autocomplete="new-password" class="bbf-input" style="max-width: 420px;" placeholder="&bull;&bull;&bull;&bull; (zum &Auml;ndern eingeben)" {literal}x-model="s.cockpit_secret"{/literal}>
+        </div>
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">
+                Anonymes IP-Pr&auml;fix mitsenden
+                <div class="bbf-form-help">Optional: zus&auml;tzlich ein gek&uuml;rztes IP-Pr&auml;fix (/24 bzw. /48) senden. Erleichtert die Netz-Erkennung. Default aus.</div>
+            </label>
+            <label class="bbf-toggle">
+                <input type="checkbox" {literal}x-model="s.cockpit_share_ip_prefix"{/literal}>
+                <span class="bbf-toggle-slider"></span>
+            </label>
+        </div>
+
+        <hr style="border-color: var(--bbf-border-light); margin: var(--bbf-spacing-lg) 0;">
         <h3 class="bbf-card-title" style="margin-bottom: var(--bbf-spacing-lg);">E-Mail-Benachrichtigung bei Spam-Welle</h3>
 
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
@@ -227,6 +262,10 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 email_alert_threshold: sv.email_alert_threshold || 50,
                 email_alert_window: sv.email_alert_window || 60,
                 native_captcha_integration: sv.native_captcha_integration === '1',
+                cockpit_enabled: sv.cockpit_enabled === '1',
+                cockpit_endpoint: sv.cockpit_endpoint || '',
+                cockpit_secret: '',
+                cockpit_share_ip_prefix: sv.cockpit_share_ip_prefix === '1',
                 altcha_hmac_key: sv.altcha_hmac_key || ''
             },
 
@@ -316,6 +355,8 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 var settings = {};
                 for (var key in this.s) {
                     if (key === 'altcha_hmac_key') continue;
+                    if (key === 'cockpit_secret' && !this.s.cockpit_secret) continue; // write-only: leer = behalten
+
                     settings[key] = typeof this.s[key] === 'boolean'
                         ? (this.s[key] ? '1' : '0')
                         : String(this.s[key]);
