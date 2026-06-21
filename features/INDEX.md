@@ -23,6 +23,7 @@
 | CAP-05 | Cockpit-Ruleset anwenden (RemoteRulesetService, Default AUS) | 🚀 Deployed | 1.0.49 | deploy |
 | CAP-06 | Ruleset-Interpreter: Fehlalarm-Allowlist (Vorrang) + zentrale IP-/Domain-Blocklist | 🚀 Deployed | 1.0.50 | deploy |
 | CAP-07 | Feedback-Loop: Spam-Log-Melde-Buttons (FN „ist Spam"/FP „Fehlalarm") → POST /api/v1/feedback | 🚀 Deployed | 1.0.51 | deploy |
+| CAP-08 | Reibungsarmes Opt-in + AVV-Pflicht (Backend-Karte „Zentrale Erkennung": Status, AVV-Häkchen, Default AUS) | 🚀 Deployed | 1.0.52 | deploy |
 
 Weitere Roadmap: führender Masterplan `docs/refactor/masterplan.md`
 (Phase 0–4: Härtung/Fail-open, Template-/Versionsrobustheit, Backend-Designsystem,

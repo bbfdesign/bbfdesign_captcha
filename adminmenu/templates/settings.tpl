@@ -128,6 +128,29 @@
             </label>
         </div>
 
+        {* CAP-08: AVV-/Datenschutz-Bestätigung – Pflicht zum Aktivieren, sonst bleibt es AUS *}
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);" {literal}x-show="s.cockpit_enabled && !cockpitAvvAt"{/literal}>
+            <label class="bbf-form-label">
+                Auftragsverarbeitung (AVV) / Datenschutz best&auml;tigen
+                <div class="bbf-form-help">Pflicht zum Aktivieren. Mit der Best&auml;tigung beauftragst du BBF Design mit der Verarbeitung <strong>pseudonymer</strong> Spam-Telemetrie (Art. 6 (1) f &ndash; IT-Sicherheit; keine Klar-IP, kein Klartext, keine vollst&auml;ndigen E-Mail-Adressen). Details: <a {literal}:href="s.cockpit_endpoint || '#'"{/literal} target="_blank" rel="noopener noreferrer">Verarbeitungs-/AVV-Informationen</a>.</div>
+            </label>
+            <label class="bbf-toggle">
+                <input type="checkbox" {literal}x-model="s.cockpit_avv_confirmed"{/literal}>
+                <span class="bbf-toggle-slider"></span>
+            </label>
+        </div>
+        <div class="bbf-form-help" style="margin-bottom: var(--bbf-spacing-md);" {literal}x-show="cockpitAvvAt"{/literal}>
+            &#10003; AVV best&auml;tigt am <span {literal}x-text="cockpitAvvAt"{/literal}></span>.
+        </div>
+
+        {* Status-Readout *}
+        <div class="bbf-form-help" style="margin-bottom: var(--bbf-spacing-md); opacity:.85;">
+            Status: Ruleset-Version <strong {literal}x-text="cockpitRulesetVer"{/literal}></strong>
+            &middot; Telemetrie <span {literal}x-text="cockpitLastRun ? 'zuletzt gesendet' : 'noch keine'"{/literal}></span>
+            &middot; Ruleset-Pull <span {literal}x-text="cockpitLastPull ? 'aktiv' : 'noch keiner'"{/literal}></span>.
+            <span {literal}x-show="!s.cockpit_endpoint || !cockpitAvvAt"{/literal}>Aktivierung: Endpoint + Secret einf&uuml;gen, AVV best&auml;tigen, Schalter an, speichern.</span>
+        </div>
+
         <hr style="border-color: var(--bbf-border-light); margin: var(--bbf-spacing-lg) 0;">
         <h3 class="bbf-card-title" style="margin-bottom: var(--bbf-spacing-lg);">E-Mail-Benachrichtigung bei Spam-Welle</h3>
 
@@ -266,8 +289,15 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 cockpit_endpoint: sv.cockpit_endpoint || '',
                 cockpit_secret: '',
                 cockpit_share_ip_prefix: sv.cockpit_share_ip_prefix === '1',
+                cockpit_avv_confirmed: false,
                 altcha_hmac_key: sv.altcha_hmac_key || ''
             },
+
+            // ── Cockpit-Status (read-only, aus Server-Settings) ──
+            cockpitAvvAt: sv.cockpit_avv_confirmed_at || '',
+            cockpitRulesetVer: sv.cockpit_ruleset_version || '0',
+            cockpitLastRun: sv.cockpit_last_run || '',
+            cockpitLastPull: sv.cockpit_ruleset_last_pull || '',
 
             // ── ForgePush-Lizenz ──
             lic: { configured:false, valid:false, verdict:'unknown', checkedAt:0, host:'', instanceId:'', secretSet:false, keySet:false, pluginMoved:null, hardViolation:false, productSlug:'' },
@@ -352,6 +382,11 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
             },
 
             saveAll: function() {
+                // CAP-08: Cockpit nur mit AVV-Bestätigung aktivierbar (Frontend-Guard; Backend prüft erneut).
+                if (this.s.cockpit_enabled && !this.cockpitAvvAt && !this.s.cockpit_avv_confirmed) {
+                    bbfAdmin.showNotification('Bitte zuerst die Auftragsverarbeitung (AVV) / Datenschutz bestätigen, um die zentrale Erkennung zu aktivieren.', 'error');
+                    return;
+                }
                 var settings = {};
                 for (var key in this.s) {
                     if (key === 'altcha_hmac_key') continue;

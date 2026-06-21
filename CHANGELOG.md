@@ -3,6 +3,20 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.52 – 2026-06-21
+
+### Neu (CAP-08): reibungsarmes Opt-in + AVV-Pflicht für die zentrale Erkennung
+
+- Backend-Karte „Zentrale Erkennung (CaptchaCockpit)" erweitert: **Status-Readout**
+  (Ruleset-Version, ob Telemetrie/Ruleset-Pull aktiv) + kurze Aktivierungs-Anleitung.
+- **AVV-/Datenschutz-Bestätigung ist Pflicht** zum Aktivieren: ein eigenes
+  Häkchen mit Hinweistext (pseudonyme Verarbeitung, Art. 6 (1) f, keine Klar-IP/PII)
+  + Link auf die Verarbeitungs-/AVV-Info. Ohne Bestätigung bleibt `cockpit_enabled`
+  **AUS** — durchgesetzt **doppelt**: Frontend-Guard (`saveAll`) und Backend
+  (`saveSettings` erzwingt es, sonst keine Aktivierung). Bestätigung wird mit
+  Zeitpunkt + Admin protokolliert (`cockpit_avv_confirmed_at/_by`); danach ist das
+  Häkchen nicht mehr nötig. Kein stilles Default-AN.
+
 ## 1.0.51 – 2026-06-21
 
 ### Neu (CAP-07): Feedback-Loop – Melden aus dem Spam-Log ans Cockpit (Default AUS)

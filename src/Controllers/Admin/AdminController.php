@@ -280,6 +280,25 @@ class AdminController
             $data = [];
         }
 
+        // CAP-08: Cockpit-Aktivierung erfordert eine AVV-/Datenschutz-Bestätigung (DSGVO).
+        // Ohne (frühere oder mitgesendete) Bestätigung wird NICHT aktiviert (Default bleibt AUS).
+        $avvBlocked = false;
+        if (isset($data['cockpit_enabled']) && (string)$data['cockpit_enabled'] === '1') {
+            $alreadyConfirmed = $this->settings->get('cockpit_avv_confirmed_at') !== '';
+            $nowConfirmed     = isset($data['cockpit_avv_confirmed']) && (string)$data['cockpit_avv_confirmed'] === '1';
+            if (!$alreadyConfirmed && !$nowConfirmed) {
+                $data['cockpit_enabled'] = '0';
+                $avvBlocked = true;
+            } elseif (!$alreadyConfirmed && $nowConfirmed) {
+                $this->settings->set('cockpit_avv_confirmed_at', date('Y-m-d H:i:s'), 'cockpit');
+                $admin = $_SESSION['AdminAccount']->cLogin ?? '';
+                if ($admin !== '') {
+                    $this->settings->set('cockpit_avv_confirmed_by', (string)$admin, 'cockpit');
+                }
+            }
+        }
+        unset($data['cockpit_avv_confirmed']); // transienter Flag, nicht persistieren
+
         foreach ($data as $key => $value) {
             $key = (string)$key;
             if (!$this->isAllowedSettingKey($key)) {
@@ -288,6 +307,13 @@ class AdminController
             $this->settings->set($key, (string)$value);
         }
         $this->settings->invalidateCache();
+
+        if ($avvBlocked) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'Cockpit NICHT aktiviert: Bitte zuerst die Auftragsverarbeitung (AVV) / Datenschutz bestätigen.',
+            ]);
+        }
 
         return $this->jsonResponse(['success' => true, 'message' => $this->t('settings_saved', 'Einstellungen gespeichert')]);
     }
