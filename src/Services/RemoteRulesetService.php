@@ -61,6 +61,104 @@ class RemoteRulesetService
         } catch (\Throwable $e) {
             $this->logDebug('pull: ' . $e->getMessage());
         }
+        try {
+            $this->pullBlocklist();
+        } catch (\Throwable $e) {
+            $this->logDebug('pullBlocklist: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Zieht die zentrale IP-/Domain-Blocklist (URL aus Ruleset `ipBlocklistUrl`,
+     * sonst `/api/v1/blocklist`), verifiziert die Signatur (Header
+     * X-Ruleset-Signature über den Rohbody) und cached sie. Vollsnapshot (since=0),
+     * damit kein Delta-Merge nötig ist. Fail-safe.
+     */
+    public function pullBlocklist(): bool
+    {
+        $endpoint = rtrim($this->settings->get('cockpit_endpoint'), '/');
+        $secret   = $this->settings->get('cockpit_secret');
+        if ($endpoint === '' || $secret === '') {
+            return false;
+        }
+
+        $rs   = self::cached($this->settings);
+        $path = (isset($rs['ipBlocklistUrl']) && is_string($rs['ipBlocklistUrl']) && $rs['ipBlocklistUrl'] !== '')
+            ? $rs['ipBlocklistUrl'] : '/api/v1/blocklist';
+        if ($path === '' || $path[0] !== '/') {
+            $path = '/' . $path;
+        }
+        $url  = $endpoint . $path . (str_contains($path, '?') ? '&' : '?') . 'since=0';
+
+        $body = $this->fetchSigned($url, $secret);
+        if ($body === null) {
+            return false;
+        }
+        $bl = json_decode($body, true);
+        if (!is_array($bl)) {
+            $this->logDebug('blocklist JSON ungültig – verworfen.');
+            return false;
+        }
+        $this->settings->set('cockpit_blocklist_cache', $body, 'cockpit');
+        return true;
+    }
+
+    /**
+     * Signierter GET (HMAC-Auth) mit Integritätsprüfung der Antwort
+     * (X-Ruleset-Signature über den Rohbody). Liefert den verifizierten Body oder null.
+     */
+    private function fetchSigned(string $url, string $secret): ?string
+    {
+        $signedAt = (string)time();
+        $sig      = hash_hmac('sha256', '|' . $signedAt, $secret);
+        $instanceId = '';
+        try {
+            $instanceId = (new LicenseService($this->db, $this->settings))->instanceId();
+        } catch (\Throwable) {
+        }
+
+        $ch = curl_init($url);
+        if ($ch === false) {
+            return null;
+        }
+        $rawSig = '';
+        curl_setopt_array($ch, [
+            CURLOPT_HTTPHEADER     => [
+                'Accept: application/json',
+                'X-Cockpit-Instance: ' . $instanceId,
+                'X-Signed-At: ' . $signedAt,
+                'X-Signature: ' . $sig,
+                'User-Agent: bbfdesign-captcha-ruleset/1.0',
+            ],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => self::HTTP_TIMEOUT,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_HEADERFUNCTION => function ($curl, $header) use (&$rawSig) {
+                if (stripos($header, 'X-Ruleset-Signature:') === 0) {
+                    $rawSig = trim(substr($header, strlen('X-Ruleset-Signature:')));
+                }
+                return strlen($header);
+            },
+        ]);
+        $body = curl_exec($ch);
+        $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($code === 304) {
+            return null;
+        }
+        if ($code < 200 || $code >= 300 || !is_string($body) || $body === '') {
+            $this->logDebug('fetchSigned HTTP ' . $code . ' (' . $url . ')');
+            return null;
+        }
+        $expected = hash_hmac('sha256', $body, $secret);
+        if ($rawSig === '' || !hash_equals($expected, $rawSig)) {
+            $this->logDebug('fetchSigned Signatur ungültig – verworfen (' . $url . ').');
+            return null;
+        }
+        return $body;
     }
 
     /**
@@ -163,6 +261,62 @@ class RemoteRulesetService
         }
         $data = json_decode($raw, true);
         return is_array($data) ? $data : [];
+    }
+
+    /**
+     * Die aktuell gecachte zentrale Blocklist (oder []). Nur bei aktiver Integration.
+     *
+     * @return array<string,mixed>
+     */
+    public static function blocklist(Setting $settings): array
+    {
+        if (!$settings->getBool('cockpit_enabled')) {
+            return [];
+        }
+        $raw = $settings->get('cockpit_blocklist_cache');
+        if ($raw === '') {
+            return [];
+        }
+        $data = json_decode($raw, true);
+        return is_array($data) ? $data : [];
+    }
+
+    /**
+     * Zentrale Fehlalarm-Allowlist aus dem Ruleset: freigegebene E-Mail-Domains
+     * (exakt) oder Phrasen (Teilstring). Schlägt JEDE Blockierung (Score/Listen/
+     * Blocklist) – die zentrale Fehlalarm-Bremse. Greift nur bei aktiver Integration.
+     */
+    public static function isAllowlisted(Setting $settings, ?string $email, string $text): bool
+    {
+        $al = self::cached($settings)['allowlist'] ?? null;
+        if (!is_array($al)) {
+            return false;
+        }
+
+        $domains = $al['emailDomains'] ?? [];
+        if (is_array($domains) && $domains !== [] && $email !== null && str_contains($email, '@')) {
+            $ed = strtolower(trim(substr($email, strrpos($email, '@') + 1)));
+            if ($ed !== '') {
+                foreach ($domains as $d) {
+                    if (strtolower(trim((string)$d)) === $ed) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        $phrases = $al['phrases'] ?? [];
+        if (is_array($phrases) && $phrases !== [] && $text !== '') {
+            $lower = mb_strtolower($text, 'UTF-8');
+            foreach ($phrases as $p) {
+                $pat = is_array($p) ? (string)($p['pattern'] ?? '') : (string)$p;
+                if ($pat !== '' && str_contains($lower, mb_strtolower($pat, 'UTF-8'))) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private function logDebug(string $msg): void

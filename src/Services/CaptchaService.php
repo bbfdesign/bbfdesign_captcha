@@ -227,6 +227,126 @@ class CaptchaService
     }
 
     /**
+     * Prüft die eingehende IP/E-Mail gegen die zentrale Cockpit-Blocklist.
+     * Reihenfolge: ipHash (lokaler Pepper, wie beim Senden) → ipPrefix (CIDR) → E-Mail-Domain.
+     * Liefert den Block-Grund oder null. Fail-safe (Aufrufer fängt Fehler).
+     */
+    private function centralBlocklistReason(string $clientIp, ?string $email): ?string
+    {
+        $bl = RemoteRulesetService::blocklist($this->settings);
+        if ($bl === []) {
+            return null;
+        }
+
+        // ipHash: nur Treffer aus DIESEM Shop (gleicher Pepper) matchen exakt.
+        $hashes = $bl['ipHashes'] ?? [];
+        if (is_array($hashes) && $hashes !== [] && $clientIp !== '') {
+            $pepper = $this->settings->get('cockpit_pepper');
+            if ($pepper !== '' && in_array(hash_hmac('sha256', $clientIp, $pepper), $hashes, true)) {
+                return 'Cockpit-Blockliste (IP)';
+            }
+        }
+
+        // ipPrefix: shop-übergreifend (CIDR-Match auf die Klar-IP).
+        $prefixes = $bl['ipPrefixes'] ?? [];
+        if (is_array($prefixes) && $clientIp !== '') {
+            foreach ($prefixes as $cidr) {
+                if (is_string($cidr) && $this->ipInCidr($clientIp, $cidr)) {
+                    return 'Cockpit-Blockliste (IP-Netz)';
+                }
+            }
+        }
+
+        // E-Mail-Domain
+        $domains = $bl['domains'] ?? [];
+        if (is_array($domains) && $domains !== [] && $email !== null && str_contains($email, '@')) {
+            $ed = strtolower(trim(substr($email, strrpos($email, '@') + 1)));
+            if ($ed !== '') {
+                foreach ($domains as $d) {
+                    if (strtolower(trim((string)$d)) === $ed) {
+                        return 'Cockpit-Blockliste (E-Mail-Domain)';
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /** IPv4/IPv6 CIDR-Containment (binär, ohne Annahmen). */
+    private function ipInCidr(string $ip, string $cidr): bool
+    {
+        if (!str_contains($cidr, '/')) {
+            return $ip === $cidr;
+        }
+        [$subnet, $bitsRaw] = explode('/', $cidr, 2);
+        $bits   = (int)$bitsRaw;
+        $ipBin  = @inet_pton($ip);
+        $subBin = @inet_pton($subnet);
+        if ($ipBin === false || $subBin === false || strlen($ipBin) !== strlen($subBin) || $bits < 0) {
+            return false;
+        }
+        $bytes = intdiv($bits, 8);
+        $rem   = $bits % 8;
+        if ($bytes > strlen($ipBin)) {
+            return false;
+        }
+        if ($bytes > 0 && substr($ipBin, 0, $bytes) !== substr($subBin, 0, $bytes)) {
+            return false;
+        }
+        if ($rem !== 0) {
+            $mask = 0xff << (8 - $rem) & 0xff;
+            if ((ord($ipBin[$bytes]) & $mask) !== (ord($subBin[$bytes]) & $mask)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Erste valide E-Mail aus den (ggf. verschachtelten) POST-Daten. */
+    private function firstPostEmail(array $postData): ?string
+    {
+        foreach ($this->flattenPostStrings($postData) as $v) {
+            if (filter_var($v, FILTER_VALIDATE_EMAIL)) {
+                return $v;
+            }
+        }
+        return null;
+    }
+
+    /** Freitext der POST-Daten (ohne Passwort-/Token-/Honeypot-Felder) für Allowlist-Phrasen. */
+    private function flattenPostText(array $postData): string
+    {
+        $out = [];
+        foreach ($this->flattenPostStrings($postData) as $k => $v) {
+            $lk = strtolower((string)$k);
+            if (str_contains($lk, 'pass') || str_contains($lk, 'token') || str_contains($lk, 'hp_')
+                || str_contains($lk, 'jtl_') || str_contains($lk, 'bbf_')) {
+                continue;
+            }
+            $out[] = $v;
+        }
+        return trim(implode(' ', $out));
+    }
+
+    /**
+     * @param array<mixed> $data
+     * @param array<string,string> $out
+     * @return array<string,string>
+     */
+    private function flattenPostStrings(array $data, array &$out = []): array
+    {
+        foreach ($data as $k => $v) {
+            if (is_array($v)) {
+                $this->flattenPostStrings($v, $out);
+            } elseif (is_string($v) || is_numeric($v)) {
+                $out[(string)$k] = (string)$v;
+            }
+        }
+        return $out;
+    }
+
+    /**
      * Formular-Submission validieren
      *
      * Prüft alle aktiven Methoden und berechnet einen Gesamtscore.
@@ -260,6 +380,24 @@ class CaptchaService
             if ($ipEntry->isBlacklisted($clientIp)) {
                 $this->logSpam($clientIp, $formType, 'ip', 100, 'blocked', null, 'IP ist auf der Blacklist');
                 return new ValidationResult(false, 100, 'IP ist auf der Blacklist');
+            }
+        }
+
+        // Cockpit: zentrale Fehlalarm-Allowlist (Vorrang) + IP-/Domain-Blocklist.
+        // Gated (cockpit_enabled) + fail-safe: ein Fehler darf NIE blockieren.
+        if ($this->settings->getBool('cockpit_enabled')) {
+            try {
+                $blEmail = $this->firstPostEmail($postData);
+                $blText  = $this->flattenPostText($postData);
+                if (!RemoteRulesetService::isAllowlisted($this->settings, $blEmail, $blText)) {
+                    $reason = $this->centralBlocklistReason($clientIp, $blEmail);
+                    if ($reason !== null) {
+                        $this->logSpam($clientIp, $formType, 'cockpit_blocklist', 100, 'blocked', $postData, $reason);
+                        return new ValidationResult(false, 100, $reason);
+                    }
+                }
+            } catch (\Throwable $e) {
+                // fail-safe: zentrale Blocklist darf bei Fehler nichts blockieren
             }
         }
 

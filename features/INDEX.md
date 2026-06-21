@@ -21,7 +21,7 @@
 | CAP-03 | Native JTL-Captcha-Integration (CaptchaServiceInterface, Default AUS) | 🚀 Deployed | 1.0.45 | deploy |
 | CAP-04 | Cockpit-Telemetrie (anonymisiert, Default AUS) | 🚀 Deployed | 1.0.48 | deploy |
 | CAP-05 | Cockpit-Ruleset anwenden (RemoteRulesetService, Default AUS) | 🚀 Deployed | 1.0.49 | deploy |
-| CAP-06 | Cockpit-IP-Blocklist → `IPEntry` (Folge-Inkrement) | ⬜ Roadmap | – | – |
+| CAP-06 | Ruleset-Interpreter: Fehlalarm-Allowlist (Vorrang) + zentrale IP-/Domain-Blocklist | 🚀 Deployed | 1.0.50 | deploy |
 
 Weitere Roadmap: führender Masterplan `docs/refactor/masterplan.md`
 (Phase 0–4: Härtung/Fail-open, Template-/Versionsrobustheit, Backend-Designsystem,

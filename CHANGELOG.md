@@ -3,6 +3,27 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.50 – 2026-06-21
+
+### Neu (CAP-06): zentrale Fehlalarm-Allowlist + IP-/Domain-Blocklist (Default AUS)
+
+- **Fehlalarm-Allowlist (Vorrang).** Das Ruleset-Feld `allowlist.emailDomains` und
+  `allowlist.phrases` wird honoriert: zentral freigegebene E-Mail-Domains/Phrasen
+  werden **nie** geblockt — schlägt `blockedEmailDomains`, `phrases`, Score und die
+  IP-/Domain-Blocklist. Die zentrale Fehlalarm-Bremse: ein FP lässt sich im Cockpit
+  beheben und wirkt sofort flottenweit (ohne Plugin-Update). Greift im Smart-Filter
+  (`AISpamService::analyze` kurzschließt) und im `CaptchaService` vor der Blocklist.
+- **Zentrale IP-/Domain-Blocklist.** `RemoteRulesetService` zieht zusätzlich die
+  signierte Blocklist (`ipBlocklistUrl` → `GET /api/v1/blocklist`,
+  `X-Ruleset-Signature` über den Rohbody verifiziert, Vollsnapshot, gedrosselt
+  stündlich, lokal gecacht). `CaptchaService::validate` weist passende Anfragen ab:
+  `ipHashes` (lokaler `cockpit_pepper`, also nur Treffer dieses Shops), `ipPrefixes`
+  (CIDR v4/v6, shop-übergreifend) und `domains` (E-Mail-Domain) — Allowlist hat Vorrang.
+- **Sicherheit:** alles **gated** (`cockpit_enabled`, Default AUS) und **fail-safe**
+  (Fehler/ungültige Signatur → kein Block); Sicherheits-Klammern unverändert. Ohne
+  aktive Cockpit-Integration ändert sich nichts. Isoliert verifiziert (CIDR v4/v6,
+  Allowlist-Vorrang, ipHash/ipPrefix/domain-Match).
+
 ## 1.0.49 – 2026-06-21
 
 ### Neu: zentrales Ruleset vom CaptchaCockpit anwenden – ohne Plugin-Update (Default AUS)

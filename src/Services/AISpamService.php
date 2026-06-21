@@ -102,6 +102,12 @@ class AISpamService
 
         $combinedText = trim($text . ' ' . ($name ?? ''));
 
+        // 0. Cockpit-Fehlalarm-Allowlist (Vorrang): zentral freigegebene E-Mail-Domains
+        //    oder Phrasen werden NIE als Spam gewertet – schlägt alle Inhalts-Checks.
+        if (RemoteRulesetService::isAllowlisted($this->settings, $email, $combinedText)) {
+            return ['score' => 0, 'details' => ['Cockpit-Allowlist: freigegeben (+0)'], 'verdict' => 'OK'];
+        }
+
         // 1. URL-Check
         $urlResult = $this->checkUrls($combinedText);
         $score    += $urlResult['score'];
