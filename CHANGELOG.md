@@ -3,6 +3,16 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.53 – 2026-06-21
+
+### Neu (CAP-09): periodisches Register (Metadaten-Komfort, Default AUS)
+
+- `CockpitTelemetryService::registerIfDue()` meldet ≈ täglich `instanceId`, `domain`,
+  `pluginVersion`, `shopVersion` und die geschützten Formulare an
+  `POST /api/v1/register`, damit das Cockpit den Flotten-Stand (Plugin-/Shop-Version)
+  sieht. Reine Komfort-Metadaten (Bindung läuft ohnehin über den Erst-Kontakt),
+  gated (`cockpit_enabled`), gedrosselt, fail-open.
+
 ## 1.0.52 – 2026-06-21
 
 ### Neu (CAP-08): reibungsarmes Opt-in + AVV-Pflicht für die zentrale Erkennung

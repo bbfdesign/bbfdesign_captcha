@@ -62,6 +62,41 @@ class CockpitTelemetryService
             && $this->settings->get('cockpit_secret') !== '';
     }
 
+    /**
+     * CAP-09: meldet gelegentlich (≈ täglich) Metadaten ans Cockpit
+     * (Plugin-/Shop-Version, geschützte Formulare), damit das Cockpit den Flotten-
+     * Stand sieht. Reine Komfort-Metadaten – Bindung läuft ohnehin über den
+     * Erst-Kontakt. Fail-open.
+     */
+    public function registerIfDue(): void
+    {
+        if (!$this->isEnabled()) {
+            return;
+        }
+        $last = $this->settings->getInt('cockpit_last_register', 0);
+        if ($last > 0 && (time() - $last) < 86400) {
+            return;
+        }
+        $this->settings->set('cockpit_last_register', (string)time(), 'cockpit');
+        try {
+            $license = new LicenseService($this->db, $this->settings);
+            $pluginVersion = '';
+            try {
+                $pluginVersion = (string)(\JTL\Plugin\Helper::getPluginById('bbfdesign_captcha')?->getCurrentVersion() ?? '');
+            } catch (\Throwable) {
+            }
+            $this->send('/api/v1/register', [
+                'instanceId'     => $license->instanceId(),
+                'domain'         => $license->host(),
+                'pluginVersion'  => $pluginVersion,
+                'shopVersion'    => defined('APPLICATION_VERSION') ? \APPLICATION_VERSION : '',
+                'formsProtected' => ['contact', 'registration', 'newsletter', 'review', 'withdrawal', 'checkout', 'login', 'password_reset'],
+            ]);
+        } catch (\Throwable $e) {
+            $this->logDebug('register: ' . $e->getMessage());
+        }
+    }
+
     /** Sendet einen Batch neuer Ereignisse; rückt den Cursor nur bei Erfolg. */
     public function flush(): void
     {

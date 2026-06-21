@@ -67,7 +67,9 @@ class Bootstrap extends Bootstrapper
 
             // Zentrale Telemetrie ans CaptchaCockpit (Default AUS, fail-open,
             // DSGVO-minimiert). Gedrosselt; sendet nur, wenn konfiguriert.
-            (new \Plugin\bbfdesign_captcha\src\Services\CockpitTelemetryService($db, $this->settingsModel))->runIfDue();
+            $cockpitTelemetry = new \Plugin\bbfdesign_captcha\src\Services\CockpitTelemetryService($db, $this->settingsModel);
+            $cockpitTelemetry->runIfDue();
+            $cockpitTelemetry->registerIfDue();
 
             // Zentrales Ruleset vom Cockpit ziehen (Default AUS, fail-safe). Wendet
             // Schwellen/Token-Heuristik/Listen ohne Plugin-Update an.
