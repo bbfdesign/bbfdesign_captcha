@@ -70,6 +70,9 @@ class AdminController
             case 'markFalsePositive':
                 return $this->markFalsePositive($request);
 
+            case 'reportToCockpit':
+                return $this->reportToCockpit($request);
+
             case 'blockIp':
                 return $this->blockIp($request);
 
@@ -510,6 +513,24 @@ class AdminController
         }
 
         return $this->jsonResponse(['success' => true]);
+    }
+
+    /**
+     * Meldet einen Spam-Log-Eintrag ans CaptchaCockpit-Trainingszentrum
+     * (FN „ist Spam" / FP „Fehlalarm"). Pseudonym, fail-open.
+     */
+    private function reportToCockpit(array $request): string
+    {
+        $id   = (int)($request['id'] ?? 0);
+        $type = (string)($request['type'] ?? '');
+        if ($id <= 0) {
+            return $this->jsonResponse(['success' => false, 'message' => $this->t('msg_missing_id', 'ID fehlt')]);
+        }
+
+        $service = new \Plugin\bbfdesign_captcha\src\Services\CockpitFeedbackService($this->db, $this->settings);
+        $result  = $service->report($id, $type);
+
+        return $this->jsonResponse($result);
     }
 
     private function blockIp(array $request): string

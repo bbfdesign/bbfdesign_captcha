@@ -102,6 +102,17 @@
                                         @click="showDetail(entry)" style="padding: 4px 8px;">
                                     Details
                                 </button>
+                                {* CAP-07: Cockpit-Feedback – nur bei aktiver Integration *}
+                                <button type="button" class="bbf-btn bbf-btn-sm bbf-btn-outline" {literal}x-show="cockpitEnabled && entry.action_taken !== 'blocked'"{/literal}
+                                        title="Durchgelassen, war aber Spam – ans Cockpit melden"
+                                        @click="reportCockpit(entry.id, 'SPAM_MISSED')" style="padding: 4px 8px;">
+                                    Als Spam melden
+                                </button>
+                                <button type="button" class="bbf-btn bbf-btn-sm bbf-btn-outline" {literal}x-show="cockpitEnabled && entry.action_taken === 'blocked'"{/literal}
+                                        title="Fälschlich geblockt – Fehlalarm ans Cockpit melden"
+                                        @click="reportCockpit(entry.id, 'FALSE_POSITIVE')" style="padding: 4px 8px;">
+                                    Fehlalarm melden
+                                </button>
                             </td>
                         </tr>
                     </template>
@@ -198,6 +209,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 ip: '',
                 action: ''
             },
+            cockpitEnabled: {if isset($settings.cockpit_enabled) && $settings.cockpit_enabled == '1'}true{else}false{/if},
 
             init: function() {
                 this.loadLog(1);
@@ -228,6 +240,14 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
             blockIp: function(ip) {
                 bbfAdmin.post('blockIp', { ip: ip }).then(function(resp) {
                     bbfAdmin.showNotification(resp.success ? 'IP gesperrt' : 'Fehler', resp.success ? 'success' : 'error');
+                });
+            },
+
+            reportCockpit: function(id, type) {
+                bbfAdmin.post('reportToCockpit', { id: id, type: type }).then(function(resp) {
+                    bbfAdmin.showNotification(resp.message || (resp.success ? 'Gemeldet' : 'Fehler'), resp.success ? 'success' : 'error');
+                }).catch(function() {
+                    bbfAdmin.showNotification('Meldung fehlgeschlagen', 'error');
                 });
             },
 

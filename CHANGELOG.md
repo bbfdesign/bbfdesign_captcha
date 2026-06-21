@@ -3,6 +3,25 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.51 – 2026-06-21
+
+### Neu (CAP-07): Feedback-Loop – Melden aus dem Spam-Log ans Cockpit (Default AUS)
+
+- Im **Spam-Log-Backend** je Eintrag zwei neue Aktionen (nur bei aktiver
+  Cockpit-Integration sichtbar): **„Als Spam melden"** (FN, für durchgelassene/
+  geloggte Einträge → `SPAM_MISSED`) und **„Fehlalarm melden"** (FP, für geblockte
+  Einträge → `FALSE_POSITIVE`). Admin-AJAX über die bestehende
+  CSRF-/jtl_token-Absicherung (`reportToCockpit`).
+- Neuer `CockpitFeedbackService`: sendet HMAC-signiert an `POST /api/v1/feedback`
+  – **nur pseudonyme Felder** (formType, contentFp, ipHash [lokaler Pepper],
+  emailDomain, occurredAt, rulesetVersion), KEIN Klartext/PII, kein note-Freitext.
+  contentFp identisch zur Telemetrie normalisiert (Cockpit kann Feedback↔Event
+  korrelieren). **Fail-open:** ein Fehler blockt nichts; das Backend zeigt den
+  Status (z. B. „Cockpit derzeit nicht erreichbar").
+- Speist das Cockpit-Trainingszentrum (Fehlalarm-Allowlist + Schwellen-Tuning →
+  Ruleset → flottenweit ohne Plugin-Update). Lokales „Kein Spam" + KI-Lernen bleibt
+  unverändert daneben bestehen.
+
 ## 1.0.50 – 2026-06-21
 
 ### Neu (CAP-06): zentrale Fehlalarm-Allowlist + IP-/Domain-Blocklist (Default AUS)
