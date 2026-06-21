@@ -8,6 +8,16 @@ IP-Listen, Bot-Erkennung und eine optionale LLM-Zweitprüfung. Claude entwickelt
 hier ausschließlich über die projektinterne Entwicklungssteuerung. Die
 ausführliche Fassung steht in `docs/claude-development-control.md`.
 
+## Entwicklungssteuerung (Verfassung)
+
+Gemeinsame Grundlage: **globale Verfassung**
+`~/.claude/entwicklungssteuerung/STEUERUNG.md` + lokaler Pointer
+`features/STEUERUNG.md`. Diese CLAUDE.md, `docs/…` und der Masterplan
+`docs/refactor/masterplan.md` bleiben **führend**. 6-Bot-Workflow
+(`/write-spec → /architecture → /frontend → /backend → /qa → /deploy`), autonom
+mit 2 harten Gates (Design nach `/architecture`, Live vor `/deploy`). Feature-Status:
+`features/INDEX.md` (ID-Schema `CAP-NN`), Spec-Vorlage `features/_TEMPLATE.md`.
+
 ## Nicht verhandelbar
 
 - **Echte Kunden dürfen nie ausgesperrt werden.** Jeder Schutz muss für legitime
