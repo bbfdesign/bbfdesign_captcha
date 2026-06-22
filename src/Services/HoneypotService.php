@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Plugin\bbfdesign_captcha\src\Services;
 
 use Plugin\bbfdesign_captcha\src\Models\Setting;
+use Plugin\bbfdesign_captcha\src\Hooks\SmartyOutputFilter;
 
 /**
  * Honeypot-Schutz: Dynamische Feldnamen, Off-Screen-Positionierung
@@ -192,6 +193,10 @@ class HoneypotService
         $pattern = '/(<form\b[^>]*>)/i';
 
         return preg_replace_callback($pattern, function (array $matches) {
+            // Such-/GET-/Navigationsformulare nie anfassen (sonst bricht die Suche).
+            if (SmartyOutputFilter::isUnprotectableForm($matches[0])) {
+                return $matches[0];
+            }
             static $formIndex = 0;
             $formIndex++;
             $honeypotHtml = $this->renderFields('auto_' . $formIndex);

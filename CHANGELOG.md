@@ -3,6 +3,23 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.54 – 2026-06-21
+
+### Fix: Suche bricht bei aktivem Plugin (Honeypot/Timing trafen Such-Formular)
+
+- `SmartyOutputFilter` + `HoneypotService::injectIntoForms` injizieren Honeypot/Timing
+  **nicht mehr in Such-, Navigations- und GET-Formulare** (neue Guard
+  `SmartyOutputFilter::isUnprotectableForm()`: `method=get`, Such-Action `navi.php`/
+  `suche`/`livesuche`/`search`, Suchfeld `cSuche`/`qsuche`/`suche`/`search`,
+  `type=search`/`role=search`/`id*=search`). Bisher wurden die Felder als erste
+  Kinder in **jedes** `<form>` geschoben → das erste Feld der Suche war ein Honeypot
+  statt `cSuche/qsuche`, die (Live-/Flexmenü-)Suche brach.
+- Geschützte Formulare (Kontakt, Registrierung, Bewertung, Login, Newsletter; POST)
+  bleiben unverändert geschützt. Fail-open: im Zweifel wird NICHT injiziert (Formular
+  wird nie beschädigt). ALTCHA war bereits korrekt ausgenommen.
+- Sofort-Mitigation ohne Update: Setting „Honeypot in alle Formulare injizieren"
+  (`honeypot_inject_all_forms`) ausschalten.
+
 ## 1.0.53 – 2026-06-21
 
 ### Neu (CAP-09): periodisches Register (Metadaten-Komfort, Default AUS)

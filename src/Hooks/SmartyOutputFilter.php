@@ -48,6 +48,41 @@ class SmartyOutputFilter
         return isset(self::FORM_SIGNATURE[$formType]);
     }
 
+    /**
+     * Such-/Navigations-/GET-Formulare NIEMALS mit Honeypot/Timing anfassen.
+     * Sonst landet als erstes Feld ein Honeypot statt des Suchfeldes (cSuche/qsuche)
+     * und die (Live-/Flexmenü-)Suche bricht. Geschützte Formulare (Kontakt,
+     * Registrierung, Bewertung, Login, Newsletter) sind POST und werden NICHT erfasst.
+     * Im Zweifel true (= nicht injizieren) → ein Formular wird nie beschädigt (fail-open).
+     *
+     * @param string $formHtml Ganzer <form>…</form>-Block ODER der öffnende <form …>-Tag.
+     */
+    public static function isUnprotectableForm(string $formHtml): bool
+    {
+        // GET → Suche/Navigation (geschützte Formulare sind POST).
+        if (preg_match('#<form\b[^>]*\bmethod\s*=\s*["\']?\s*get\b#i', $formHtml)) {
+            return true;
+        }
+        // Action auf Navi/Suche.
+        if (preg_match('#\baction\s*=\s*["\'][^"\']*(?:navi\.php|suche|livesuche|search)#i', $formHtml)) {
+            return true;
+        }
+        // Suchfeld bzw. Such-Semantik (nur sichtbar, wenn der ganze Block übergeben wird).
+        if (preg_match('#\bname\s*=\s*["\'](?:cSuche|qsuche|suche|search)["\']#i', $formHtml)) {
+            return true;
+        }
+        if (preg_match('#\btype\s*=\s*["\']search["\']#i', $formHtml)) {
+            return true;
+        }
+        if (preg_match('#\brole\s*=\s*["\']search["\']#i', $formHtml)) {
+            return true;
+        }
+        if (preg_match('#\bid\s*=\s*["\'][^"\']*search[^"\']*["\']#i', $formHtml)) {
+            return true;
+        }
+        return false;
+    }
+
     public function __construct(Setting $settings)
     {
         $this->settings = $settings;
@@ -102,6 +137,12 @@ class SmartyOutputFilter
             $count = $forms->count();
             for ($i = 0; $i < $count; $i++) {
                 $form   = $forms->eq($i);
+
+                // Such-/GET-/Navigationsformulare nie anfassen (sonst bricht die Suche).
+                if (self::isUnprotectableForm($form->htmlOuter())) {
+                    continue;
+                }
+
                 $fields = '';
 
                 if ($timingOn && strpos($form->htmlOuter(), TimingService::getFieldName()) === false) {
@@ -202,6 +243,10 @@ class SmartyOutputFilter
         $pattern = '/(<form\b[^>]*>)/i';
 
         return preg_replace_callback($pattern, function (array $matches) use ($timingField) {
+            // Such-/GET-/Navigationsformulare nie anfassen (sonst bricht die Suche).
+            if (self::isUnprotectableForm($matches[0])) {
+                return $matches[0];
+            }
             // Prüfe ob bereits ein Timing-Token vorhanden ist
             if (strpos($matches[0], TimingService::getFieldName()) !== false) {
                 return $matches[0];

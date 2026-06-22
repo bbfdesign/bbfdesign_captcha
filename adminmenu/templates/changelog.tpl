@@ -2,6 +2,12 @@
 
 <div class="bbf-card">
     <div style="color: var(--bbf-body-text); line-height: 1.7;">
+        <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.54</h3>
+        <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">21.06.2026 &mdash; Hotfix Suche</p>
+        <ul style="padding-left: 20px; margin-bottom: 24px;">
+            <li><span class="bbf-badge bbf-badge-warning" style="margin-right: 6px;">Fix</span> Honeypot/Timing werden nicht mehr in Such-, Navigations- und GET-Formulare injiziert &ndash; die (Live-/Flexmen&uuml;-)Suche funktioniert wieder bei aktivem Plugin. Gesch&uuml;tzte Formulare (Kontakt, Registrierung, Bewertung) bleiben unver&auml;ndert gesch&uuml;tzt.</li>
+        </ul>
+
         <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.0</h3>
         <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">24.03.2026 &mdash; Initiales Release</p>
         <ul style="padding-left: 20px; margin-bottom: 24px;">
