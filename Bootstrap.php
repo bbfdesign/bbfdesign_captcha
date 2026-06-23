@@ -75,6 +75,15 @@ class Bootstrap extends Bootstrapper
             // Schwellen/Token-Heuristik/Listen ohne Plugin-Update an.
             (new \Plugin\bbfdesign_captcha\src\Services\RemoteRulesetService($db, $this->settingsModel))->pullIfDue();
 
+            // CAP-12: Auto-Lizenzierung (keyless, by-domain). Gedrosselt (12 h) + fail-open;
+            // greift nur, wenn ein Signing-Secret konfiguriert ist. Schaltet den Schutz NIE ab –
+            // ein Lizenzproblem wird nur als Backend-Hinweis angezeigt.
+            try {
+                (new \Plugin\bbfdesign_captcha\src\Services\LicenseService($db, $this->settingsModel))->checkIfDue();
+            } catch (\Throwable $e) {
+                // fail-open: der Lizenz-Check darf den Shop nie beeinträchtigen
+            }
+
             // Frontend: Hooks + API-Routen registrieren
             if (Shop::isFrontend()) {
                 $this->registerFrontendHooks($dispatcher);
@@ -250,7 +259,7 @@ class Bootstrap extends Bootstrapper
         // Secrets niemals an den Browser geben (DSGVO/Sicherheit). Die
         // Lizenz-Sektion arbeitet write-only über eigene AJAX-Actions.
         $publicSettings = $allSettings;
-        foreach (['forgepush_signing_secret', 'forgepush_license_key', 'cockpit_secret', 'cockpit_pepper'] as $secretKey) {
+        foreach (['forgepush_signing_secret', 'forgepush_license_key', 'cockpit_secret', 'cockpit_pepper', 'cockpit_enrollment_secret'] as $secretKey) {
             unset($publicSettings[$secretKey]);
         }
         $smarty->assign([

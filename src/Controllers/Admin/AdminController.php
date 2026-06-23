@@ -73,6 +73,9 @@ class AdminController
             case 'reportToCockpit':
                 return $this->reportToCockpit($request);
 
+            case 'cockpitEnroll':
+                return $this->cockpitEnroll($request);
+
             case 'blockIp':
                 return $this->blockIp($request);
 
@@ -557,6 +560,57 @@ class AdminController
         $result  = $service->report($id, $type);
 
         return $this->jsonResponse($result);
+    }
+
+    /**
+     * Auto-Anmeldung am Cockpit (CAP-11): speichert Endpoint + Enrollment-Key,
+     * meldet das Plugin selbst an (holt pro-Shop-Secret) und aktiviert nach
+     * AVV-Bestätigung die zentrale Erkennung. Reibungsarmes 1-Klick-Opt-in.
+     */
+    private function cockpitEnroll(array $request): string
+    {
+        $endpoint   = trim((string)($request['endpoint'] ?? ''));
+        $enrollKey  = trim((string)($request['enrollment_secret'] ?? ''));
+        $avv        = (string)($request['avv_confirmed'] ?? '') === '1';
+
+        if ($endpoint !== '') {
+            $this->settings->set('cockpit_endpoint', $endpoint, 'cockpit');
+        }
+        if ($enrollKey !== '') {
+            $this->settings->set('cockpit_enrollment_secret', $enrollKey, 'cockpit');
+        }
+        $this->settings->invalidateCache();
+
+        // AVV-Pflicht (DSGVO) – wie bei der manuellen Aktivierung.
+        $avvAlready = $this->settings->get('cockpit_avv_confirmed_at') !== '';
+        if (!$avvAlready && !$avv) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'Bitte zuerst die Auftragsverarbeitung (AVV) / Datenschutz bestätigen.',
+            ]);
+        }
+
+        $service = new \Plugin\bbfdesign_captcha\src\Services\CockpitEnrollService($this->db, $this->settings);
+        $result  = $service->enroll();
+        if (empty($result['success'])) {
+            return $this->jsonResponse($result);
+        }
+
+        // Erfolgreich angemeldet → AVV protokollieren + zentrale Erkennung aktivieren.
+        if (!$avvAlready) {
+            $this->settings->set('cockpit_avv_confirmed_at', date('Y-m-d H:i:s'), 'cockpit');
+            $admin = $_SESSION['AdminAccount']->cLogin ?? '';
+            if ($admin !== '') {
+                $this->settings->set('cockpit_avv_confirmed_by', (string)$admin, 'cockpit');
+            }
+        }
+        $this->settings->set('cockpit_enabled', '1', 'cockpit');
+        $this->settings->invalidateCache();
+
+        return $this->jsonResponse([
+            'success' => true,
+            'message' => 'Automatisch angemeldet und zentrale Erkennung aktiviert.',
+        ]);
     }
 
     private function blockIp(array $request): string

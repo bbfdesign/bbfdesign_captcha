@@ -110,6 +110,30 @@
     <div class="bbf-card">
         <h3 class="bbf-card-title" style="margin-bottom: var(--bbf-spacing-lg);">Zentrale Erkennung (CaptchaCockpit)</h3>
 
+        {* CAP-11: Schnell-/Auto-Anmeldung – Plugin registriert sich selbst, Secret kommt automatisch *}
+        <div class="bbf-alert bbf-alert-info" style="margin-bottom: var(--bbf-spacing-md);" {literal}x-show="!cockpitAvvAt"{/literal} x-cloak>
+            <strong>Schnell-Anmeldung (empfohlen)</strong>
+            <div class="bbf-form-help" style="margin-top:4px;">Endpoint + Anmelde-Schl&uuml;ssel eingeben, AVV best&auml;tigen, anmelden &ndash; das Plugin registriert sich selbst am Cockpit und erh&auml;lt sein Secret automatisch. Kein manuelles Secret-Kopieren n&ouml;tig.</div>
+        </div>
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">
+                Anmelde-Schl&uuml;ssel (Enrollment-Key)
+                <div class="bbf-form-help">Geteilter Schl&uuml;ssel von BBF f&uuml;r die Selbst-Anmeldung. Wird nur server&shy;seitig gespeichert.</div>
+            </label>
+            <input type="password" autocomplete="new-password" class="bbf-input" style="max-width: 420px;" placeholder="Enrollment-Key einf&uuml;gen" {literal}x-model="enrollKey"{/literal}>
+        </div>
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-lg);">
+            <label class="bbf-form-label">Automatisch anmelden</label>
+            <div>
+                <button type="button" class="bbf-btn bbf-btn-primary" {literal}@click="enroll()" :disabled="enrolling"{/literal}>
+                    <span {literal}x-text="enrolling ? 'Melde an…' : 'Automatisch anmelden &amp; aktivieren'"{/literal}>Automatisch anmelden &amp; aktivieren</span>
+                </button>
+                <div class="bbf-form-help" style="margin-top:6px;">Benötigt Endpoint + Enrollment-Key + AVV-Best&auml;tigung (unten).</div>
+            </div>
+        </div>
+
+        <hr style="border-color: var(--bbf-border-light); margin: var(--bbf-spacing-md) 0;">
+
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
             <label class="bbf-form-label">
                 Telemetrie an Cockpit senden
@@ -143,7 +167,7 @@
         </div>
 
         {* CAP-08: AVV-/Datenschutz-Bestätigung – Pflicht zum Aktivieren, sonst bleibt es AUS *}
-        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);" {literal}x-show="s.cockpit_enabled && !cockpitAvvAt"{/literal}>
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);" {literal}x-show="!cockpitAvvAt"{/literal}>
             <label class="bbf-form-label">
                 Auftragsverarbeitung (AVV) / Datenschutz best&auml;tigen
                 <div class="bbf-form-help">Pflicht zum Aktivieren. Mit der Best&auml;tigung beauftragst du BBF Design mit der Verarbeitung <strong>pseudonymer</strong> Spam-Telemetrie (Art. 6 (1) f &ndash; IT-Sicherheit; keine Klar-IP, kein Klartext, keine vollst&auml;ndigen E-Mail-Adressen). Details: <a {literal}:href="s.cockpit_endpoint || '#'"{/literal} target="_blank" rel="noopener noreferrer">Verarbeitungs-/AVV-Informationen</a>.</div>
@@ -324,6 +348,8 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
             cockpitRulesetVer: sv.cockpit_ruleset_version || '0',
             cockpitLastRun: sv.cockpit_last_run || '',
             cockpitLastPull: sv.cockpit_ruleset_last_pull || '',
+            enrollKey: '',
+            enrolling: false,
 
             // ── ForgePush-Lizenz ──
             lic: { configured:false, valid:false, verdict:'unknown', checkedAt:0, host:'', instanceId:'', secretSet:false, keySet:false, pluginMoved:null, hardViolation:false, productSlug:'' },
@@ -405,6 +431,27 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 var min = Math.floor(sec/60); if (min < 60) return 'vor ' + min + ' Min';
                 var hr = Math.floor(min/60);  if (hr < 24)  return 'vor ' + hr + ' Std';
                 return 'vor ' + Math.floor(hr/24) + ' Tg';
+            },
+
+            enroll: function() {
+                var self = this;
+                if (!this.s.cockpit_endpoint) { bbfAdmin.showNotification('Bitte zuerst den Cockpit-Endpoint eintragen.', 'error'); return; }
+                if (!this.enrollKey) { bbfAdmin.showNotification('Bitte den Enrollment-Key eintragen.', 'error'); return; }
+                if (!this.cockpitAvvAt && !this.s.cockpit_avv_confirmed) { bbfAdmin.showNotification('Bitte zuerst die AVV / Datenschutz bestätigen.', 'error'); return; }
+                this.enrolling = true;
+                bbfAdmin.post('cockpitEnroll', {
+                    endpoint: this.s.cockpit_endpoint,
+                    enrollment_secret: this.enrollKey,
+                    avv_confirmed: this.s.cockpit_avv_confirmed ? '1' : '0'
+                }).then(function(resp) {
+                    self.enrolling = false;
+                    bbfAdmin.showNotification(resp.message || (resp.success ? 'Angemeldet' : 'Fehler'), resp.success ? 'success' : 'error');
+                    if (resp.success) {
+                        self.s.cockpit_enabled = true;
+                        if (!self.cockpitAvvAt) self.cockpitAvvAt = new Date().toISOString().slice(0,19).replace('T',' ');
+                        self.enrollKey = '';
+                    }
+                }).catch(function() { self.enrolling = false; bbfAdmin.showNotification('Anmeldung fehlgeschlagen', 'error'); });
             },
 
             saveAll: function() {

@@ -26,6 +26,8 @@
 | CAP-08 | Reibungsarmes Opt-in + AVV-Pflicht (Backend-Karte „Zentrale Erkennung": Status, AVV-Häkchen, Default AUS) | 🚀 Deployed | 1.0.52 | deploy |
 | CAP-09 | Periodisches Register (Plugin-/Shop-Version, Metadaten-Komfort) | 🚀 Deployed | 1.0.53 | deploy |
 | CAP-10 | Settings-UX-Rework: Tabs (Allgemein/Cockpit/Benachrichtigungen/Sicherheit) + Sticky-Speichern + mobiloptimiert | 🚀 Deployed | 1.0.55 | deploy |
+| CAP-11 | Cockpit-Auto-Anmeldung (Self-Registration via /api/v1/enroll, holt pro-Shop-Secret, 1-Klick + AVV) | 🚀 Deployed | 1.0.56 | deploy |
+| CAP-12 | Auto-Lizenzierung (ForgePush keyless by-domain: checkIfDue in boot, 12h, fail-open, schaltet Schutz nie ab) | 🚀 Deployed | 1.0.56 | deploy |
 
 Weitere Roadmap: führender Masterplan `docs/refactor/masterplan.md`
 (Phase 0–4: Härtung/Fail-open, Template-/Versionsrobustheit, Backend-Designsystem,

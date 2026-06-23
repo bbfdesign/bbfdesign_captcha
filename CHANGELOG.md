@@ -3,6 +3,30 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.56 – 2026-06-22
+
+### Neu (CAP-11): Auto-Anmeldung am Cockpit (Self-Registration, ForgePush-Stil)
+
+- Statt im Cockpit manuell einen Shop anzulegen und das Secret zu kopieren, meldet
+  sich das Plugin jetzt **selbst an**: neuer `CockpitEnrollService` →
+  `POST /api/v1/enroll`, signiert mit dem **geteilten Enrollment-Key**
+  (`cockpit_enrollment_secret`); das Cockpit legt den Shop automatisch an und liefert
+  das **pro-Shop-Secret** zurück, das automatisch als `cockpit_secret` gespeichert wird.
+- Backend: „**Schnell-Anmeldung**" im Cockpit-Tab — Endpoint + Enrollment-Key + AVV
+  bestätigen → Button **„Automatisch anmelden & aktivieren"** (Action `cockpitEnroll`):
+  enrollt, übernimmt das Secret, protokolliert die AVV und schaltet die zentrale
+  Erkennung ein (1-Klick). AVV bleibt Pflicht (DSGVO). Enrollment-Key wird aus dem
+  Frontend gefiltert (write-only).
+
+### Neu (CAP-12): Auto-Lizenzierung (ForgePush, keyless by-domain)
+
+- Der Lizenz-Check (`LicenseService::checkIfDue()`, keyless über Host +
+  serverFingerprint, HMAC-verifiziert) läuft jetzt **automatisch** im Boot-/Cron-Pfad
+  (gedrosselt 12 h, fail-open) — vorher lief er nur manuell im Backend. Damit ist die
+  Lizenzierung selbsttätig. **Wichtig:** ein Lizenzproblem schaltet den Spam-Schutz
+  weiterhin **NICHT** ab — es wird nur als Backend-Hinweis angezeigt (fail-open 24 h
+  Kulanz; harte Negativ-Verdikte rein informativ).
+
 ## 1.0.55 – 2026-06-21
 
 ### Verbessert (CAP-10): Einstellungen mit Tabs + mobiloptimiert (Design-Standard)
