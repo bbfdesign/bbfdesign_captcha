@@ -25,6 +25,7 @@
 | CAP-07 | Feedback-Loop: Spam-Log-Melde-Buttons (FN „ist Spam"/FP „Fehlalarm") → POST /api/v1/feedback | 🚀 Deployed | 1.0.51 | deploy |
 | CAP-08 | Reibungsarmes Opt-in + AVV-Pflicht (Backend-Karte „Zentrale Erkennung": Status, AVV-Häkchen, Default AUS) | 🚀 Deployed | 1.0.52 | deploy |
 | CAP-09 | Periodisches Register (Plugin-/Shop-Version, Metadaten-Komfort) | 🚀 Deployed | 1.0.53 | deploy |
+| CAP-10 | Settings-UX-Rework: Tabs (Allgemein/Cockpit/Benachrichtigungen/Sicherheit) + Sticky-Speichern + mobiloptimiert | 🚀 Deployed | 1.0.55 | deploy |
 
 Weitere Roadmap: führender Masterplan `docs/refactor/masterplan.md`
 (Phase 0–4: Härtung/Fail-open, Template-/Versionsrobustheit, Backend-Designsystem,

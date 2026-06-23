@@ -1,6 +1,16 @@
 <h2 class="bbf-page-title">Einstellungen</h2>
 
 <div {literal}x-data="bbfSettings()"{/literal}>
+    {literal}
+    <div class="bbf-tabs bbf-settings-tabs" role="tablist">
+        <button type="button" class="bbf-tab" role="tab" :class="{active: activeTab==='allgemein'}" @click="activeTab='allgemein'">Allgemein</button>
+        <button type="button" class="bbf-tab" role="tab" :class="{active: activeTab==='cockpit'}" @click="activeTab='cockpit'">Zentrale Erkennung</button>
+        <button type="button" class="bbf-tab" role="tab" :class="{active: activeTab==='alerts'}" @click="activeTab='alerts'">Benachrichtigungen</button>
+        <button type="button" class="bbf-tab" role="tab" :class="{active: activeTab==='sicherheit'}" @click="activeTab='sicherheit'">Sicherheit &amp; Lizenz</button>
+    </div>
+    {/literal}
+
+    <div {literal}x-show="activeTab==='allgemein'"{/literal}>
     <div class="bbf-card">
         <h3 class="bbf-card-title" style="margin-bottom: var(--bbf-spacing-lg);">Allgemeine Einstellungen</h3>
 
@@ -93,7 +103,11 @@
             </label>
         </div>
 
-        <hr style="border-color: var(--bbf-border-light); margin: var(--bbf-spacing-lg) 0;">
+    </div>
+    </div>
+
+    <div {literal}x-show="activeTab==='cockpit'"{/literal}>
+    <div class="bbf-card">
         <h3 class="bbf-card-title" style="margin-bottom: var(--bbf-spacing-lg);">Zentrale Erkennung (CaptchaCockpit)</h3>
 
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
@@ -151,7 +165,11 @@
             <span {literal}x-show="!s.cockpit_endpoint || !cockpitAvvAt"{/literal}>Aktivierung: Endpoint + Secret einf&uuml;gen, AVV best&auml;tigen, Schalter an, speichern.</span>
         </div>
 
-        <hr style="border-color: var(--bbf-border-light); margin: var(--bbf-spacing-lg) 0;">
+    </div>
+    </div>
+
+    <div {literal}x-show="activeTab==='alerts'"{/literal}>
+    <div class="bbf-card">
         <h3 class="bbf-card-title" style="margin-bottom: var(--bbf-spacing-lg);">E-Mail-Benachrichtigung bei Spam-Welle</h3>
 
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
@@ -177,7 +195,11 @@
             </div>
         </div>
 
-        <hr style="border-color: var(--bbf-border-light); margin: var(--bbf-spacing-lg) 0;">
+    </div>
+    </div>
+
+    <div {literal}x-show="activeTab==='sicherheit'"{/literal}>
+    <div class="bbf-card">
         <h3 class="bbf-card-title" style="margin-bottom: var(--bbf-spacing-lg);">ALTCHA HMAC-Key</h3>
 
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
@@ -191,9 +213,6 @@
             </div>
         </div>
 
-        <div style="margin-top: var(--bbf-spacing-xl);">
-            <button type="button" class="bbf-btn bbf-btn-primary" {literal}@click="saveAll()"{/literal}>Alle Einstellungen speichern</button>
-        </div>
     </div>
 
     {* ── ForgePush-Lizenz ── *}
@@ -261,6 +280,12 @@
             <button type="button" class="bbf-btn bbf-btn-secondary" @click="recheckLicense()" :disabled="licBusy">Jetzt prüfen</button>
         </div>
     </div>
+    </div>
+
+    <div class="bbf-settings-savebar">
+        <button type="button" class="bbf-btn bbf-btn-primary" @click="saveAll()">Alle Einstellungen speichern</button>
+        <span class="bbf-settings-savebar-hint">Speichert alle Tabs. Die ForgePush-Lizenz hat einen eigenen Speichern-Button.</span>
+    </div>
     {/literal}
 </div>
 
@@ -273,6 +298,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
     Alpine.data('bbfSettings', function() {
         var sv = window.bbfServerSettings || {};
         return {
+            activeTab: 'allgemein',
             s: {
                 global_enabled: sv.global_enabled === '1',
                 default_action: sv.default_action || 'both',

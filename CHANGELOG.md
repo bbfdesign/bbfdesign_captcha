@@ -3,6 +3,21 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.55 – 2026-06-21
+
+### Verbessert (CAP-10): Einstellungen mit Tabs + mobiloptimiert (Design-Standard)
+
+- Die lange Einspalten-Liste der Einstellungen ist jetzt in **4 Tabs** gegliedert:
+  **Allgemein** (inkl. Formular-Abdeckung), **Zentrale Erkennung** (Cockpit),
+  **Benachrichtigungen** (Spam-Wellen-Mail), **Sicherheit & Lizenz** (ALTCHA-Key +
+  ForgePush). Nutzt die bestehende `.bbf-tabs`-Komponente des BBF-Designsystems.
+- **Mobiloptimiert:** Tab-Leiste horizontal scrollbar (kein Umbruch/Überlauf),
+  Form-Grid stapelt einspaltig, Speichern-Button füllt die Breite.
+- **Globale Sticky-Speichern-Leiste** unten („Alle Einstellungen speichern",
+  über alle Tabs sichtbar) statt eines am Seitenende versteckten Buttons; die
+  ForgePush-Lizenz behält ihren eigenen Speichern-Button. Reine UI-Strukturierung,
+  keine Funktions-/Logikänderung an den Einstellungen.
+
 ## 1.0.54 – 2026-06-21
 
 ### Fix: Suche bricht bei aktivem Plugin (Honeypot/Timing trafen Such-Formular)
