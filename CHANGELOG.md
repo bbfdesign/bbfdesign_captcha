@@ -3,6 +3,26 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.57 – 2026-06-22
+
+### Behoben/Neu (CAP-13): echte Zero-Touch-Selbstanmeldung am Cockpit
+
+- CAP-11 war nur ein **manueller** Button → es hat sich nie ein Plugin automatisch
+  registriert. Jetzt meldet sich das Plugin **beim Boot selbst an**: neuer
+  `CockpitEnrollService::enrollIfDue()` (gedrosselt 6 h, fail-open, kein Hotpath) –
+  wenn noch kein `cockpit_secret` vorliegt **und** ein Anmelde-Schlüssel verfügbar
+  ist → `POST /api/v1/enroll`, `shopSecret` + Endpoint werden gespeichert. Der Shop
+  erscheint dadurch automatisch im Cockpit. Telemetrie bleibt davon getrennt (AVV-gated).
+- **Kein Secret im Repo** (ForgePush-Modell): der geteilte Anmelde-Schlüssel kommt –
+  wie das ForgePush-Signing-Secret – aus einer **Server-Konstante**
+  `define('BBFCAPTCHA_ENROLLMENT_SECRET', …)` (oder optional aus dem Backend-Setting),
+  niemals aus dem Plugin-Code. Auflösung: Setting → Server-Konstante → leer (= aus).
+  Endpoint-Default `https://captchacockpit.bbfdesign.de` (überschreibbar).
+- Auto-Lizenzierung war bereits korrekt (LicenseService liest `FORGEPUSH_SIGNING_SECRET`
+  als Konstante; `checkIfDue()` seit CAP-12 im Boot) – greift, sobald die Konstante
+  gesetzt ist. UI: Schnell-Anmeldung vereinfacht (Schlüssel optional), AVV-Link auf
+  `…/datenschutz`.
+
 ## 1.0.56 – 2026-06-22
 
 ### Neu (CAP-11): Auto-Anmeldung am Cockpit (Self-Registration, ForgePush-Stil)

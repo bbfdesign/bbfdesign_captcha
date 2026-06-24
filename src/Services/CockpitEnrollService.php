@@ -6,6 +6,7 @@ namespace Plugin\bbfdesign_captcha\src\Services;
 
 use JTL\DB\DbInterface;
 use JTL\Shop;
+use Plugin\bbfdesign_captcha\src\Config\CockpitDefaults;
 use Plugin\bbfdesign_captcha\src\Models\Setting;
 
 /**
@@ -32,6 +33,53 @@ class CockpitEnrollService
         $this->settings = $settings;
     }
 
+    /** Effektiver Endpoint: Setting → ausgelieferter Default. */
+    public function effectiveEndpoint(): string
+    {
+        $ep = trim($this->settings->get('cockpit_endpoint'));
+        return rtrim($ep !== '' ? $ep : CockpitDefaults::ENDPOINT, '/');
+    }
+
+    /** Effektiver Enrollment-Key: Setting → Server-Konstante → leer. */
+    public function effectiveEnrollmentKey(): string
+    {
+        $k = trim($this->settings->get('cockpit_enrollment_secret'));
+        return $k !== '' ? $k : CockpitDefaults::enrollmentSecretFromConstant();
+    }
+
+    /**
+     * Zero-Touch-Selbstanmeldung beim Boot/Cron: wenn noch KEIN cockpit_secret
+     * vorliegt und ein Enrollment-Key verfügbar ist, einmalig (gedrosselt) enrollen.
+     * Fail-open, nie im Hotpath. Telemetrie bleibt davon getrennt (AVV-gated).
+     */
+    public function enrollIfDue(): void
+    {
+        // Schon angemeldet? Nichts tun.
+        if ($this->settings->get('cockpit_secret') !== '') {
+            return;
+        }
+        // Kein Key (weder Setting noch Server-Konstante) → Auto-Enroll aus.
+        if ($this->effectiveEnrollmentKey() === '') {
+            return;
+        }
+        // Fehler-Backoff: höchstens alle 6 h ein Versuch.
+        $last = $this->settings->getInt('cockpit_enroll_last', 0);
+        if ($last > 0 && (time() - $last) < 21600) {
+            return;
+        }
+        $this->settings->set('cockpit_enroll_last', (string)time(), 'cockpit');
+        try {
+            $this->enroll();
+        } catch (\Throwable $e) {
+            if ($this->settings->getBool('debug_mode')) {
+                try {
+                    Shop::Container()->getLogService()->warning('BBF Captcha enrollIfDue: ' . $e->getMessage());
+                } catch (\Throwable) {
+                }
+            }
+        }
+    }
+
     /**
      * Führt die Selbst-Anmeldung aus und speichert bei Erfolg das pro-Shop-Secret.
      *
@@ -39,13 +87,13 @@ class CockpitEnrollService
      */
     public function enroll(): array
     {
-        $endpoint        = rtrim($this->settings->get('cockpit_endpoint'), '/');
-        $enrollmentKey   = $this->settings->get('cockpit_enrollment_secret');
+        $endpoint        = $this->effectiveEndpoint();
+        $enrollmentKey   = $this->effectiveEnrollmentKey();
         if ($endpoint === '') {
-            return ['success' => false, 'message' => 'Bitte zuerst den Cockpit-Endpoint eintragen.'];
+            return ['success' => false, 'message' => 'Kein Cockpit-Endpoint konfiguriert.'];
         }
         if ($enrollmentKey === '') {
-            return ['success' => false, 'message' => 'Bitte den Enrollment-Key (Anmelde-Schlüssel) eintragen.'];
+            return ['success' => false, 'message' => 'Kein Anmelde-Schlüssel verfügbar (Setting oder Server-Konstante BBFCAPTCHA_ENROLLMENT_SECRET).'];
         }
 
         $license = new LicenseService($this->db, $this->settings);
@@ -117,6 +165,11 @@ class CockpitEnrollService
 
         // Pro-Shop-Secret übernehmen → ab jetzt per-Shop-HMAC für ingest/ruleset/feedback.
         $this->settings->set('cockpit_secret', $secret, 'cockpit');
+        // Endpoint persistieren (falls über den Default enrollt wurde), damit
+        // Telemetrie/Ruleset/Feedback denselben Endpoint verwenden.
+        if (trim($this->settings->get('cockpit_endpoint')) === '') {
+            $this->settings->set('cockpit_endpoint', $endpoint, 'cockpit');
+        }
         if (isset($data['rulesetVersion'])) {
             $this->settings->set('cockpit_ruleset_version', (string)(int)$data['rulesetVersion'], 'cockpit');
         }

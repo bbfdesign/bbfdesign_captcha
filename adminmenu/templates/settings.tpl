@@ -112,23 +112,23 @@
 
         {* CAP-11: Schnell-/Auto-Anmeldung – Plugin registriert sich selbst, Secret kommt automatisch *}
         <div class="bbf-alert bbf-alert-info" style="margin-bottom: var(--bbf-spacing-md);" {literal}x-show="!cockpitAvvAt"{/literal} x-cloak>
-            <strong>Schnell-Anmeldung (empfohlen)</strong>
-            <div class="bbf-form-help" style="margin-top:4px;">Endpoint + Anmelde-Schl&uuml;ssel eingeben, AVV best&auml;tigen, anmelden &ndash; das Plugin registriert sich selbst am Cockpit und erh&auml;lt sein Secret automatisch. Kein manuelles Secret-Kopieren n&ouml;tig.</div>
+            <strong>Selbst-Anmeldung</strong>
+            <div class="bbf-form-help" style="margin-top:4px;">Das Plugin meldet sich beim Cockpit <strong>automatisch beim n&auml;chsten Start</strong> selbst an (sobald der geteilte Anmelde-Schl&uuml;ssel als Server-Konstante <code>BBFCAPTCHA_ENROLLMENT_SECRET</code> gesetzt ist) und erh&auml;lt sein Secret von allein &ndash; kein manuelles Kopieren. Hier kannst du den Schl&uuml;ssel alternativ eintragen und sofort anmelden.</div>
         </div>
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
             <label class="bbf-form-label">
-                Anmelde-Schl&uuml;ssel (Enrollment-Key)
-                <div class="bbf-form-help">Geteilter Schl&uuml;ssel von BBF f&uuml;r die Selbst-Anmeldung. Wird nur server&shy;seitig gespeichert.</div>
+                Anmelde-Schl&uuml;ssel (optional)
+                <div class="bbf-form-help">Nur n&ouml;tig, falls die Server-Konstante <code>BBFCAPTCHA_ENROLLMENT_SECRET</code> nicht gesetzt ist. Wird nur server&shy;seitig gespeichert.</div>
             </label>
-            <input type="password" autocomplete="new-password" class="bbf-input" style="max-width: 420px;" placeholder="Enrollment-Key einf&uuml;gen" {literal}x-model="enrollKey"{/literal}>
+            <input type="password" autocomplete="new-password" class="bbf-input" style="max-width: 420px;" placeholder="Anmelde-Schl&uuml;ssel (optional)" {literal}x-model="enrollKey"{/literal}>
         </div>
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-lg);">
-            <label class="bbf-form-label">Automatisch anmelden</label>
+            <label class="bbf-form-label">Jetzt anmelden</label>
             <div>
                 <button type="button" class="bbf-btn bbf-btn-primary" {literal}@click="enroll()" :disabled="enrolling"{/literal}>
-                    <span {literal}x-text="enrolling ? 'Melde an…' : 'Automatisch anmelden &amp; aktivieren'"{/literal}>Automatisch anmelden &amp; aktivieren</span>
+                    <span {literal}x-text="enrolling ? 'Melde an…' : 'Jetzt anmelden &amp; aktivieren'"{/literal}>Jetzt anmelden &amp; aktivieren</span>
                 </button>
-                <div class="bbf-form-help" style="margin-top:6px;">Benötigt Endpoint + Enrollment-Key + AVV-Best&auml;tigung (unten).</div>
+                <div class="bbf-form-help" style="margin-top:6px;">Ben&ouml;tigt nur die AVV-Best&auml;tigung (unten); Schl&uuml;ssel + Endpoint kommen aus Server-Konstante/Default.</div>
             </div>
         </div>
 
@@ -170,7 +170,7 @@
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);" {literal}x-show="!cockpitAvvAt"{/literal}>
             <label class="bbf-form-label">
                 Auftragsverarbeitung (AVV) / Datenschutz best&auml;tigen
-                <div class="bbf-form-help">Pflicht zum Aktivieren. Mit der Best&auml;tigung beauftragst du BBF Design mit der Verarbeitung <strong>pseudonymer</strong> Spam-Telemetrie (Art. 6 (1) f &ndash; IT-Sicherheit; keine Klar-IP, kein Klartext, keine vollst&auml;ndigen E-Mail-Adressen). Details: <a {literal}:href="s.cockpit_endpoint || '#'"{/literal} target="_blank" rel="noopener noreferrer">Verarbeitungs-/AVV-Informationen</a>.</div>
+                <div class="bbf-form-help">Pflicht zum Aktivieren. Mit der Best&auml;tigung beauftragst du BBF Design mit der Verarbeitung <strong>pseudonymer</strong> Spam-Telemetrie (Art. 6 (1) f &ndash; IT-Sicherheit; keine Klar-IP, kein Klartext, keine vollst&auml;ndigen E-Mail-Adressen). Details: <a {literal}:href="(s.cockpit_endpoint || 'https://captchacockpit.bbfdesign.de') + '/datenschutz'"{/literal} target="_blank" rel="noopener noreferrer">Verarbeitungs-/AVV-Informationen</a>.</div>
             </label>
             <label class="bbf-toggle">
                 <input type="checkbox" {literal}x-model="s.cockpit_avv_confirmed"{/literal}>
@@ -435,8 +435,6 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
 
             enroll: function() {
                 var self = this;
-                if (!this.s.cockpit_endpoint) { bbfAdmin.showNotification('Bitte zuerst den Cockpit-Endpoint eintragen.', 'error'); return; }
-                if (!this.enrollKey) { bbfAdmin.showNotification('Bitte den Enrollment-Key eintragen.', 'error'); return; }
                 if (!this.cockpitAvvAt && !this.s.cockpit_avv_confirmed) { bbfAdmin.showNotification('Bitte zuerst die AVV / Datenschutz bestätigen.', 'error'); return; }
                 this.enrolling = true;
                 bbfAdmin.post('cockpitEnroll', {

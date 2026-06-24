@@ -67,6 +67,11 @@ class Bootstrap extends Bootstrapper
 
             // Zentrale Telemetrie ans CaptchaCockpit (Default AUS, fail-open,
             // DSGVO-minimiert). Gedrosselt; sendet nur, wenn konfiguriert.
+            // CAP-13: Zero-Touch-Selbstanmeldung am Cockpit (gedrosselt, fail-open, kein
+            // Hotpath). Enrollt nur, wenn noch kein Secret da ist und ein Enrollment-Key
+            // verfügbar ist (Setting oder Server-Konstante BBFCAPTCHA_ENROLLMENT_SECRET).
+            (new \Plugin\bbfdesign_captcha\src\Services\CockpitEnrollService($db, $this->settingsModel))->enrollIfDue();
+
             $cockpitTelemetry = new \Plugin\bbfdesign_captcha\src\Services\CockpitTelemetryService($db, $this->settingsModel);
             $cockpitTelemetry->runIfDue();
             $cockpitTelemetry->registerIfDue();
