@@ -29,6 +29,7 @@
 | CAP-11 | Cockpit-Auto-Anmeldung (Self-Registration via /api/v1/enroll, holt pro-Shop-Secret, 1-Klick + AVV) | 🚀 Deployed | 1.0.56 | deploy |
 | CAP-12 | Auto-Lizenzierung (ForgePush keyless by-domain: checkIfDue in boot, 12h, fail-open, schaltet Schutz nie ab) | 🚀 Deployed | 1.0.56 | deploy |
 | CAP-13 | Zero-Touch-Selbstanmeldung: enrollIfDue() im Boot (Key+Endpoint aus Server-Konstante BBFCAPTCHA_ENROLLMENT_SECRET/Default, kein Secret im Repo) | 🚀 Deployed | 1.0.57 | deploy |
+| CAP-14 | Newsletter-Bombing-Schutz: ALTCHA-Nachweis beim Newsletter verpflichtend (fehlend = Bot); Login/Reg/Checkout bleiben fail-open | 🚀 Deployed | 1.0.58 | deploy |
 
 Weitere Roadmap: führender Masterplan `docs/refactor/masterplan.md`
 (Phase 0–4: Härtung/Fail-open, Template-/Versionsrobustheit, Backend-Designsystem,

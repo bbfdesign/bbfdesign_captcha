@@ -227,6 +227,28 @@ class CaptchaService
     }
 
     /**
+     * Formulare mit ALTCHA-PFLICHT: hier zählt eine FEHLENDE Lösung als Fehlschlag
+     * (statt fail-open).
+     *
+     * Begründung: Honeypot + Timing sind wertlos gegen einen Bot, der die Seite lädt
+     * (er braucht ohnehin den jtl_token und bekommt Timing-Token/Honeypot-Felder gratis).
+     * Er lässt dann einfach den Proof-of-Work weg. Für UNKRITISCHE Formulare wie den
+     * Newsletter ist das Abweisen richtig: ein nicht zustande gekommenes Abo ist harmlos,
+     * Missbrauch (E-Mail-Bombing an fremde Adressen über den Shop) dagegen teuer.
+     *
+     * NIEMALS für Login/Registrierung/Checkout/Widerruf – die bleiben fail-open,
+     * damit echte Kunden nie ausgesperrt werden. Abschaltbar über
+     * `newsletter_require_altcha = 0`.
+     */
+    private function requiresAltchaProof(string $formType): bool
+    {
+        if ($formType !== 'newsletter') {
+            return false;
+        }
+        return $this->settings->get('newsletter_require_altcha', '1') === '1';
+    }
+
+    /**
      * Prüft die eingehende IP/E-Mail gegen die zentrale Cockpit-Blocklist.
      * Reihenfolge: ipHash (lokaler Pepper, wie beim Senden) → ipPrefix (CIDR) → E-Mail-Domain.
      * Liefert den Block-Grund oder null. Fail-safe (Aufrufer fängt Fehler).
@@ -431,6 +453,17 @@ class CaptchaService
             if (!$result['valid']) {
                 $totalScore += $result['score'];
                 $reasons[]   = $result['reason'];
+                if (empty($detectionMethod)) {
+                    $detectionMethod = 'altcha';
+                }
+            } elseif ($this->requiresAltchaProof($formType)
+                && empty($postData[AltchaService::fieldName()])
+            ) {
+                // Pflicht-Formular OHNE Nachweis = der klassische Bot-Direkt-POST:
+                // Honeypot leer + Timing-Token von der Seite geklaut, aber kein
+                // Proof-of-Work. Für diese Formulare zählt das als Fehlschlag.
+                $totalScore += 100;
+                $reasons[]   = 'ALTCHA-Nachweis fehlt (für dieses Formular verpflichtend)';
                 if (empty($detectionMethod)) {
                     $detectionMethod = 'altcha';
                 }

@@ -103,6 +103,17 @@
             </label>
         </div>
 
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">
+                Newsletter: Proof-of-Work verpflichtend
+                <div class="bbf-form-help">Sch&uuml;tzt gegen <strong>Newsletter-Bombing</strong> (Bots tragen fremde E-Mail-Adressen ein, euer Shop verschickt die Best&auml;tigungsmails). Ein Bot l&auml;dt die Seite, bekommt Timing-Token und leere Honeypots gratis und l&auml;sst nur den ALTCHA-Nachweis weg. Mit dieser Option gilt ein <strong>fehlender</strong> Nachweis beim Newsletter als Bot. Gilt <strong>ausschlie&szlig;lich</strong> f&uuml;r das Newsletter-Formular &ndash; Login, Registrierung, Checkout und Widerruf bleiben unver&auml;ndert fail-open. Nur abschalten, wenn Abonnenten ohne JavaScript zwingend m&ouml;glich sein m&uuml;ssen.</div>
+            </label>
+            <label class="bbf-toggle">
+                <input type="checkbox" {literal}x-model="s.newsletter_require_altcha"{/literal}>
+                <span class="bbf-toggle-slider"></span>
+            </label>
+        </div>
+
     </div>
     </div>
 
@@ -335,6 +346,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 email_alert_threshold: sv.email_alert_threshold || 50,
                 email_alert_window: sv.email_alert_window || 60,
                 native_captcha_integration: sv.native_captcha_integration === '1',
+                newsletter_require_altcha: sv.newsletter_require_altcha !== '0',
                 cockpit_enabled: sv.cockpit_enabled === '1',
                 cockpit_endpoint: sv.cockpit_endpoint || '',
                 cockpit_secret: '',

@@ -23,6 +23,12 @@ class AltchaService
     /** Name des Hidden-Fields */
     private const FIELD_NAME = 'bbf_altcha';
 
+    /** Name des POST-Feldes mit der ALTCHA-Lösung (für Pflicht-Prüfungen von außen). */
+    public static function fieldName(): string
+    {
+        return self::FIELD_NAME;
+    }
+
     public function __construct(Setting $settings)
     {
         $this->settings = $settings;

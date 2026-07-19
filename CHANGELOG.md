@@ -3,6 +3,28 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.58 – 2026-07-19
+
+### Behoben (CAP-14): Newsletter-Bombing – Bots trugen fremde E-Mail-Adressen ein
+
+- **Vorfall:** Über das Newsletter-Formular wurden fremde Adressen abonniert; der
+  Shop verschickte die Opt-in-Bestätigungen (E-Mail-Bombing über den Shop,
+  Absender-Reputation in Gefahr).
+- **Ursache:** Honeypot + Timing sind wirkungslos gegen einen Bot, der die Seite
+  lädt – er braucht ohnehin den `jtl_token` und bekommt Timing-Token und leere
+  Honeypot-Felder gratis. Er lässt dann nur den ALTCHA-Nachweis (`bbf_altcha`) weg.
+  Eine **fehlende** ALTCHA-Lösung gilt bewusst als fail-open (score 0), damit nie
+  ein echter Kunde ausgesperrt wird → Score 0 → durchgelassen.
+- **Fix:** Für das **Newsletter-Formular** ist der ALTCHA-Nachweis jetzt
+  **verpflichtend** – fehlt er, wird die Übermittlung als Bot gewertet (+100).
+  Bewusst nur hier: ein nicht zustande gekommenes Abo ist harmlos, Missbrauch als
+  Mail-Schleuder teuer. **Login, Registrierung, Checkout und Widerruf bleiben
+  unverändert fail-open** (echte Kunden werden nie ausgesperrt).
+- Greift nur, wo ALTCHA für den Newsletter aktiv ist (Widget wird dann nachweislich
+  gerendert) → kein Lockout, wo es nicht aktiv ist. Abschaltbar über den neuen
+  Schalter „Newsletter: Proof-of-Work verpflichtend" (Einstellungen → Allgemein →
+  Formular-Abdeckung, Default AN).
+
 ## 1.0.57 – 2026-06-22
 
 ### Behoben/Neu (CAP-13): echte Zero-Touch-Selbstanmeldung am Cockpit
