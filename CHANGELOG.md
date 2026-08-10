@@ -3,6 +3,26 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.59 – 2026-08-10
+
+### Neu (CAP-15): Kopplung per Einmal-Code – Anbindung ans Cockpit ohne Serverzugriff
+
+- **Warum:** Die Selbstanmeldung (CAP-13) brauchte die geteilte Server-Konstante
+  `BBFCAPTCHA_ENROLLMENT_SECRET`. Die war auf keinem Shop gesetzt – also meldete
+  sich nie eine Installation an, es floss keine Telemetrie, und die Zentrale
+  konnte bei Spam-Wellen nicht helfen. Der Code-Weg beseitigt diese Hürde.
+- **Ablauf:** Im Cockpit unter *Instanzen* einen Kopplungs-Code erzeugen
+  (`BBF-XXXX-XXXX`), unter *Einstellungen → Zentrale Erkennung* eintragen,
+  „Koppeln & aktivieren". Die Installation holt sich ihr Shop-Secret selbst.
+- `CockpitEnrollService::pair()` gegen `POST /api/v1/pair` (Cockpit CC-14,
+  Vertrag §2b) – ohne Signatur, der Code ist der Nachweis. Klartext wird nicht
+  gespeichert, nur eingelöst. Verständliche Meldungen für unbekannt (401),
+  bereits eingelöst (409), abgelaufen (410) und zu viele Versuche (429).
+- Admin-Action `cockpitPair` mit derselben AVV-Pflicht wie `cockpitEnroll`.
+- Der Schlüssel-Weg bleibt als aufklappbare Alternative für den Massen-Rollout.
+- Intern: `identityPayload()`, `post()` und `storeSecretFromResponse()` geteilt
+  zwischen Enrollment und Kopplung – keine doppelte Logik.
+
 ## 1.0.58 – 2026-07-19
 
 ### Behoben (CAP-14): Newsletter-Bombing – Bots trugen fremde E-Mail-Adressen ein

@@ -121,27 +121,51 @@
     <div class="bbf-card">
         <h3 class="bbf-card-title" style="margin-bottom: var(--bbf-spacing-lg);">Zentrale Erkennung (CaptchaCockpit)</h3>
 
-        {* CAP-11: Schnell-/Auto-Anmeldung – Plugin registriert sich selbst, Secret kommt automatisch *}
+        {* CAP-15: Kopplung per Einmal-Code – der Normalweg, kein Serverzugriff nötig *}
         <div class="bbf-alert bbf-alert-info" style="margin-bottom: var(--bbf-spacing-md);" {literal}x-show="!cockpitAvvAt"{/literal} x-cloak>
-            <strong>Selbst-Anmeldung</strong>
-            <div class="bbf-form-help" style="margin-top:4px;">Das Plugin meldet sich beim Cockpit <strong>automatisch beim n&auml;chsten Start</strong> selbst an (sobald der geteilte Anmelde-Schl&uuml;ssel als Server-Konstante <code>BBFCAPTCHA_ENROLLMENT_SECRET</code> gesetzt ist) und erh&auml;lt sein Secret von allein &ndash; kein manuelles Kopieren. Hier kannst du den Schl&uuml;ssel alternativ eintragen und sofort anmelden.</div>
+            <strong>Mit dem Cockpit koppeln</strong>
+            <div class="bbf-form-help" style="margin-top:4px;">Im Cockpit unter <strong>Instanzen</strong> einen Kopplungs-Code erzeugen (Form <code>BBF-XXXX-XXXX</code>), hier eintragen, koppeln &ndash; fertig. Der Code gilt einmalig und 15&nbsp;Minuten; Gro&szlig;-/Kleinschreibung und Bindestriche sind egal. Danach holt sich diese Installation ihr Secret selbst.</div>
         </div>
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
             <label class="bbf-form-label">
-                Anmelde-Schl&uuml;ssel (optional)
-                <div class="bbf-form-help">Nur n&ouml;tig, falls die Server-Konstante <code>BBFCAPTCHA_ENROLLMENT_SECRET</code> nicht gesetzt ist. Wird nur server&shy;seitig gespeichert.</div>
+                Kopplungs-Code
+                <div class="bbf-form-help">Aus dem Cockpit, einmalig g&uuml;ltig. Wird nicht gespeichert &ndash; nur eingel&ouml;st.</div>
             </label>
-            <input type="password" autocomplete="new-password" class="bbf-input" style="max-width: 420px;" placeholder="Anmelde-Schl&uuml;ssel (optional)" {literal}x-model="enrollKey"{/literal}>
+            <input type="text" autocomplete="off" spellcheck="false" class="bbf-input" style="max-width: 420px; font-family: var(--bbf-font-mono, monospace); letter-spacing: .12em; text-transform: uppercase;" placeholder="BBF-XXXX-XXXX" {literal}x-model="pairCode"{/literal}>
         </div>
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-lg);">
-            <label class="bbf-form-label">Jetzt anmelden</label>
+            <label class="bbf-form-label">Jetzt koppeln</label>
             <div>
-                <button type="button" class="bbf-btn bbf-btn-primary" {literal}@click="enroll()" :disabled="enrolling"{/literal}>
-                    <span {literal}x-text="enrolling ? 'Melde an…' : 'Jetzt anmelden &amp; aktivieren'"{/literal}>Jetzt anmelden &amp; aktivieren</span>
+                <button type="button" class="bbf-btn bbf-btn-primary" {literal}@click="pair()" :disabled="pairing || !pairCode"{/literal}>
+                    <span {literal}x-text="pairing ? 'Koppele…' : 'Koppeln &amp; aktivieren'"{/literal}>Koppeln &amp; aktivieren</span>
                 </button>
-                <div class="bbf-form-help" style="margin-top:6px;">Ben&ouml;tigt nur die AVV-Best&auml;tigung (unten); Schl&uuml;ssel + Endpoint kommen aus Server-Konstante/Default.</div>
+                <div class="bbf-form-help" style="margin-top:6px;">Ben&ouml;tigt zus&auml;tzlich die AVV-Best&auml;tigung (unten).</div>
             </div>
         </div>
+
+        <hr style="border-color: var(--bbf-border-light); margin: var(--bbf-spacing-md) 0;">
+
+        {* CAP-11: Alternativweg für Massen-Rollout – geteilter Schlüssel als Server-Konstante *}
+        <details style="margin-bottom: var(--bbf-spacing-lg);">
+            <summary style="cursor:pointer;">Alternative: Anmeldung per Anmelde-Schl&uuml;ssel (Massen-Rollout)</summary>
+            <div style="margin-top: var(--bbf-spacing-md);">
+                <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+                    <label class="bbf-form-label">
+                        Anmelde-Schl&uuml;ssel (optional)
+                        <div class="bbf-form-help">Nur n&ouml;tig, falls die Server-Konstante <code>BBFCAPTCHA_ENROLLMENT_SECRET</code> nicht gesetzt ist. Ist sie gesetzt, meldet sich das Plugin beim n&auml;chsten Start von allein an. Wird nur server&shy;seitig gespeichert.</div>
+                    </label>
+                    <input type="password" autocomplete="new-password" class="bbf-input" style="max-width: 420px;" placeholder="Anmelde-Schl&uuml;ssel (optional)" {literal}x-model="enrollKey"{/literal}>
+                </div>
+                <div class="bbf-form-grid">
+                    <label class="bbf-form-label">Jetzt anmelden</label>
+                    <div>
+                        <button type="button" class="bbf-btn bbf-btn-secondary" {literal}@click="enroll()" :disabled="enrolling"{/literal}>
+                            <span {literal}x-text="enrolling ? 'Melde an…' : 'Anmelden &amp; aktivieren'"{/literal}>Anmelden &amp; aktivieren</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </details>
 
         <hr style="border-color: var(--bbf-border-light); margin: var(--bbf-spacing-md) 0;">
 
@@ -362,6 +386,8 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
             cockpitLastPull: sv.cockpit_ruleset_last_pull || '',
             enrollKey: '',
             enrolling: false,
+            pairCode: '',
+            pairing: false,
 
             // ── ForgePush-Lizenz ──
             lic: { configured:false, valid:false, verdict:'unknown', checkedAt:0, host:'', instanceId:'', secretSet:false, keySet:false, pluginMoved:null, hardViolation:false, productSlug:'' },
@@ -443,6 +469,26 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 var min = Math.floor(sec/60); if (min < 60) return 'vor ' + min + ' Min';
                 var hr = Math.floor(min/60);  if (hr < 24)  return 'vor ' + hr + ' Std';
                 return 'vor ' + Math.floor(hr/24) + ' Tg';
+            },
+
+            pair: function() {
+                var self = this;
+                if (!this.cockpitAvvAt && !this.s.cockpit_avv_confirmed) { bbfAdmin.showNotification('Bitte zuerst die AVV / Datenschutz bestätigen.', 'error'); return; }
+                if (!this.pairCode) { bbfAdmin.showNotification('Bitte den Kopplungs-Code eintragen.', 'error'); return; }
+                this.pairing = true;
+                bbfAdmin.post('cockpitPair', {
+                    endpoint: this.s.cockpit_endpoint,
+                    code: this.pairCode,
+                    avv_confirmed: this.s.cockpit_avv_confirmed ? '1' : '0'
+                }).then(function(resp) {
+                    self.pairing = false;
+                    bbfAdmin.showNotification(resp.message || (resp.success ? 'Gekoppelt' : 'Fehler'), resp.success ? 'success' : 'error');
+                    if (resp.success) {
+                        self.s.cockpit_enabled = true;
+                        if (!self.cockpitAvvAt) self.cockpitAvvAt = new Date().toISOString().slice(0,19).replace('T',' ');
+                        self.pairCode = '';
+                    }
+                }).catch(function() { self.pairing = false; bbfAdmin.showNotification('Kopplung fehlgeschlagen', 'error'); });
             },
 
             enroll: function() {

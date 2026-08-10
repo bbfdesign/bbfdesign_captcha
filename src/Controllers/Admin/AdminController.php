@@ -75,6 +75,8 @@ class AdminController
 
             case 'cockpitEnroll':
                 return $this->cockpitEnroll($request);
+            case 'cockpitPair':
+                return $this->cockpitPair($request);
 
             case 'blockIp':
                 return $this->blockIp($request);
@@ -610,6 +612,59 @@ class AdminController
         return $this->jsonResponse([
             'success' => true,
             'message' => 'Automatisch angemeldet und zentrale Erkennung aktiviert.',
+        ]);
+    }
+
+    /**
+     * Kopplung per Einmal-Code (CAP-15, Cockpit CC-14). Gleicher Ablauf wie
+     * cockpitEnroll, nur ohne geteilten Server-Schlüssel: der Code aus dem
+     * Cockpit ist der Nachweis. Nach Erfolg wird – wie beim Enrollment – die
+     * AVV protokolliert und die zentrale Erkennung aktiviert.
+     */
+    private function cockpitPair(array $request): string
+    {
+        $endpoint = trim((string)($request['endpoint'] ?? ''));
+        $code     = trim((string)($request['code'] ?? ''));
+        $avv      = (string)($request['avv_confirmed'] ?? '') === '1';
+
+        if ($code === '') {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'Bitte den Kopplungs-Code aus dem Cockpit eintragen.',
+            ]);
+        }
+        if ($endpoint !== '') {
+            $this->settings->set('cockpit_endpoint', $endpoint, 'cockpit');
+            $this->settings->invalidateCache();
+        }
+
+        $avvAlready = $this->settings->get('cockpit_avv_confirmed_at') !== '';
+        if (!$avvAlready && !$avv) {
+            return $this->jsonResponse([
+                'success' => false,
+                'message' => 'Bitte zuerst die Auftragsverarbeitung (AVV) / Datenschutz bestätigen.',
+            ]);
+        }
+
+        $service = new \Plugin\bbfdesign_captcha\src\Services\CockpitEnrollService($this->db, $this->settings);
+        $result  = $service->pair($code);
+        if (empty($result['success'])) {
+            return $this->jsonResponse($result);
+        }
+
+        if (!$avvAlready) {
+            $this->settings->set('cockpit_avv_confirmed_at', date('Y-m-d H:i:s'), 'cockpit');
+            $admin = $_SESSION['AdminAccount']->cLogin ?? '';
+            if ($admin !== '') {
+                $this->settings->set('cockpit_avv_confirmed_by', (string)$admin, 'cockpit');
+            }
+        }
+        $this->settings->set('cockpit_enabled', '1', 'cockpit');
+        $this->settings->invalidateCache();
+
+        return $this->jsonResponse([
+            'success' => true,
+            'message' => 'Gekoppelt und zentrale Erkennung aktiviert.',
         ]);
     }
 
