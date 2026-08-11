@@ -80,6 +80,14 @@
 
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
             <label class="bbf-form-label">
+                Zustell-Adresse f&uuml;r nachgereichte Nachrichten
+                <div class="bbf-form-help">Ein Fehlalarm w&uuml;rde die Anfrage eines echten Kunden verschlucken. Im Spam-Log l&auml;sst sich eine blockierte Einreichung deshalb nachtr&auml;glich per Mail zustellen &ndash; hier steht, wohin. Leer = Master-Absender des Shops. Setzt voraus, dass „Formulardaten protokollieren" aktiv war.</div>
+            </label>
+            <input type="email" class="bbf-input" style="max-width: 420px;" placeholder="z.&nbsp;B. info@deinshop.de" {literal}x-model="s.delivery_recipient"{/literal}>
+        </div>
+
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">
                 Debug-Modus
                 <div class="bbf-form-help">Zus&auml;tzliches Logging f&uuml;r Fehlersuche</div>
             </label>
@@ -407,6 +415,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 auto_cleanup: sv.auto_cleanup === '1',
                 log_request_data: sv.log_request_data !== '0',
                 debug_mode: sv.debug_mode === '1',
+                delivery_recipient: sv.delivery_recipient || '',
                 email_alert_enabled: sv.email_alert_enabled === '1',
                 email_alert_address: sv.email_alert_address || '',
                 email_alert_threshold: sv.email_alert_threshold || 50,

@@ -77,6 +77,8 @@ class AdminController
                 return $this->cockpitEnroll($request);
             case 'cockpitPair':
                 return $this->cockpitPair($request);
+            case 'deliverBlocked':
+                return $this->deliverBlocked($request);
 
             case 'blockIp':
                 return $this->blockIp($request);
@@ -666,6 +668,24 @@ class AdminController
             'success' => true,
             'message' => 'Gekoppelt und zentrale Erkennung aktiviert.',
         ]);
+    }
+
+    /**
+     * CAP-17: eine blockierte, im Nachhinein als berechtigt eingestufte
+     * Einreichung nachträglich per Mail zustellen. Verhindert, dass ein
+     * Fehlalarm die Anfrage eines echten Kunden endgültig verschluckt.
+     */
+    private function deliverBlocked(array $request): string
+    {
+        $id = (int)($request['id'] ?? 0);
+        if ($id <= 0) {
+            return $this->jsonResponse(['success' => false, 'message' => 'Ungültiger Eintrag.']);
+        }
+        $to = trim((string)($request['recipient'] ?? ''));
+
+        $service = new \Plugin\bbfdesign_captcha\src\Services\BlockedMessageDelivery($this->db, $this->settings);
+
+        return $this->jsonResponse($service->deliver($id, $to));
     }
 
     private function blockIp(array $request): string

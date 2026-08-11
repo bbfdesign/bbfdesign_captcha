@@ -363,6 +363,15 @@ class SpamLogService
      *
      * Orientiert an der Mailversand-Umsetzung des BBF-Ticket-Plugins.
      */
+    /**
+     * Öffentlicher Zugang zum Shop-Mailversand (CAP-17: Zustellung blockierter
+     * Nachrichten nutzt denselben Weg wie die Wellen-Benachrichtigung).
+     */
+    public function sendMail(string $to, string $subject, string $html): bool
+    {
+        return $this->sendViaShopMailer($to, $subject, $html);
+    }
+
     private function sendViaShopMailer(string $to, string $subject, string $html): bool
     {
         if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {

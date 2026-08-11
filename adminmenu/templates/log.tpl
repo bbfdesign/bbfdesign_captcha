@@ -113,6 +113,13 @@
                                         @click="reportCockpit(entry.id, 'FALSE_POSITIVE')" style="padding: 4px 8px;">
                                     Fehlalarm melden
                                 </button>
+                                {* CAP-17: Fehlalarm kostet sonst die Anfrage eines echten Kunden *}
+                                <button type="button" class="bbf-btn bbf-btn-sm bbf-btn-primary" {literal}x-show="entry.action_taken === 'blocked' && entry.request_data"{/literal}
+                                        {literal}:disabled="delivering === entry.id || entry.delivered_at"
+                                        :title="entry.delivered_at ? ('Bereits zugestellt am ' + entry.delivered_at) : 'Diese Nachricht doch noch per Mail zustellen'"
+                                        @click="deliver(entry)"{/literal} style="padding: 4px 8px;">
+                                    <span {literal}x-text="entry.delivered_at ? 'Zugestellt' : (delivering === entry.id ? 'Sende…' : 'Nachricht zustellen')"{/literal}>Nachricht zustellen</span>
+                                </button>
                             </td>
                         </tr>
                     </template>
@@ -210,6 +217,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 action: ''
             },
             cockpitEnabled: {if isset($settings.cockpit_enabled) && $settings.cockpit_enabled == '1'}true{else}false{/if},
+            delivering: 0,
 
             init: function() {
                 this.loadLog(1);
@@ -248,6 +256,21 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                     bbfAdmin.showNotification(resp.message || (resp.success ? 'Gemeldet' : 'Fehler'), resp.success ? 'success' : 'error');
                 }).catch(function() {
                     bbfAdmin.showNotification('Meldung fehlgeschlagen', 'error');
+                });
+            },
+
+            // CAP-17: fälschlich blockierte Nachricht doch noch zustellen.
+            deliver: function(entry) {
+                var self = this;
+                if (entry.delivered_at) { bbfAdmin.showNotification('Wurde bereits zugestellt.', 'error'); return; }
+                self.delivering = entry.id;
+                bbfAdmin.post('deliverBlocked', { id: entry.id }).then(function(resp) {
+                    self.delivering = 0;
+                    bbfAdmin.showNotification(resp.message || (resp.success ? 'Zugestellt' : 'Fehler'), resp.success ? 'success' : 'error');
+                    if (resp.success) { entry.delivered_at = new Date().toISOString().slice(0,19).replace('T',' '); }
+                }).catch(function() {
+                    self.delivering = 0;
+                    bbfAdmin.showNotification('Zustellung fehlgeschlagen', 'error');
                 });
             },
 

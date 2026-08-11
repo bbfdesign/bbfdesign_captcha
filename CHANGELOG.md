@@ -3,6 +3,26 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.61 – 2026-08-11
+
+### Neu (CAP-17): Blockierte Nachricht nachträglich zustellen
+
+- **Anlass (Björn):** „Auch wenn man etwas zustimmt, muss man hier ja in der Lage
+  sein, die Nachricht doch noch zu erhalten." Bis hierher kostete jeder Fehlalarm
+  die Anfrage eines echten Kunden — abgewiesen, im Log sichtbar, für den
+  Empfänger verloren.
+- Im Spam-Log gibt es bei blockierten Einträgen mit protokollierten Formulardaten
+  den Knopf **„Nachricht zustellen"**. Er baut aus den Feldern eine lesbare Mail
+  und schickt sie über das Shop-Mailsystem an die Zustell-Adresse.
+- Neue Einstellung `delivery_recipient` (leer = Master-Absender des Shops).
+- Neue Spalte `delivered_at` (Migration 5, idempotent per Spaltenprüfung, nullable,
+  wird beim Downgrade **nicht** entfernt) verhindert Doppelversand; der Knopf zeigt
+  danach „Zugestellt" mit Datum.
+- Technische Felder (Token, Honeypot, Consent-Marker) werden aus der Mail
+  herausgefiltert; verschachtelte Formulardaten werden flach dargestellt.
+- Ohne protokollierte Formulardaten sagt die Aktion klar, dass es nichts
+  zuzustellen gibt — und wo man das für die Zukunft einschaltet.
+
 ## 1.0.60 – 2026-08-11
 
 ### Neu (CAP-16): Geführter Verbindungs-Assistent statt Formularfeld-Raten
