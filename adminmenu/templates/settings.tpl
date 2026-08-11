@@ -121,33 +121,78 @@
     <div class="bbf-card">
         <h3 class="bbf-card-title" style="margin-bottom: var(--bbf-spacing-lg);">Zentrale Erkennung (CaptchaCockpit)</h3>
 
-        {* CAP-15: Kopplung per Einmal-Code – der Normalweg, kein Serverzugriff nötig *}
-        <div class="bbf-alert bbf-alert-info" style="margin-bottom: var(--bbf-spacing-md);" {literal}x-show="!cockpitAvvAt"{/literal} x-cloak>
-            <strong>Mit dem Cockpit koppeln</strong>
-            <div class="bbf-form-help" style="margin-top:4px;">Im Cockpit unter <strong>Instanzen</strong> einen Kopplungs-Code erzeugen (Form <code>BBF-XXXX-XXXX</code>), hier eintragen, koppeln &ndash; fertig. Der Code gilt einmalig und 15&nbsp;Minuten; Gro&szlig;-/Kleinschreibung und Bindestriche sind egal. Danach holt sich diese Installation ihr Secret selbst.</div>
-        </div>
-        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
-            <label class="bbf-form-label">
-                Kopplungs-Code
-                <div class="bbf-form-help">Aus dem Cockpit, einmalig g&uuml;ltig. Wird nicht gespeichert &ndash; nur eingel&ouml;st.</div>
-            </label>
-            <input type="text" autocomplete="off" spellcheck="false" class="bbf-input" style="max-width: 420px; font-family: var(--bbf-font-mono, monospace); letter-spacing: .12em; text-transform: uppercase;" placeholder="BBF-XXXX-XXXX" {literal}x-model="pairCode"{/literal}>
-        </div>
-        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-lg);">
-            <label class="bbf-form-label">Jetzt koppeln</label>
+        {* CAP-16: geführter Verbindungs-Assistent. Ein Bildschirm, drei Schritte,
+           sichtbarer Zustand – statt „Feld ausfüllen und hoffen". *}
+        <div class="bbf-conn-status" {literal}:class="cockpitConnected ? 'is-on' : 'is-off'"{/literal}>
+            <span class="bbf-conn-dot"></span>
             <div>
-                <button type="button" class="bbf-btn bbf-btn-primary" {literal}@click="pair()" :disabled="pairing || !pairCode"{/literal}>
-                    <span {literal}x-text="pairing ? 'Koppele…' : 'Koppeln &amp; aktivieren'"{/literal}>Koppeln &amp; aktivieren</span>
-                </button>
-                <div class="bbf-form-help" style="margin-top:6px;">Ben&ouml;tigt zus&auml;tzlich die AVV-Best&auml;tigung (unten).</div>
+                <strong {literal}x-text="cockpitConnected ? 'Mit dem Cockpit verbunden' : 'Noch nicht verbunden'"{/literal}>Noch nicht verbunden</strong>
+                <div class="bbf-form-help" style="margin-top:2px;">
+                    <span {literal}x-show="cockpitConnected"{/literal}>
+                        Ruleset-Version <strong {literal}x-text="cockpitRulesetVer"{/literal}></strong> &middot;
+                        Telemetrie <span {literal}x-text="s.cockpit_enabled ? 'aktiv' : 'aus'"{/literal}></span> &middot;
+                        Ruleset-Pull <span {literal}x-text="cockpitLastPull ? 'l&auml;uft' : 'noch keiner'"{/literal}></span>
+                    </span>
+                    <span {literal}x-show="!cockpitConnected"{/literal}>
+                        Drei Schritte, etwa eine Minute. Der Schutz dieses Shops l&auml;uft unabh&auml;ngig davon weiter.
+                    </span>
+                </div>
             </div>
         </div>
 
-        <hr style="border-color: var(--bbf-border-light); margin: var(--bbf-spacing-md) 0;">
+        <div class="bbf-steps" {literal}x-show="!cockpitConnected"{/literal}>
+            <div class="bbf-step" {literal}:class="pairCode ? 'is-done' : 'is-active'"{/literal}>
+                <span class="bbf-step-num" {literal}x-text="pairCode ? '&#10003;' : '1'"{/literal}>1</span>
+                <div class="bbf-step-body">
+                    <strong>Kopplungs-Code im Cockpit holen</strong>
+                    <div class="bbf-form-help">
+                        Im CaptchaCockpit unter <em>Instanzen &rarr; Assistent starten</em>. Der Code sieht aus wie
+                        <code>BBF-XXXX-XXXX</code> und gilt 15 Minuten.
+                        <a {literal}:href="(s.cockpit_endpoint || 'https://captchacockpit.bbfdesign.de') + '/shops/verbinden'"{/literal} target="_blank" rel="noopener noreferrer">Cockpit &ouml;ffnen</a>
+                    </div>
+                    <input type="text" autocomplete="off" spellcheck="false" class="bbf-input"
+                           style="max-width:320px; margin-top:8px; font-family:var(--bbf-font-mono,monospace); letter-spacing:.12em; text-transform:uppercase;"
+                           placeholder="BBF-XXXX-XXXX" {literal}x-model="pairCode"{/literal}>
+                </div>
+            </div>
+
+            <div class="bbf-step" {literal}:class="(cockpitAvvAt || s.cockpit_avv_confirmed) ? 'is-done' : (pairCode ? 'is-active' : '')"{/literal}>
+                <span class="bbf-step-num" {literal}x-text="(cockpitAvvAt || s.cockpit_avv_confirmed) ? '&#10003;' : '2'"{/literal}>2</span>
+                <div class="bbf-step-body">
+                    <strong>Auftragsverarbeitung best&auml;tigen</strong>
+                    <div class="bbf-form-help">
+                        Pflicht. Es werden ausschlie&szlig;lich <strong>pseudonyme</strong> Signale &uuml;bertragen &ndash; keine Klar-IP,
+                        kein Klartext, keine vollst&auml;ndigen E-Mail-Adressen.
+                        <a {literal}:href="(s.cockpit_endpoint || 'https://captchacockpit.bbfdesign.de') + '/datenschutz'"{/literal} target="_blank" rel="noopener noreferrer">Was genau &uuml;bertragen wird</a>
+                    </div>
+                    <label class="bbf-toggle" style="margin-top:8px;" {literal}x-show="!cockpitAvvAt"{/literal}>
+                        <input type="checkbox" {literal}x-model="s.cockpit_avv_confirmed"{/literal}>
+                        <span class="bbf-toggle-slider"></span>
+                    </label>
+                    <div class="bbf-form-help" style="margin-top:6px;" {literal}x-show="cockpitAvvAt"{/literal}>
+                        &#10003; Best&auml;tigt am <span {literal}x-text="cockpitAvvAt"{/literal}></span>.
+                    </div>
+                </div>
+            </div>
+
+            <div class="bbf-step" {literal}:class="(pairCode && (cockpitAvvAt || s.cockpit_avv_confirmed)) ? 'is-active' : ''"{/literal}>
+                <span class="bbf-step-num">3</span>
+                <div class="bbf-step-body">
+                    <strong>Verbinden</strong>
+                    <div class="bbf-form-help">Der Shop holt sich sein Secret selbst. Im Cockpit springt die Anzeige sofort um.</div>
+                    <button type="button" class="bbf-btn bbf-btn-primary" style="margin-top:8px;"
+                            {literal}@click="pair()" :disabled="pairing || !pairCode || !(cockpitAvvAt || s.cockpit_avv_confirmed)"{/literal}>
+                        <span {literal}x-text="pairing ? 'Verbinde…' : 'Jetzt verbinden'"{/literal}>Jetzt verbinden</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <hr style="border-color: var(--bbf-border-light); margin: var(--bbf-spacing-md) 0;" {literal}x-show="!cockpitConnected"{/literal}>
 
         {* CAP-11: Alternativweg für Massen-Rollout – geteilter Schlüssel als Server-Konstante *}
         <details style="margin-bottom: var(--bbf-spacing-lg);">
-            <summary style="cursor:pointer;">Alternative: Anmeldung per Anmelde-Schl&uuml;ssel (Massen-Rollout)</summary>
+            <summary style="cursor:pointer;">Alternative f&uuml;r viele Shops auf einmal: Anmelde-Schl&uuml;ssel statt Code</summary>
             <div style="margin-top: var(--bbf-spacing-md);">
                 <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
                     <label class="bbf-form-label">
@@ -201,8 +246,9 @@
             </label>
         </div>
 
-        {* CAP-08: AVV-/Datenschutz-Bestätigung – Pflicht zum Aktivieren, sonst bleibt es AUS *}
-        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);" {literal}x-show="!cockpitAvvAt"{/literal}>
+        {* CAP-08: AVV-/Datenschutz-Bestätigung – Pflicht zum Aktivieren. Beim
+           nicht verbundenen Shop steht sie oben in Schritt 2, hier nur danach. *}
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);" {literal}x-show="!cockpitAvvAt && cockpitConnected"{/literal}>
             <label class="bbf-form-label">
                 Auftragsverarbeitung (AVV) / Datenschutz best&auml;tigen
                 <div class="bbf-form-help">Pflicht zum Aktivieren. Mit der Best&auml;tigung beauftragst du BBF Design mit der Verarbeitung <strong>pseudonymer</strong> Spam-Telemetrie (Art. 6 (1) f &ndash; IT-Sicherheit; keine Klar-IP, kein Klartext, keine vollst&auml;ndigen E-Mail-Adressen). Details: <a {literal}:href="(s.cockpit_endpoint || 'https://captchacockpit.bbfdesign.de') + '/datenschutz'"{/literal} target="_blank" rel="noopener noreferrer">Verarbeitungs-/AVV-Informationen</a>.</div>
@@ -216,12 +262,8 @@
             &#10003; AVV best&auml;tigt am <span {literal}x-text="cockpitAvvAt"{/literal}></span>.
         </div>
 
-        {* Status-Readout *}
-        <div class="bbf-form-help" style="margin-bottom: var(--bbf-spacing-md); opacity:.85;">
-            Status: Ruleset-Version <strong {literal}x-text="cockpitRulesetVer"{/literal}></strong>
-            &middot; Telemetrie <span {literal}x-text="cockpitLastRun ? 'zuletzt gesendet' : 'noch keine'"{/literal}></span>
-            &middot; Ruleset-Pull <span {literal}x-text="cockpitLastPull ? 'aktiv' : 'noch keiner'"{/literal}></span>.
-            <span {literal}x-show="!s.cockpit_endpoint || !cockpitAvvAt"{/literal}>Aktivierung: Endpoint + Secret einf&uuml;gen, AVV best&auml;tigen, Schalter an, speichern.</span>
+        <div class="bbf-form-help" style="margin-bottom: var(--bbf-spacing-md); opacity:.85;" {literal}x-show="cockpitConnected"{/literal}>
+            Telemetrie <span {literal}x-text="cockpitLastRun ? 'zuletzt gesendet' : 'noch keine'"{/literal}></span>.
         </div>
 
     </div>
@@ -388,6 +430,8 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
             enrolling: false,
             pairCode: '',
             pairing: false,
+            // CAP-16: verbunden = Secret liegt serverseitig vor (Flag, nie das Secret selbst)
+            cockpitConnected: sv.cockpit_secret_set === '1',
 
             // ── ForgePush-Lizenz ──
             lic: { configured:false, valid:false, verdict:'unknown', checkedAt:0, host:'', instanceId:'', secretSet:false, keySet:false, pluginMoved:null, hardViolation:false, productSlug:'' },
@@ -485,6 +529,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                     bbfAdmin.showNotification(resp.message || (resp.success ? 'Gekoppelt' : 'Fehler'), resp.success ? 'success' : 'error');
                     if (resp.success) {
                         self.s.cockpit_enabled = true;
+                        self.cockpitConnected = true;
                         if (!self.cockpitAvvAt) self.cockpitAvvAt = new Date().toISOString().slice(0,19).replace('T',' ');
                         self.pairCode = '';
                     }
@@ -504,6 +549,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                     bbfAdmin.showNotification(resp.message || (resp.success ? 'Angemeldet' : 'Fehler'), resp.success ? 'success' : 'error');
                     if (resp.success) {
                         self.s.cockpit_enabled = true;
+                        self.cockpitConnected = true;
                         if (!self.cockpitAvvAt) self.cockpitAvvAt = new Date().toISOString().slice(0,19).replace('T',' ');
                         self.enrollKey = '';
                     }

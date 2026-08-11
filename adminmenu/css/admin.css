@@ -1599,3 +1599,71 @@ html.theme-dark .bbf-btn-outline {
     .bbf-settings-savebar .bbf-btn { width: 100%; }
     .bbf-settings-savebar-hint { display: none; }
 }
+
+/* ── CAP-16: Verbindungs-Assistent (Zentrale Erkennung) ───────────────────── */
+.bbf-conn-status {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-bottom: var(--bbf-spacing-lg);
+    border: 1px solid var(--bbf-border);
+    border-left: 3px solid var(--bbf-text-light);
+    border-radius: var(--bbf-radius-md);
+    background: var(--bbf-bg-input);
+}
+.bbf-conn-status.is-on { border-left-color: var(--bbf-success); }
+.bbf-conn-status.is-off { border-left-color: var(--bbf-primary); }
+.bbf-conn-dot {
+    width: 10px;
+    height: 10px;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: var(--bbf-text-light);
+    flex: 0 0 auto;
+}
+.bbf-conn-status.is-on .bbf-conn-dot { background: var(--bbf-success); }
+.bbf-conn-status.is-off .bbf-conn-dot { background: var(--bbf-primary); }
+
+.bbf-steps { display: flex; flex-direction: column; gap: 4px; }
+.bbf-step {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid transparent;
+    border-radius: var(--bbf-radius-md);
+    transition: background var(--bbf-transition), border-color var(--bbf-transition);
+}
+.bbf-step.is-active {
+    border-color: var(--bbf-border);
+    background: var(--bbf-bg-card);
+}
+.bbf-step-num {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--bbf-border-input);
+    color: var(--bbf-text-light);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+.bbf-step.is-active .bbf-step-num {
+    border-color: var(--bbf-primary);
+    color: var(--bbf-primary);
+}
+.bbf-step.is-done .bbf-step-num {
+    border-color: transparent;
+    color: #fff;
+    background: var(--bbf-admin-gradient, var(--bbf-primary));
+}
+.bbf-step-body { min-width: 0; }
+.bbf-step-body > strong { display: block; }
+
+@media (max-width: 640px) {
+    .bbf-step { padding: 12px 10px; }
+}

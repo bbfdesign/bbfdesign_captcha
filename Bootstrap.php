@@ -267,6 +267,9 @@ class Bootstrap extends Bootstrapper
         foreach (['forgepush_signing_secret', 'forgepush_license_key', 'cockpit_secret', 'cockpit_pepper', 'cockpit_enrollment_secret'] as $secretKey) {
             unset($publicSettings[$secretKey]);
         }
+        // CAP-16: Der Assistent muss zeigen können, OB gekoppelt ist – ohne das
+        // Secret selbst preiszugeben. Deshalb nur ein abgeleitetes Ja/Nein.
+        $publicSettings['cockpit_secret_set'] = trim((string)($allSettings['cockpit_secret'] ?? '')) !== '' ? '1' : '0';
         $smarty->assign([
             'plugin'        => $plugin,
             'pluginId'      => $plugin->getPluginID(),

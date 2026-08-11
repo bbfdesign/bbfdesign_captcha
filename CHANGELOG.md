@@ -3,6 +3,26 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.60 – 2026-08-11
+
+### Neu (CAP-16): Geführter Verbindungs-Assistent statt Formularfeld-Raten
+
+- **Anlass (Björn):** „Es gibt keinen Wizard auf beiden Seiten, der geführt wird.
+  Das ist nicht userfreundlich." Stimmt — bisher standen Code-Feld, AVV-Häkchen
+  und Knopf unverbunden nebeneinander, und ob es geklappt hat, sah man nirgends.
+- **Statusband oben:** „Mit dem Cockpit verbunden" / „Noch nicht verbunden",
+  darunter Ruleset-Version, Telemetrie und Ruleset-Pull auf einen Blick.
+- **Drei nummerierte Schritte** mit sichtbarem Fortschritt: Code im Cockpit holen
+  (mit Direktlink zum Assistenten) → Auftragsverarbeitung bestätigen → Verbinden.
+  Der Knopf bleibt gesperrt, bis beides vorliegt.
+- Nach erfolgreicher Kopplung schaltet die Ansicht sofort auf „verbunden" um; die
+  Detaileinstellungen (Endpoint, Secret, IP-Präfix) bleiben darunter erreichbar.
+- Der Anmelde-Schlüssel-Weg für den Massen-Rollout liegt zusammengeklappt darunter.
+- `Bootstrap.php` liefert das abgeleitete Flag `cockpit_secret_set` — der Zustand
+  ist sichtbar, **ohne** dass das Secret selbst je in den Browser gelangt.
+- Neue Stile `.bbf-conn-status` / `.bbf-steps` in `admin.css`, ausschließlich über
+  `--bbf-*`-Tokens.
+
 ## 1.0.59 – 2026-08-10
 
 ### Neu (CAP-15): Kopplung per Einmal-Code – Anbindung ans Cockpit ohne Serverzugriff
