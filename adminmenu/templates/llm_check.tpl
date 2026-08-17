@@ -38,7 +38,7 @@
                 <div class="bbf-form-help">Für OpenAI / Claude / Gemini. Wird verschlüsselt an den jeweiligen Anbieter übertragen.</div>
             </label>
             <input type="password" class="bbf-input" style="max-width: 420px;" autocomplete="off"
-                   {literal}x-model="s.llm_api_key"{/literal} placeholder="sk-...">
+                   {literal}x-model="s.llm_api_key" :placeholder="llmApiKeySet ? '•••••••• (gesetzt)' : 'sk-...'"{/literal}>
         </div>
 
         <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);" {literal}x-show="s.llm_provider === 'ollama'"{/literal}>
@@ -153,12 +153,13 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
             s: {
                 llm_enabled:         sv.llm_enabled === '1',
                 llm_provider:        sv.llm_provider || 'none',
-                llm_api_key:         sv.llm_api_key || '',
+                llm_api_key:         '',
                 llm_model:           sv.llm_model || '',
                 llm_endpoint:        sv.llm_endpoint || 'http://localhost:11434',
                 llm_only_borderline: sv.llm_only_borderline !== '0',
                 llm_timeout:         parseInt(sv.llm_timeout) || 8
             },
+            llmApiKeySet: sv.llm_api_key_set === '1',
             testing: false,
             classifying: false,
             testResult: null,

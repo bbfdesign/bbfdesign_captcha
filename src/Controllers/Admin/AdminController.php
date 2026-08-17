@@ -7,6 +7,7 @@ namespace Plugin\bbfdesign_captcha\src\Controllers\Admin;
 use JTL\DB\DbInterface;
 use JTL\Plugin\PluginInterface;
 use Plugin\bbfdesign_captcha\src\Models\Setting;
+use Plugin\bbfdesign_captcha\src\Services\CustomCssSanitizer;
 
 class AdminController
 {
@@ -271,6 +272,13 @@ class AdminController
             return $this->jsonResponse(['success' => false, 'message' => $this->t('msg_missing_key', 'Schlüssel fehlt')]);
         }
 
+        if ($this->isWriteOnlySecretKey($key) && trim((string)$value) === '') {
+            return $this->jsonResponse(['success' => true, 'message' => $this->t('settings_saved', 'Einstellungen gespeichert')]);
+        }
+        if ($key === 'custom_css') {
+            $value = CustomCssSanitizer::sanitize((string)$value);
+        }
+
         $this->settings->set($key, $value, $group);
         $this->settings->invalidateCache();
 
@@ -311,6 +319,12 @@ class AdminController
             if (!$this->isAllowedSettingKey($key)) {
                 continue;
             }
+            if ($this->isWriteOnlySecretKey($key) && trim((string)$value) === '') {
+                continue;
+            }
+            if ($key === 'custom_css') {
+                $value = CustomCssSanitizer::sanitize((string)$value);
+            }
             $this->settings->set($key, (string)$value);
         }
         $this->settings->invalidateCache();
@@ -343,6 +357,33 @@ class AdminController
             }
         }
         return true;
+    }
+
+    /**
+     * Secrets sind im Backend write-only. Ein leeres Feld bedeutet "unverändert",
+     * nicht "bestehendes Secret löschen".
+     */
+    private function isWriteOnlySecretKey(string $key): bool
+    {
+        $exact = [
+            'altcha_hmac_key',
+            'cockpit_secret',
+            'cockpit_pepper',
+            'cockpit_enrollment_secret',
+            'cron_token',
+            'forgepush_signing_secret',
+            'forgepush_license_key',
+            'friendly_captcha_api_key',
+            'hcaptcha_secret_key',
+            'llm_api_key',
+            'recaptcha_secret_key',
+            'turnstile_secret_key',
+        ];
+        if (in_array($key, $exact, true)) {
+            return true;
+        }
+
+        return (bool)preg_match('/(?:^|_)(?:secret|private_key|api_secret|hmac_key|token)$/', $key);
     }
 
     // ─── ForgePush-Lizenz ───────────────────────────────────────────────
@@ -858,9 +899,9 @@ class AdminController
             'newsletter'     => ['methods' => '["honeypot","timing"]',                      'score_threshold' => 50, 'action_on_spam' => 'both'],
             'review'         => ['methods' => '["honeypot","timing","altcha","ai_filter"]', 'score_threshold' => 60, 'action_on_spam' => 'both'],
             'checkout'       => ['methods' => '["honeypot","timing"]',                      'score_threshold' => 80, 'action_on_spam' => 'log'],
-            'password_reset' => ['methods' => '["honeypot","timing"]',                      'score_threshold' => 50, 'action_on_spam' => 'both'],
+            'password_reset' => ['methods' => '["honeypot","timing"]',                      'score_threshold' => 80, 'action_on_spam' => 'log'],
             'wishlist'       => ['methods' => '["honeypot"]',                               'score_threshold' => 50, 'action_on_spam' => 'log'],
-            'login'          => ['methods' => '["honeypot","timing"]',                      'score_threshold' => 50, 'action_on_spam' => 'both'],
+            'login'          => ['methods' => '["honeypot","timing"]',                      'score_threshold' => 80, 'action_on_spam' => 'log'],
         ];
     }
 

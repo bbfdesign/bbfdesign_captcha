@@ -1,0 +1,29 @@
+/* BBF Tickets — Farb-Tokens. Quelle: adminmenu/css/admin-base.css (verbatim). */
+:root{
+--bbf-primary:#db2e87;--bbf-primary-hover:#c41f76;--bbf-primary-light:#f9e8f1;--bbf-primary-badge:#c8dd9b;
+--bbf-accent-cyan:#08a7d4;
+/* CI-Palette — direkt aus dem Logo (V-Mark) gesampelt */
+--bbf-ci-pink:#db2e87;--bbf-ci-violet:#882b96;--bbf-ci-cyan:#08a7d4;--bbf-ci-blue:#1c7bbf;--bbf-ci-lime:#c8dd9b;--bbf-ci-green:#78c090;
+/* Chart-Rollen (SOTA §2/§5) */
+--bbf-chart-1:#db2e87;--bbf-chart-2:#08a7d4;--bbf-chart-3:#882b96;--bbf-chart-4:#78c090;--bbf-chart-5:#1c7bbf;--bbf-chart-6:#c8dd9b;
+--bbf-text-dark:#1b2559;--bbf-text-medium:#364468;--bbf-text-light:#8b95b5;--bbf-text-white:#ffffff;
+--bbf-bg-page:#f4f7fe;--bbf-bg-card:#ffffff;--bbf-bg-input:#f6f8fd;--bbf-bg-table-header:#f6f8fd;--bbf-bg-sidebar:#ffffff;--bbf-bg-hover:#eef2fb;
+--bbf-bg-float:#eef2fc; /* Valex-Float: getönte v2-Inhaltsfläche (admin-v2.css) */
+--bbf-border:#e3e9f7;--bbf-border-light:#eff3fc;--bbf-border-input:#dde4f5;
+--bbf-success:#28a745;--bbf-success-light:#d4edda;--bbf-warning:#ffc107;--bbf-warning-light:#fff3cd;--bbf-danger:#dc3545;--bbf-danger-light:#f8d7da;--bbf-info:#17a2b8;--bbf-info-light:#d1ecf1;
+/* CI-Verläufe (admin.css, exakte Werte) */
+--bbf-gradient-header:linear-gradient(100deg,var(--bbf-primary,#db2e87) 0%,#b5297f 42%,var(--bbf-accent-cyan,#08a7d4) 100%);
+--bbf-gradient-header-dark:linear-gradient(115deg,#b32368 0%,#45307d 46%,#1d3f6e 76%,#0a87ab 100%); /* @kind other */
+--bbf-admin-gradient:linear-gradient(135deg,#db2e87 0%,#882b96 48%,#1c7bbf 100%); /* @kind other */
+/* Semantische Aliase (Templates referenzieren diese Namen) */
+--bbf-text:var(--bbf-text-medium);--bbf-card-bg:var(--bbf-bg-card);--bbf-surface:var(--bbf-bg-card);--bbf-bg:var(--bbf-bg-page);--bbf-bg-light:var(--bbf-bg-page);--bbf-bg-soft:var(--bbf-bg-input);--bbf-soft-bg:var(--bbf-bg-input);--bbf-secondary:var(--bbf-info);--bbf-pink:var(--bbf-primary);--bbf-ui-pink:var(--bbf-primary);
+}
+html.theme-dark,html.bbf-theme-dark,html[data-bbf-theme="dark"],body.theme-dark{
+--bbf-primary:#ee5fa8;--bbf-primary-hover:#db2e87;--bbf-primary-light:rgba(238,95,168,0.14);--bbf-primary-badge:#c8dd9b;
+--bbf-text-dark:#f8fafc;--bbf-text-medium:#e2e8f0;--bbf-text-light:#bac7da;--bbf-text-white:#ffffff;
+--bbf-bg-page:#080f1c;--bbf-bg-card:#0f1728;--bbf-bg-input:#121d31;--bbf-bg-table-header:#18243a;--bbf-bg-sidebar:#0b1221;--bbf-bg-hover:#18243a;
+--bbf-bg-float:var(--bbf-bg-page);
+--bbf-border:#33445f;--bbf-border-light:#263650;--bbf-border-input:#42536f;
+--bbf-success:#4ade80;--bbf-success-light:rgba(74,222,128,0.16);--bbf-warning:#fbbf24;--bbf-warning-light:rgba(251,191,36,0.16);--bbf-danger:#fb7185;--bbf-danger-light:rgba(251,113,133,0.16);--bbf-info:#38bdf8;--bbf-info-light:rgba(56,189,248,0.16);
+--bbf-gradient-header:var(--bbf-gradient-header-dark);
+}

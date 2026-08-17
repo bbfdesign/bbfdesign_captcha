@@ -1,7 +1,9 @@
 <link rel="stylesheet" href="{$adminUrl|escape:'html'}css/admin-base.css?v={$pluginVersion|default:'0'|escape:'url'}">
+<link rel="stylesheet" href="{$adminUrl|escape:'html'}css/admin-v2-tokens.css?v={$pluginVersion|default:'0'|escape:'url'}">
 <link rel="stylesheet" href="{$adminUrl|escape:'html'}css/admin.css?v={$pluginVersion|default:'0'|escape:'url'}">
+<link rel="stylesheet" href="{$adminUrl|escape:'html'}css/admin-v2.css?v={$pluginVersion|default:'0'|escape:'url'}">
 
-<div class="bbf-plugin-page" {literal}x-data="bbfCaptchaAdmin()" x-init="init()"{/literal}>
+<div class="bbf-plugin-page bbf-v2" {literal}x-data="bbfCaptchaAdmin()" x-init="init()"{/literal}>
     <a href="#bbf-main-content" class="bbf-skip-link">Skip to content</a>
     {$jtl_token}
 
@@ -117,6 +119,25 @@
 
     {* ── Main Content ── *}
     <div class="bbf-main">
+        <div class="bbf-v2-topbar">
+            <div>
+                <div class="bbf-v2-module">BBF Captcha</div>
+                <h1 class="bbf-v2-topbar-title" {literal}x-text="pageTitle()"{/literal}>Dashboard</h1>
+                <p class="bbf-v2-topbar-sub">Schutz, Erkennung und Betrieb</p>
+            </div>
+            <div class="bbf-v2-topbar-actions">
+                <button type="button" class="bbf-v2-search" {literal}@click="focusSearch()"{/literal}>
+                    <span>Suche</span>
+                    <span class="bbf-v2-kbd">&#8984;K</span>
+                </button>
+                <button type="button" class="bbf-v2-iconbtn" aria-label="Theme wechseln" {literal}@click="toggleTheme()"{/literal}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>
+                </button>
+                <button type="button" class="bbf-v2-iconbtn" aria-label="Benachrichtigungen" {literal}@click="navigate('log')"{/literal}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                </button>
+            </div>
+        </div>
         {* ── Gradient Header ── *}
         <div class="bbf-header">
             <div class="bbf-header-inner">
@@ -176,10 +197,31 @@ document.addEventListener('alpine:init', function() {
             page: '',
             loading: false,
             sidebarCollapsed: false,
+            titles: {
+                dashboard: 'Dashboard',
+                protection_methods: 'Schutzmethoden',
+                form_protection: 'Formulare',
+                ai_spam_filter: 'Smart-Spamfilter',
+                llm_check: 'LLM-Prüfung',
+                ip_management: 'IP-Verwaltung',
+                log: 'Spam-Log',
+                api: 'API',
+                settings: 'Einstellungen',
+                css_editor: 'Custom CSS',
+                documentation: 'Dokumentation',
+                changelog: 'Changelog'
+            },
 
             init: function() {
                 // Dashboard ist IMMER die erste Seite
                 this.navigate('dashboard');
+                var self = this;
+                document.addEventListener('keydown', function(event) {
+                    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+                        event.preventDefault();
+                        self.focusSearch();
+                    }
+                });
             },
 
             navigate: function(pageName) {
@@ -222,6 +264,19 @@ document.addEventListener('alpine:init', function() {
                 var params = 'action=getPage&page=' + encodeURIComponent(pageName) + '&is_ajax=1';
                 if (token) params += '&jtl_token=' + encodeURIComponent(token.value);
                 xhr.send(params);
+            },
+
+            pageTitle: function() {
+                return this.titles[this.page] || 'Dashboard';
+            },
+
+            toggleTheme: function() {
+                document.documentElement.classList.toggle('theme-dark');
+            },
+
+            focusSearch: function() {
+                var input = document.querySelector('#bbf-page-content input[type="search"], #bbf-page-content input[type="text"], #bbf-page-content input:not([type])');
+                if (input) input.focus();
             },
 
             evalScripts: function(container) {

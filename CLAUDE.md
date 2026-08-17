@@ -7,6 +7,8 @@ Turnstile, Friendly, reCAPTCHA, hCaptcha), Honeypot, Timing, Rate-Limit,
 IP-Listen, Bot-Erkennung und eine optionale LLM-Zweitprüfung. Claude entwickelt
 hier ausschließlich über die projektinterne Entwicklungssteuerung. Die
 ausführliche Fassung steht in `docs/claude-development-control.md`.
+Codex-spezifische Rollenführung (Lead, Dev, Kritiker, UX, Security, QA) steht in
+`docs/codex-rollensteuerung.md`.
 
 ## Entwicklungssteuerung (Verfassung)
 

@@ -3,6 +3,29 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.62 – 2026-08-17
+
+### Sicherheit/Produktionsreife
+
+- Admin-Seiten liefern Provider-, LLM-, Cron-, Cockpit-, ForgePush- und HMAC-Secrets
+  nicht mehr in `settingsJson` aus. Stattdessen gibt es nur noch `*_set`-Flags;
+  Secret-Felder bleiben write-only.
+- Leere write-only Secret-Felder überschreiben vorhandene Server-Secrets nicht mehr.
+- Custom CSS wird beim Speichern und Ausliefern über eine widget-gescopte
+  Allowlist bereinigt: keine `@import`, keine externen `url(...)`, keine
+  Style-/Script-Breakouts.
+- Request-Data-Logging redigiert sensitive Felder jetzt rekursiv.
+- Login und Passwort-Reset werden fail-open auf `log` mit höherer Schwelle gesetzt;
+  eine Migration passt nur unveränderte alte Defaults an.
+- Das lokale Gate prüft jetzt zusätzlich Admin-Secret-Redaction.
+
+### Backend-Optik/Steuerung
+
+- BBF-v2-Tokens aus dem Backend-Prototyp liegen unter `adminmenu/css/tokens/`.
+- Neue scoped v2-Schicht `admin-v2.css`: dunkle Sidebar, 3px-CI-Toplinie,
+  64px-Topbar, kompakte Cards/KPIs, 40px Controls und mobile Tabellenkarten.
+- Codex-Rollensteuerung für Lead, Dev, Kritiker, UX, Security und QA dokumentiert.
+
 ## 1.0.61 – 2026-08-11
 
 ### Neu (CAP-17): Blockierte Nachricht nachträglich zustellen

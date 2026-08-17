@@ -63,7 +63,9 @@ class PluginHelper
                     continue 2;
                 }
             }
-            if (is_string($value) && mb_strlen($value) > 500) {
+            if (is_array($value)) {
+                $sanitized[$key] = self::sanitizeRequestData($value);
+            } elseif (is_string($value) && mb_strlen($value) > 500) {
                 $sanitized[$key] = mb_substr($value, 0, 500) . '...[truncated]';
             } else {
                 $sanitized[$key] = $value;

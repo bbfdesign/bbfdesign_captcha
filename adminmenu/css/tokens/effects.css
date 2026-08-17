@@ -1,0 +1,23 @@
+/* BBF Tickets — Schatten, Motion, Focus. Quelle: admin-base.css (verbatim). */
+:root{
+--bbf-shadow-sm:0 1px 3px rgba(0,0,0,0.08);--bbf-shadow-md:0 4px 12px rgba(0,0,0,0.1);--bbf-shadow-lg:0 8px 24px rgba(0,0,0,0.12);
+--bbf-shadow-card:0 2px 4px rgba(27,37,89,0.03),0 18px 40px -16px rgba(112,144,176,0.22);
+--bbf-shadow-card-hover:0 4px 8px rgba(27,37,89,0.05),0 24px 48px -16px rgba(112,144,176,0.32);
+--bbf-duration-fast:120ms; /* @kind other */
+--bbf-duration-base:180ms; /* @kind other */
+--bbf-duration-slow:280ms; /* @kind other */
+--bbf-ease-standard:cubic-bezier(.2,.8,.2,1); /* @kind other */
+--bbf-ease-emphasized:cubic-bezier(.16,1,.3,1); /* @kind other */
+--bbf-transition-base:all var(--bbf-duration-base) var(--bbf-ease-standard);
+--bbf-transition:0.2s ease; /* @kind other */
+--bbf-transition-slow:0.3s ease; /* @kind other */
+--bbf-motion-fast:140ms cubic-bezier(.2,.8,.2,1); /* @kind other */
+--bbf-motion:220ms cubic-bezier(.2,.8,.2,1); /* @kind other */
+--bbf-motion-slow:420ms cubic-bezier(.2,.8,.2,1); /* @kind other */
+--bbf-focus-ring:0 0 0 3px color-mix(in srgb,var(--bbf-primary,#db2e87) 32%,transparent);
+}
+html.theme-dark,html.bbf-theme-dark,html[data-bbf-theme="dark"],body.theme-dark{
+--bbf-shadow-sm:0 1px 2px rgba(0,0,0,0.35);--bbf-shadow-md:0 12px 28px rgba(0,0,0,0.28);--bbf-shadow-lg:0 20px 48px rgba(0,0,0,0.36);
+--bbf-shadow-card:0 1px 2px rgba(0,0,0,0.4),0 10px 28px -14px rgba(0,0,0,0.55);
+--bbf-shadow-card-hover:0 2px 4px rgba(0,0,0,0.45),0 16px 36px -14px rgba(0,0,0,0.62);
+}

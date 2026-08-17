@@ -176,7 +176,7 @@
                 </div>
                 <div class="bbf-form-grid" style="margin-bottom: 12px;">
                     <label class="bbf-form-label">Secret Key</label>
-                    <input type="password" class="bbf-input" placeholder="0x..."
+                    <input type="password" class="bbf-input" {literal}:placeholder="secretSet.turnstile ? '•••••••• (gesetzt)' : '0x...'"{/literal}
                            {literal}x-model="methods.turnstile_secret_key"
                            @change="saveSetting('turnstile_secret_key', methods.turnstile_secret_key)"{/literal}>
                 </div>
@@ -233,7 +233,7 @@
                 </div>
                 <div class="bbf-form-grid" style="margin-bottom: 12px;">
                     <label class="bbf-form-label">Secret Key</label>
-                    <input type="password" class="bbf-input"
+                    <input type="password" class="bbf-input" {literal}:placeholder="secretSet.recaptcha ? '•••••••• (gesetzt)' : ''"{/literal}
                            {literal}x-model="methods.recaptcha_secret_key"
                            @change="saveSetting('recaptcha_secret_key', methods.recaptcha_secret_key)"{/literal}>
                 </div>
@@ -279,7 +279,7 @@
                 </div>
                 <div class="bbf-form-grid">
                     <label class="bbf-form-label">API Key</label>
-                    <input type="password" class="bbf-input"
+                    <input type="password" class="bbf-input" {literal}:placeholder="secretSet.friendly ? '•••••••• (gesetzt)' : ''"{/literal}
                            {literal}x-model="methods.friendly_captcha_api_key"
                            @change="saveSetting('friendly_captcha_api_key', methods.friendly_captcha_api_key)"{/literal}>
                 </div>
@@ -316,7 +316,7 @@
                 </div>
                 <div class="bbf-form-grid">
                     <label class="bbf-form-label">Secret Key</label>
-                    <input type="password" class="bbf-input"
+                    <input type="password" class="bbf-input" {literal}:placeholder="secretSet.hcaptcha ? '•••••••• (gesetzt)' : ''"{/literal}
                            {literal}x-model="methods.hcaptcha_secret_key"
                            @change="saveSetting('hcaptcha_secret_key', methods.hcaptcha_secret_key)"{/literal}>
                 </div>
@@ -348,19 +348,25 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 ai_filter_enabled: s.ai_filter_enabled === '1',
                 turnstile_enabled: s.turnstile_enabled === '1',
                 turnstile_site_key: s.turnstile_site_key || '',
-                turnstile_secret_key: s.turnstile_secret_key || '',
+                turnstile_secret_key: '',
                 turnstile_mode: s.turnstile_mode || 'managed',
                 recaptcha_enabled: s.recaptcha_enabled === '1',
                 recaptcha_version: s.recaptcha_version || 'v3',
                 recaptcha_site_key: s.recaptcha_site_key || '',
-                recaptcha_secret_key: s.recaptcha_secret_key || '',
+                recaptcha_secret_key: '',
                 recaptcha_score_threshold: s.recaptcha_score_threshold || '0.5',
                 friendly_captcha_enabled: s.friendly_captcha_enabled === '1',
                 friendly_captcha_site_key: s.friendly_captcha_site_key || '',
-                friendly_captcha_api_key: s.friendly_captcha_api_key || '',
+                friendly_captcha_api_key: '',
                 hcaptcha_enabled: s.hcaptcha_enabled === '1',
                 hcaptcha_site_key: s.hcaptcha_site_key || '',
-                hcaptcha_secret_key: s.hcaptcha_secret_key || ''
+                hcaptcha_secret_key: ''
+            },
+            secretSet: {
+                turnstile: s.turnstile_secret_key_set === '1',
+                recaptcha: s.recaptcha_secret_key_set === '1',
+                friendly: s.friendly_captcha_api_key_set === '1',
+                hcaptcha: s.hcaptcha_secret_key_set === '1'
             },
 
             saveSetting: function(key, value) {

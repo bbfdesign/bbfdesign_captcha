@@ -63,7 +63,7 @@
             </label>
             <div>
                 <input type="text" class="bbf-input" readonly onclick="this.select()"
-                       value="{$ShopURL}/bbfdesign-captcha/api/v1/cron?token={$settings.cron_token|default:''}">
+                       value="Token wird aus Sicherheitsgr&uuml;nden nicht im Browser angezeigt.">
             </div>
         </div>
 
@@ -317,7 +317,7 @@
                 <div class="bbf-form-help">Wird automatisch generiert und w&ouml;chentlich rotiert</div>
             </label>
             <div style="display: flex; align-items: center; gap: 8px;">
-                <code style="font-size: 12px; color: var(--bbf-muted); word-break: break-all;">{literal}<span x-text="s.altcha_hmac_key ? s.altcha_hmac_key.substring(0, 16) + '...' : 'Nicht gesetzt'"></span>{/literal}</code>
+                <code style="font-size: 12px; color: var(--bbf-muted); word-break: break-all;">{literal}<span x-text="altchaHmacSet ? '•••••••• (gesetzt)' : 'Nicht gesetzt'"></span>{/literal}</code>
                 <button type="button" class="bbf-btn bbf-btn-sm bbf-btn-secondary" {literal}@click="regenerateHmac()"{/literal}>Neu generieren</button>
             </div>
         </div>
@@ -427,7 +427,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 cockpit_secret: '',
                 cockpit_share_ip_prefix: sv.cockpit_share_ip_prefix === '1',
                 cockpit_avv_confirmed: false,
-                altcha_hmac_key: sv.altcha_hmac_key || ''
+                altcha_hmac_key: ''
             },
 
             // ── Cockpit-Status (read-only, aus Server-Settings) ──
@@ -441,6 +441,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
             pairing: false,
             // CAP-16: verbunden = Secret liegt serverseitig vor (Flag, nie das Secret selbst)
             cockpitConnected: sv.cockpit_secret_set === '1',
+            altchaHmacSet: sv.altcha_hmac_key_set === '1',
 
             // ── ForgePush-Lizenz ──
             lic: { configured:false, valid:false, verdict:'unknown', checkedAt:0, host:'', instanceId:'', secretSet:false, keySet:false, pluginMoved:null, hardViolation:false, productSlug:'' },

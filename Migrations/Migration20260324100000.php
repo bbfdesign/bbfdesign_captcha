@@ -207,9 +207,9 @@ class Migration20260324100000 extends Migration implements IMigration
             ['newsletter', '["honeypot","timing"]', 50, 'both'],
             ['review', '["honeypot","timing","altcha","ai_filter"]', 60, 'both'],
             ['checkout', '["honeypot","timing"]', 80, 'log'],
-            ['password_reset', '["honeypot","timing"]', 50, 'both'],
+            ['password_reset', '["honeypot","timing"]', 80, 'log'],
             ['wishlist', '["honeypot"]', 50, 'log'],
-            ['login', '["honeypot","timing"]', 50, 'both'],
+            ['login', '["honeypot","timing"]', 80, 'log'],
         ];
 
         foreach ($forms as [$type, $methods, $threshold, $action]) {

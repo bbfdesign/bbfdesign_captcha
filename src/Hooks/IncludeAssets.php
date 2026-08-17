@@ -6,6 +6,7 @@ namespace Plugin\bbfdesign_captcha\src\Hooks;
 
 use JTL\Plugin\PluginInterface;
 use Plugin\bbfdesign_captcha\src\Models\Setting;
+use Plugin\bbfdesign_captcha\src\Services\CustomCssSanitizer;
 
 /**
  * Frontend JS/CSS einbinden
@@ -98,12 +99,13 @@ class IncludeAssets
                  . htmlspecialchars($frontendUrl . 'css/bbfdesign-captcha.css' . $v, ENT_QUOTES, 'UTF-8')
                  . '" media="all">' . "\n";
 
-        // Custom CSS (aus Admin-Einstellungen) – gegen Style-Context-Escape härten
+        // Custom CSS (aus Admin-Einstellungen) – streng widget-scoped filtern.
         $customCss = (string)$this->settings->get('custom_css');
         if (trim($customCss) !== '') {
-            $safeCss = preg_replace('#</\s*style#i', '', $customCss);
-            $safeCss = str_replace(['<!--', '-->'], '', (string)$safeCss);
-            $assets .= '<style>' . $safeCss . '</style>' . "\n";
+            $safeCss = CustomCssSanitizer::sanitize($customCss);
+            if ($safeCss !== '') {
+                $assets .= '<style>' . $safeCss . '</style>' . "\n";
+            }
         }
 
         // JS (async/defer, blockiert nicht!)

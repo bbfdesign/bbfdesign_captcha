@@ -260,16 +260,8 @@ class Bootstrap extends Bootstrapper
         $langVars     = $plugin->getLocalization();
         $templatePath = $plugin->getPaths()->getAdminPath() . 'templates/';
 
-        $allSettings = $settings->getAll();
-        // Secrets niemals an den Browser geben (DSGVO/Sicherheit). Die
-        // Lizenz-Sektion arbeitet write-only über eigene AJAX-Actions.
-        $publicSettings = $allSettings;
-        foreach (['forgepush_signing_secret', 'forgepush_license_key', 'cockpit_secret', 'cockpit_pepper', 'cockpit_enrollment_secret'] as $secretKey) {
-            unset($publicSettings[$secretKey]);
-        }
-        // CAP-16: Der Assistent muss zeigen können, OB gekoppelt ist – ohne das
-        // Secret selbst preiszugeben. Deshalb nur ein abgeleitetes Ja/Nein.
-        $publicSettings['cockpit_secret_set'] = trim((string)($allSettings['cockpit_secret'] ?? '')) !== '' ? '1' : '0';
+        $allSettings    = $settings->getAll();
+        $publicSettings = $this->publicAdminSettings($allSettings);
         $smarty->assign([
             'plugin'        => $plugin,
             'pluginId'      => $plugin->getPluginID(),
@@ -328,6 +320,49 @@ class Bootstrap extends Bootstrapper
         }
 
         return json_encode(['content' => $content]);
+    }
+
+    /**
+     * Admin-Fragmente bekommen nur nicht-sensitive Settings. Secrets sind im UI
+     * write-only; für Statusanzeigen liefern wir ausschließlich *_set-Flags.
+     *
+     * @param array<string, mixed> $settings
+     * @return array<string, mixed>
+     */
+    private function publicAdminSettings(array $settings): array
+    {
+        $public = $settings;
+        foreach (array_keys($settings) as $key) {
+            if ($this->isSensitiveSettingKey((string)$key)) {
+                unset($public[$key]);
+                $public[$key . '_set'] = trim((string)$settings[$key]) !== '' ? '1' : '0';
+            }
+        }
+
+        return $public;
+    }
+
+    private function isSensitiveSettingKey(string $key): bool
+    {
+        $exact = [
+            'altcha_hmac_key',
+            'cockpit_secret',
+            'cockpit_pepper',
+            'cockpit_enrollment_secret',
+            'cron_token',
+            'forgepush_signing_secret',
+            'forgepush_license_key',
+            'friendly_captcha_api_key',
+            'hcaptcha_secret_key',
+            'llm_api_key',
+            'recaptcha_secret_key',
+            'turnstile_secret_key',
+        ];
+        if (in_array($key, $exact, true)) {
+            return true;
+        }
+
+        return (bool)preg_match('/(?:^|_)(?:secret|private_key|api_secret|hmac_key|token)$/', $key);
     }
 
     /**

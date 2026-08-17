@@ -136,6 +136,24 @@ asset_sanity() {
   ok "Asset-/Template-Sanity"
 }
 
+admin_secret_redaction_scan() {
+  local hits=0
+  local pattern='sv\.[A-Za-z0-9_]*(secret|api_key|hmac_key|token)\b|\$settings\.[A-Za-z0-9_]*(secret|api_key|hmac_key|token)\b'
+  while IFS= read -r line; do
+    [[ "$line" == *"_set"* ]] && continue
+    printf 'Möglicher Admin-Secret-Leak: %s\n' "$line" >&2
+    hits=1
+  done < <(grep -REn "$pattern" adminmenu/templates 2>/dev/null || true)
+
+  if grep -Eq "settingsJson.*getAll|settingsJson.*allSettings" Bootstrap.php 2>/dev/null; then
+    printf 'Möglicher Admin-Secret-Leak: settingsJson basiert direkt auf allen Settings.\n' >&2
+    hits=1
+  fi
+
+  [[ "$hits" == "0" ]] || fail "Admin-Secret-Redaction: sensitive Settings dürfen nicht ins Browser-JSON."
+  ok "Admin-Secret-Redaction"
+}
+
 require_main_origin() {
   local branch origin_url
   branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -197,6 +215,9 @@ php_lint
 
 section "Secret-Scan"
 secret_scan
+
+section "Admin-Secret-Redaction"
+admin_secret_redaction_scan
 
 section "Asset-/Template-Sanity"
 asset_sanity

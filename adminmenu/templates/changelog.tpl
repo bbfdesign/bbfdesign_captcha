@@ -2,6 +2,15 @@
 
 <div class="bbf-card">
     <div style="color: var(--bbf-body-text); line-height: 1.7;">
+        <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.62</h3>
+        <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">17.08.2026 &mdash; Produktionsh&auml;rtung &amp; BBF-v2-Backend</p>
+        <ul style="padding-left: 20px; margin-bottom: 24px;">
+            <li><span class="bbf-badge bbf-badge-warning" style="margin-right: 6px;">Security</span> Admin-Seiten liefern Secrets nicht mehr in Browser-JSON aus; Secret-Felder sind write-only mit Status-Flags.</li>
+            <li><span class="bbf-badge bbf-badge-warning" style="margin-right: 6px;">Security</span> Custom CSS wird serverseitig widget-gescopet und per Allowlist bereinigt.</li>
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">UI</span> Backend-Shell an BBF-v2-Prototyp angepasst: dunkle Sidebar, CI-Toplinie, Topbar, kompakte Controls und mobile Tabellenkarten.</li>
+            <li><span class="bbf-badge bbf-badge-info" style="margin-right: 6px;">QA</span> Entwicklungssteuerung erweitert: Admin-Secret-Redaction-Gate und dokumentierte Codex-Rollenrunde.</li>
+        </ul>
+
         <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.54</h3>
         <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">21.06.2026 &mdash; Hotfix Suche</p>
         <ul style="padding-left: 20px; margin-bottom: 24px;">

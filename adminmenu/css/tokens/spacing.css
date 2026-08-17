@@ -1,0 +1,9 @@
+/* BBF Tickets — Abstände & Radius. Quelle: admin-base.css (verbatim). */
+:root{
+--bbf-spacing-xs:4px;--bbf-spacing-sm:8px;--bbf-spacing-md:16px;--bbf-spacing-lg:24px;--bbf-spacing-xl:32px;--bbf-spacing-xxl:48px;
+--bbf-radius-none:0px;--bbf-radius-sm:4px;--bbf-radius-md:8px;--bbf-radius-lg:10px;--bbf-radius-xl:12px;--bbf-radius-pill:50px;
+--bbf-radius-card:14px; /* v2-Karten/KPIs (admin-v2.css „mutiger Look") */
+--bbf-sidebar-width:260px;--bbf-sidebar-item-height:45px;--bbf-sidebar-item-radius:var(--bbf-radius-md);
+--bbf-control-height:40px;--bbf-control-height-sm:32px;
+--bbf-input-height:48px;--bbf-input-padding:0.59rem 1rem;--bbf-input-radius:6px;
+}

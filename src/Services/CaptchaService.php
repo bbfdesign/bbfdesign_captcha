@@ -58,9 +58,9 @@ class CaptchaService
             'withdrawal'     => ['methods' => ['honeypot', 'timing', 'altcha', 'ai_filter'], 'score_threshold' => 60, 'action_on_spam' => 'both'],
             'native'         => ['methods' => ['honeypot', 'timing', 'altcha', 'ai_filter'], 'score_threshold' => 60, 'action_on_spam' => 'both'],
             'checkout'       => ['methods' => ['honeypot', 'timing'],                        'score_threshold' => 80, 'action_on_spam' => 'log'],
-            'password_reset' => ['methods' => ['honeypot', 'timing'],                        'score_threshold' => 50, 'action_on_spam' => 'both'],
+            'password_reset' => ['methods' => ['honeypot', 'timing'],                        'score_threshold' => 80, 'action_on_spam' => 'log'],
             'wishlist'       => ['methods' => ['honeypot'],                                  'score_threshold' => 50, 'action_on_spam' => 'log'],
-            'login'          => ['methods' => ['honeypot', 'timing'],                        'score_threshold' => 50, 'action_on_spam' => 'both'],
+            'login'          => ['methods' => ['honeypot', 'timing'],                        'score_threshold' => 80, 'action_on_spam' => 'log'],
         ];
 
         return $defaults[$formType] ?? ['methods' => ['honeypot', 'timing'], 'score_threshold' => 60, 'action_on_spam' => 'both'];

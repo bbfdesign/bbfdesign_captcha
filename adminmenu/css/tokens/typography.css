@@ -1,0 +1,16 @@
+/* BBF Tickets — Typografie-Tokens. Quelle: admin-base.css + SOTA-DESIGN-SPEC-2026-07. */
+:root{
+--bbf-font-family:"Manrope",Helvetica,Arial,Lucida,sans-serif;
+--bbf-font:var(--bbf-font-family);
+--bbf-font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+--bbf-font-size-xs:12px;--bbf-font-size-sm:13px;--bbf-font-size-base:14px;--bbf-font-size-md:15px;--bbf-font-size-lg:16px;--bbf-font-size-xl:20px;--bbf-font-size-xxl:27px;
+--bbf-font-weight-light:300;--bbf-font-weight-normal:400;--bbf-font-weight-medium:500;--bbf-font-weight-bold:700;--bbf-font-weight-extrabold:800;
+/* SOTA-Rollen */
+--bbf-type-page-title:800 24px/1.2 var(--bbf-font-family); /* tracking -0.5px */
+--bbf-type-section-title:700 16px/1.3 var(--bbf-font-family);
+--bbf-type-body:400 14px/1.5 var(--bbf-font-family);
+--bbf-type-label:700 11px/1.3 var(--bbf-font-family); /* UPPERCASE, tracking .08em, muted */
+--bbf-type-kpi:800 30px/1.1 var(--bbf-font-family);   /* tabular-nums, letter-spacing -0.5px */
+--bbf-type-kpi-hero:700 34px/1.1 var(--bbf-font-family);
+--bbf-type-micro:400 12px/1.4 var(--bbf-font-family);
+}
