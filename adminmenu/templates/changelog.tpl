@@ -2,6 +2,14 @@
 
 <div class="bbf-card">
     <div style="color: var(--bbf-body-text); line-height: 1.7;">
+        <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.63</h3>
+        <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">17.08.2026 &mdash; Backend-v2-Qualit&auml;tsrunde</p>
+        <ul style="padding-left: 20px; margin-bottom: 24px;">
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">UI</span> Einstellungszeilen sind lesbar, Help-Texte normal gesetzt und Kartenbreiten sinnvoll begrenzt.</li>
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">UI</span> Formularschutz-Tabelle mit festen Spalten, kompakteren Methoden-Chips und mobilen Labels.</li>
+            <li><span class="bbf-badge bbf-badge-info" style="margin-right: 6px;">UX</span> Topbar zeigt App-Kontext statt doppelter Seiten&uuml;berschrift.</li>
+        </ul>
+
         <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.62</h3>
         <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">17.08.2026 &mdash; Produktionsh&auml;rtung &amp; BBF-v2-Backend</p>
         <ul style="padding-left: 20px; margin-bottom: 24px;">

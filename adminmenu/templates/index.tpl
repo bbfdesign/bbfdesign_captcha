@@ -121,9 +121,9 @@
     <div class="bbf-main">
         <div class="bbf-v2-topbar">
             <div>
-                <div class="bbf-v2-module">BBF Captcha</div>
-                <h1 class="bbf-v2-topbar-title" {literal}x-text="pageTitle()"{/literal}>Dashboard</h1>
-                <p class="bbf-v2-topbar-sub">Schutz, Erkennung und Betrieb</p>
+                <div class="bbf-v2-module">Backend</div>
+                <h1 class="bbf-v2-topbar-title">BBF Captcha</h1>
+                <p class="bbf-v2-topbar-sub" {literal}x-text="pageTitle() + ' · Schutz, Erkennung und Betrieb'"{/literal}>Dashboard · Schutz, Erkennung und Betrieb</p>
             </div>
             <div class="bbf-v2-topbar-actions">
                 <button type="button" class="bbf-v2-search" {literal}@click="focusSearch()"{/literal}>

@@ -3,6 +3,19 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.63 – 2026-08-17
+
+### Verbessert: Backend-v2-Qualitätsrunde
+
+- Formularzeilen im Backend sind jetzt echte, lesbare Einstellungszeilen statt
+  schmaler Uppercase-Spalten: Help-Texte bleiben normal lesbar, Labels brechen
+  nicht mehr wortweise um.
+- Einfache Konfigurationskarten werden in der Breite begrenzt, damit die Oberfläche
+  nicht wie eine leere Wand wirkt.
+- Formularschutz-Tabelle erhält feste operative Spalten, kompaktere Methoden-Chips
+  und mobile `data-label`-Labels.
+- Topbar ist nun App-Kontext statt doppelte Seitenüberschrift.
+
 ## 1.0.62 – 2026-08-17
 
 ### Sicherheit/Produktionsreife

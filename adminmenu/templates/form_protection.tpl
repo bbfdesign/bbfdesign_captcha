@@ -8,7 +8,7 @@
 
     <div class="bbf-card">
         <div style="overflow-x: auto;">
-            <table class="bbf-table">
+            <table class="bbf-table bbf-form-protection-table">
                 <thead>
                     <tr>
                         <th>Formular</th>
@@ -23,11 +23,11 @@
                     {literal}
                     <template x-for="(form, index) in forms" :key="form.form_type">
                         <tr>
-                            <td>
+                            <td data-label="Formular">
                                 <strong x-text="formLabels[form.form_type] || form.form_type"></strong>
                             </td>
-                            <td>
-                                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                            <td data-label="Methoden">
+                                <div class="bbf-method-chip-row">
                                     <template x-for="method in availableMethods" :key="method.key">
                                         <label class="bbf-method-chip" :class="{ 'is-active': isMethodActive(form, method.key) }">
                                             <input type="checkbox" class="bbf-method-chip-input"
@@ -38,12 +38,12 @@
                                     </template>
                                 </div>
                             </td>
-                            <td>
+                            <td data-label="Score">
                                 <input type="number" class="bbf-input" style="width: 80px; height: 36px; padding: 4px 8px;"
                                        x-model="form.score_threshold" min="0" max="200"
                                        @change="saveForm(form)">
                             </td>
-                            <td>
+                            <td data-label="Aktion">
                                 <select class="bbf-input bbf-select" style="width: 120px; height: 36px; padding: 4px 8px;"
                                         x-model="form.action_on_spam" @change="saveForm(form)">
                                     <option value="block">Blockieren</option>
@@ -51,14 +51,14 @@
                                     <option value="both">Beides</option>
                                 </select>
                             </td>
-                            <td>
+                            <td data-label="Aktiv">
                                 <label class="bbf-toggle">
                                     <input type="checkbox" :checked="parseInt(form.is_active) === 1"
                                            @change="form.is_active = $event.target.checked ? 1 : 0; saveForm(form)">
                                     <span class="bbf-toggle-slider"></span>
                                 </label>
                             </td>
-                            <td>
+                            <td data-label="Speichern">
                                 <button type="button" class="bbf-btn bbf-btn-sm bbf-btn-secondary"
                                         @click="saveForm(form)">Speichern</button>
                             </td>
