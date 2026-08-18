@@ -2,6 +2,14 @@
 
 <div class="bbf-card">
     <div style="color: var(--bbf-body-text); line-height: 1.7;">
+        <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.64</h3>
+        <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">18.08.2026 &mdash; verbindliche BBF-v2-Shell</p>
+        <ul style="padding-left: 20px; margin-bottom: 24px;">
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">UI</span> Sidebar ohne Plugin-Titel und ohne Hamburger, Logo invertiert auf 132px, Fl&auml;che `#0e1526`.</li>
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">UI</span> Navigation mit 40px Items, 14px/700, 16px Icons, aktiver Pink-Cyan-Rail und prototypnahem Hover.</li>
+            <li><span class="bbf-badge bbf-badge-info" style="margin-right: 6px;">UX</span> Seitentitel steht ausschlie&szlig;lich in der 64px-Topbar.</li>
+        </ul>
+
         <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.63</h3>
         <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">17.08.2026 &mdash; Backend-v2-Qualit&auml;tsrunde</p>
         <ul style="padding-left: 20px; margin-bottom: 24px;">

@@ -3,6 +3,19 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.64 – 2026-08-18
+
+### Verbessert: verbindliche BBF-v2-Shell-Angleichung
+
+- Sidebar folgt dem Tickets-Backend-Prototyp enger: dunkle Fläche `#0e1526`,
+  invertiertes bbfdesign-Logo mit 132px Breite, kein Plugin-Titel, kein Hamburger
+  und keine Einklapp-Logik.
+- Navigation geschärft: Sections 11px/700 uppercase mit `.08em` Letterspacing,
+  Items 40px hoch, 14px/700, 16px Icons, aktive Pink-Cyan-Rail und prototypnahe
+  Hover-Bewegung.
+- Seitentitel steht ausschließlich in der 64px-Topbar; doppelte Content-Titel
+  werden in der v2-Shell ausgeblendet.
+
 ## 1.0.63 – 2026-08-17
 
 ### Verbessert: Backend-v2-Qualitätsrunde

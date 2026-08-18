@@ -8,14 +8,11 @@
     {$jtl_token}
 
     {* ── Sidebar ── *}
-    <div class="bbf-sidebar" {literal}:class="{ 'bbf-sidebar-collapsed': sidebarCollapsed }"{/literal}>
+    <div class="bbf-sidebar">
         <div class="bbf-sidebar-header">
             <div class="bbf-sidebar-logo">
                 <img src="{$adminUrl|escape:'html'}images/Logo_bbfdesign_dark_2024.png" alt="bbfdesign" class="bbf-logo-img">
             </div>
-            <button type="button" class="bbf-sidebar-toggle" aria-label="Toggle navigation" {literal}@click="sidebarCollapsed = !sidebarCollapsed" :aria-expanded="!sidebarCollapsed"{/literal}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-            </button>
         </div>
 
         <div class="bbf-sidebar-content">
@@ -122,8 +119,8 @@
         <div class="bbf-v2-topbar">
             <div>
                 <div class="bbf-v2-module">Backend</div>
-                <h1 class="bbf-v2-topbar-title">BBF Captcha</h1>
-                <p class="bbf-v2-topbar-sub" {literal}x-text="pageTitle() + ' · Schutz, Erkennung und Betrieb'"{/literal}>Dashboard · Schutz, Erkennung und Betrieb</p>
+                <h1 class="bbf-v2-topbar-title" {literal}x-text="pageTitle()"{/literal}>Dashboard</h1>
+                <p class="bbf-v2-topbar-sub">Schutz, Erkennung und Betrieb</p>
             </div>
             <div class="bbf-v2-topbar-actions">
                 <button type="button" class="bbf-v2-search" {literal}@click="focusSearch()"{/literal}>
@@ -196,7 +193,6 @@ document.addEventListener('alpine:init', function() {
         return {
             page: '',
             loading: false,
-            sidebarCollapsed: false,
             titles: {
                 dashboard: 'Dashboard',
                 protection_methods: 'Schutzmethoden',
