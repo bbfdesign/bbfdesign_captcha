@@ -52,13 +52,24 @@ class CockpitReviewRedactor
 
     public function snippetFromRequestDataJson(string $requestDataJson, int $maxChars = self::DEFAULT_MAX_CHARS): ?string
     {
+        $payload = $this->reviewPayloadFromRequestDataJson($requestDataJson, $maxChars);
+        return is_array($payload) ? (string)$payload['snippet'] : null;
+    }
+
+    /**
+     * @return array{snippet:string,meta:array<string,mixed>}|null
+     */
+    public function reviewPayloadFromRequestDataJson(string $requestDataJson, int $maxChars = self::DEFAULT_MAX_CHARS): ?array
+    {
         $data = json_decode($requestDataJson, true);
         if (!is_array($data)) {
             return null;
         }
 
-        $texts = [];
-        $this->collectTexts($data, $texts);
+        $texts      = [];
+        $fields     = [];
+        $piiRemoved = [];
+        $this->collectTexts($data, $texts, $fields, $piiRemoved);
 
         $combined = $this->normalize(implode(' ', $texts));
         if ($combined === '') {
@@ -70,22 +81,39 @@ class CockpitReviewRedactor
             return null;
         }
 
-        return $this->truncate($redacted, max(40, min(300, $maxChars)));
+        $maxChars = max(40, min(300, $maxChars));
+        $snippet  = $this->truncate($redacted, $maxChars);
+
+        return [
+            'snippet' => $snippet,
+            'meta'    => [
+                'redacted'         => true,
+                'source'           => 'plugin',
+                'redactionVersion' => self::VERSION,
+                'fields'           => array_values(array_unique($fields)),
+                'piiRemoved'       => array_values(array_unique(array_merge($piiRemoved, $this->markersIn($snippet)))),
+                'maxChars'         => $maxChars,
+            ],
+        ];
     }
 
     /**
      * @param array<mixed> $data
      * @param array<int,string> $texts
+     * @param array<int,string> $fields
+     * @param array<int,string> $piiRemoved
      */
-    private function collectTexts(array $data, array &$texts): void
+    private function collectTexts(array $data, array &$texts, array &$fields, array &$piiRemoved): void
     {
         foreach ($data as $key => $value) {
-            if ($this->isIgnoredKey((string)$key)) {
+            $key = (string)$key;
+            if ($this->isIgnoredKey($key)) {
+                $piiRemoved[] = $this->categoryForKey($key);
                 continue;
             }
 
             if (is_array($value)) {
-                $this->collectTexts($value, $texts);
+                $this->collectTexts($value, $texts, $fields, $piiRemoved);
                 continue;
             }
 
@@ -99,6 +127,7 @@ class CockpitReviewRedactor
             }
 
             $texts[] = $text;
+            $fields[] = $this->safeFieldName($key);
         }
     }
 
@@ -111,6 +140,47 @@ class CockpitReviewRedactor
             }
         }
         return false;
+    }
+
+    private function categoryForKey(string $key): string
+    {
+        $key = mb_strtolower($key, 'UTF-8');
+        if (preg_match('/mail|e-mail|email/u', $key)) {
+            return 'email';
+        }
+        if (preg_match('/tel|telefon|phone/u', $key)) {
+            return 'phone';
+        }
+        if (preg_match('/adresse|address|anschrift|street|strasse|straße|hausnummer|plz|zip|postcode|city/u', $key)) {
+            return 'address';
+        }
+        if (preg_match('/firma|company/u', $key)) {
+            return 'company';
+        }
+        if (preg_match('/name|vorname|nachname|firstname|lastname|fullname/u', $key)) {
+            return 'name';
+        }
+        if (preg_match('/pass|password|passwort/u', $key)) {
+            return 'password';
+        }
+        if (preg_match('/token|jtl_hp|jtl_token/u', $key)) {
+            return 'token';
+        }
+        if (preg_match('/bestell|kundennummer|customer|order/u', $key)) {
+            return 'orderReference';
+        }
+        return 'sensitiveField';
+    }
+
+    private function safeFieldName(string $key): string
+    {
+        $key = mb_strtolower($key, 'UTF-8');
+        $safe = preg_replace('/[^a-z0-9_:-]+/u', '_', $key);
+        $safe = trim(is_string($safe) ? $safe : 'field', '_:-');
+        if ($safe === '') {
+            return 'field';
+        }
+        return mb_substr($safe, 0, 40, 'UTF-8');
     }
 
     public function redactText(string $text): string
@@ -144,6 +214,31 @@ class CockpitReviewRedactor
         }
 
         return trim($this->normalize($text), " \t\n\r\0\x0B,.;:-");
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    private function markersIn(string $text): array
+    {
+        $map = [
+            '[Adresse]'  => 'address',
+            '[E-Mail]'   => 'email',
+            '[Name]'     => 'name',
+            '[PLZ/Ort]'  => 'address',
+            '[Referenz]' => 'orderReference',
+            '[Signatur]' => 'name',
+            '[Telefon]'  => 'phone',
+            '[Token]'    => 'token',
+            '[URL]'      => 'url',
+        ];
+        $found = [];
+        foreach ($map as $marker => $category) {
+            if (str_contains($text, $marker)) {
+                $found[] = $category;
+            }
+        }
+        return $found;
     }
 
     private function normalize(string $text): string

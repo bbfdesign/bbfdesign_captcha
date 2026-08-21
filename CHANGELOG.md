@@ -3,6 +3,18 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.66 – 2026-08-21
+
+### Fix: Cockpit-Review-Vertrag final abgestimmt
+
+- Review-Telemetrie sendet jetzt zum optionalen `reviewSnippet` das vom
+  CaptchaCockpit erwartete `reviewMeta` mit Quelle, Redaction-Version,
+  nicht-sensiblen Quellfeldern, entfernten PII-Kategorien und 180-Zeichen-Limit.
+- Die alten losen Zusatzfelder `reviewSnippetVersion` und
+  `reviewSnippetMaxChars` wurden durch die Meta-Struktur ersetzt.
+- Sensible Felder bleiben als Snippet-Quelle ausgeschlossen und werden nicht in
+  `reviewMeta.fields` gemeldet, damit Cockpit die Vorschau speichern darf.
+
 ## 1.0.65 – 2026-08-21
 
 ### Neu: Cockpit-Review ohne Klartext-Zentralarchiv

@@ -2,6 +2,13 @@
 
 <div class="bbf-card">
     <div style="color: var(--bbf-body-text); line-height: 1.7;">
+        <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.66</h3>
+        <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">21.08.2026 &mdash; Cockpit-Review-Vertrag final abgestimmt</p>
+        <ul style="padding-left: 20px; margin-bottom: 24px;">
+            <li><span class="bbf-badge bbf-badge-warning" style="margin-right: 6px;">Fix</span> Review-Ingest sendet jetzt `reviewMeta` mit Source, Redaction-Version, Quellfeldern, PII-Kategorien und 180-Zeichen-Limit.</li>
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">Security</span> Sensible Felder bleiben von der Snippet-Quelle ausgeschlossen und erscheinen nicht in `reviewMeta.fields`.</li>
+        </ul>
+
         <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.65</h3>
         <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">21.08.2026 &mdash; Cockpit-Review ohne Klartext-Zentralarchiv</p>
         <ul style="padding-left: 20px; margin-bottom: 24px;">

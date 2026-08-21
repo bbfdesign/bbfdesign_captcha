@@ -68,8 +68,14 @@ Formulardaten zentral zu speichern.
 ```json
 {
   "reviewSnippet": "Kurze redigierte Vorschau...",
-  "reviewSnippetVersion": "pii-redaction-v1",
-  "reviewSnippetMaxChars": 180
+  "reviewMeta": {
+    "redacted": true,
+    "source": "plugin",
+    "redactionVersion": "pii-redaction-v1",
+    "fields": ["message"],
+    "piiRemoved": ["email", "phone", "address"],
+    "maxChars": 180
+  }
 }
 ```
 
@@ -82,6 +88,10 @@ Anforderungen ans Cockpit:
 - keine Volltextsuche über Snippets ohne zusätzliche Datenschutzfreigabe
 - Anzeige klar als "redigierte Vorschau" kennzeichnen
 - Feedback-Aktion `Spam`/`Kein Spam` an bestehenden Feedback-Fluss anbinden
+- `reviewMeta.fields` darf nur nicht-sensitive Quellfelder enthalten. Sensible
+  Felder wie `name`, `email`, `telefon`, `adresse`, `firma`, `password`,
+  `token`, `bestell*` oder `kundennummer` werden im Plugin bereits aus der
+  Snippet-Quelle entfernt und nicht in `fields` gemeldet.
 
 Bestehende Signatur bleibt:
 

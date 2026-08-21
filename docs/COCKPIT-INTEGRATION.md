@@ -16,6 +16,9 @@
   - `action` ∈ BLOCKED|LOGGED|ALLOWED, `score`, `detectionMethod`, `reasons`
   - optional `reviewSnippet` nur bei `cockpit_review_enabled=1` und nur für
     BLOCKED|LOGGED; max. 180 Zeichen, lokal redigiert via `CockpitReviewRedactor`
+  - zum Snippet wird `reviewMeta` mit `redacted=true`, Quelle `plugin`,
+    Redaction-Version, nicht-sensiblen Quellfeldern und entfernten PII-Kategorien
+    gesendet
 - Sendet HMAC-signierte Batches (≤500) an `POST {endpoint}/api/v1/ingest`.
 - **Fail-open:** jeder Fehler/Timeout → kein Throw; Cursor wird nur bei Erfolg
   vorgerückt (Retry beim nächsten Lauf). Läuft gedrosselt über den nativen Cron.

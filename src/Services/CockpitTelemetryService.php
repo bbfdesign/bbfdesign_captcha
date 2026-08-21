@@ -165,11 +165,10 @@ class CockpitTelemetryService
             $event['ipPrefix'] = $this->ipPrefix($ip);
         }
         if ($this->shouldSendReviewSnippet((string)$event['action'])) {
-            $snippet = (new CockpitReviewRedactor())->snippetFromRequestDataJson((string)($row->request_data ?? ''));
-            if ($snippet !== null) {
-                $event['reviewSnippet']        = $snippet;
-                $event['reviewSnippetVersion'] = CockpitReviewRedactor::VERSION;
-                $event['reviewSnippetMaxChars'] = 180;
+            $review = (new CockpitReviewRedactor())->reviewPayloadFromRequestDataJson((string)($row->request_data ?? ''));
+            if ($review !== null) {
+                $event['reviewSnippet'] = $review['snippet'];
+                $event['reviewMeta']    = $review['meta'];
             }
         }
 
