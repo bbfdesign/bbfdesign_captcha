@@ -3,6 +3,24 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.65 – 2026-08-21
+
+### Neu: Cockpit-Review ohne Klartext-Zentralarchiv
+
+- Neues ADR `docs/cockpit-review-workflow-2026-08-21.md` beschreibt den
+  Spam-/Quarantäne-Workflow zwischen Plugin und CaptchaCockpit inklusive
+  Ingest-Feldern, lokal verbleibenden Daten, Feedback-Fluss, Retention und
+  signiertem Remote-Review als nächste Cockpit-Phase.
+- Neues Opt-in-Setting `cockpit_review_enabled` (Default aus, AVV-/Hinweis-Gate):
+  Nur bei geblockten oder geloggten Ereignissen wird optional ein maximal 180
+  Zeichen kurzer, redigierter `reviewSnippet` ans Cockpit gesendet.
+- Neue zentrale Redaction `CockpitReviewRedactor`: dedizierte Namens-, E-Mail-,
+  Telefon-, Adress-, Token- und Passwortfelder werden ignoriert; typische URLs,
+  E-Mails, Telefonnummern, Adressen, PLZ/Ort, Referenzen und lange Tokens werden
+  maskiert.
+- Standard-Telemetrie bleibt DSGVO-minimiert und unverändert: Hashes,
+  Fingerprints, Shape, E-Mail-Domain, Gründe, Score und Aktion.
+
 ## 1.0.64 – 2026-08-18
 
 ### Verbessert: verbindliche BBF-v2-Shell-Angleichung

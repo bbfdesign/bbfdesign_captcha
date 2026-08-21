@@ -14,6 +14,8 @@
   - `contentFp` = `sha256(normalisierter Inhalt)`; `contentShape` = `{len, upperRatio, transitions, digits, urls}`
   - `emailDomain` = nur Domain-Teil; **kein** Name/Freitext/volle E-Mail
   - `action` ∈ BLOCKED|LOGGED|ALLOWED, `score`, `detectionMethod`, `reasons`
+  - optional `reviewSnippet` nur bei `cockpit_review_enabled=1` und nur für
+    BLOCKED|LOGGED; max. 180 Zeichen, lokal redigiert via `CockpitReviewRedactor`
 - Sendet HMAC-signierte Batches (≤500) an `POST {endpoint}/api/v1/ingest`.
 - **Fail-open:** jeder Fehler/Timeout → kein Throw; Cursor wird nur bei Erfolg
   vorgerückt (Retry beim nächsten Lauf). Läuft gedrosselt über den nativen Cron.
@@ -40,6 +42,7 @@
 | `cockpit_endpoint` | `''` | z. B. `https://captchacockpit.bbfdesign.de` |
 | `cockpit_secret` | `''` | Shared-Secret (write-only, nie ins Frontend) |
 | `cockpit_share_ip_prefix` | `0` | opt-in: zusätzlich anonymisiertes /24-/48-Prefix senden |
+| `cockpit_review_enabled` | `0` | opt-in: redigierte Review-Vorschau für Quarantäne-Listen senden |
 | `cockpit_pepper` | auto | serverseitiger HMAC-Pepper für `ipHash` |
 | `cockpit_cursor_id` | `0` | zuletzt gesendete spam_log-id |
 | `cockpit_ruleset_version` | `0` | zuletzt angewandte Ruleset-Version (Inkr. 2) |
@@ -57,3 +60,8 @@ Aktivierung nur durch Betreiber nach AVV. Es verlassen den Shop ausschließlich
 pseudonyme/aggregierte Merkmale (siehe `~/captchacockpit/docs/DSGVO.md`). Bestehende
 Plugin-IP-Anonymisierung (`log_ip_anonymize`) bleibt unberührt; das Cockpit
 bekommt ohnehin nur `ipHash`.
+
+Der Review-Modus ist separat opt-in: Dedizierte Namens-, E-Mail-, Telefon-,
+Adress-, Token- und Passwortfelder werden nicht übernommen; typische PII-Muster
+werden maskiert. Details und Cockpit-Anforderungen siehe
+`docs/cockpit-review-workflow-2026-08-21.md`.

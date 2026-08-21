@@ -253,6 +253,16 @@
                 <span class="bbf-toggle-slider"></span>
             </label>
         </div>
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">
+                Review-Vorschau ans Cockpit senden
+                <div class="bbf-form-help">Optional f&uuml;r Quarant&auml;ne-/Review-Listen: sendet bei geblockten oder geloggten Einreichungen eine maximal 180 Zeichen kurze, redigierte Vorschau. Dedizierte Namens-, E-Mail-, Telefon-, Adress-, Token- und Passwortfelder werden nicht &uuml;bernommen; typische PII-Muster werden maskiert. <strong>Standard: aus</strong> &ndash; nur aktivieren, wenn diese Verarbeitung in AVV/Datenschutz bewusst abgedeckt ist.</div>
+            </label>
+            <label class="bbf-toggle">
+                <input type="checkbox" {literal}x-model="s.cockpit_review_enabled"{/literal}>
+                <span class="bbf-toggle-slider"></span>
+            </label>
+        </div>
 
         {* CAP-08: AVV-/Datenschutz-Bestätigung – Pflicht zum Aktivieren. Beim
            nicht verbundenen Shop steht sie oben in Schritt 2, hier nur danach. *}
@@ -426,6 +436,7 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 cockpit_endpoint: sv.cockpit_endpoint || '',
                 cockpit_secret: '',
                 cockpit_share_ip_prefix: sv.cockpit_share_ip_prefix === '1',
+                cockpit_review_enabled: sv.cockpit_review_enabled === '1',
                 cockpit_avv_confirmed: false,
                 altcha_hmac_key: ''
             },

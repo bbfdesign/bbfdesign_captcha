@@ -16,8 +16,8 @@ use Plugin\bbfdesign_captcha\src\Models\Setting;
  * - Fail-open: jeder Fehler/Timeout wird verschluckt; der Schutz des Shops hängt
  *   NICHT vom Cockpit ab. Der Cursor rückt nur bei erfolgreichem Versand vor.
  * - Datenminimierung: es verlassen den Shop NUR pseudonyme/aggregierte Merkmale
- *   (ipHash, contentFp/contentShape, E-Mail-DOMAIN) – keine Klar-IP, kein
- *   Klartext-Inhalt, kein Name, keine volle E-Mail-Adresse.
+ *   (ipHash, contentFp/contentShape, E-Mail-DOMAIN). Redigierte Review-Snippets
+ *   werden nur bei explizitem Opt-in übertragen.
  *
  * Vertrag: ~/captchacockpit/docs/API-CONTRACT.md (POST /api/v1/ingest).
  */
@@ -164,8 +164,22 @@ class CockpitTelemetryService
         if ($shareIpPrefix && $ip !== '') {
             $event['ipPrefix'] = $this->ipPrefix($ip);
         }
+        if ($this->shouldSendReviewSnippet((string)$event['action'])) {
+            $snippet = (new CockpitReviewRedactor())->snippetFromRequestDataJson((string)($row->request_data ?? ''));
+            if ($snippet !== null) {
+                $event['reviewSnippet']        = $snippet;
+                $event['reviewSnippetVersion'] = CockpitReviewRedactor::VERSION;
+                $event['reviewSnippetMaxChars'] = 180;
+            }
+        }
 
         return $event;
+    }
+
+    private function shouldSendReviewSnippet(string $action): bool
+    {
+        return $this->settings->getBool('cockpit_review_enabled')
+            && in_array(strtoupper($action), ['BLOCKED', 'LOGGED'], true);
     }
 
     /**

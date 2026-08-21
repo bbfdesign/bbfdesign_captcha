@@ -2,6 +2,14 @@
 
 <div class="bbf-card">
     <div style="color: var(--bbf-body-text); line-height: 1.7;">
+        <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.65</h3>
+        <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">21.08.2026 &mdash; Cockpit-Review ohne Klartext-Zentralarchiv</p>
+        <ul style="padding-left: 20px; margin-bottom: 24px;">
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">Neu</span> Optionaler Cockpit-Review-Modus mit redigierter 180-Zeichen-Vorschau f&uuml;r geblockte oder geloggte Einreichungen.</li>
+            <li><span class="bbf-badge bbf-badge-warning" style="margin-right: 6px;">Security</span> Standard-Telemetrie bleibt minimiert; Review-Vorschau ist Default aus und an AVV-/Datenschutzbewusstsein gekoppelt.</li>
+            <li><span class="bbf-badge bbf-badge-info" style="margin-right: 6px;">ADR</span> Workflow, Cockpit-API-Erweiterung, Retention, RBAC und Remote-Review-Endpoint dokumentiert.</li>
+        </ul>
+
         <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.64</h3>
         <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">18.08.2026 &mdash; verbindliche BBF-v2-Shell</p>
         <ul style="padding-left: 20px; margin-bottom: 24px;">

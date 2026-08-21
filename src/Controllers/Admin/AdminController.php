@@ -312,6 +312,14 @@ class AdminController
                 }
             }
         }
+        if (isset($data['cockpit_review_enabled']) && (string)$data['cockpit_review_enabled'] === '1') {
+            $alreadyConfirmed = $this->settings->get('cockpit_avv_confirmed_at') !== '';
+            $nowConfirmed     = isset($data['cockpit_avv_confirmed']) && (string)$data['cockpit_avv_confirmed'] === '1';
+            if (!$alreadyConfirmed && !$nowConfirmed) {
+                $data['cockpit_review_enabled'] = '0';
+                $avvBlocked = true;
+            }
+        }
         unset($data['cockpit_avv_confirmed']); // transienter Flag, nicht persistieren
 
         foreach ($data as $key => $value) {
