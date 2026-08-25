@@ -49,6 +49,7 @@ class TurnstileService
 
         $siteKey = $this->settings->get('turnstile_site_key');
         $mode    = $this->settings->get('turnstile_mode', 'managed');
+        $language = CaptchaLocaleService::currentLanguage();
 
         $html  = '<div class="bbf-captcha-widget bbf-captcha-turnstile"';
         $html .= ' data-bbf-consent="bbfdesign_captcha_turnstile">';
@@ -59,7 +60,7 @@ class TurnstileService
             $html .= ' data-appearance="interaction-only"';
         }
 
-        $html .= ' data-language="de"';
+        $html .= ' data-language="' . htmlspecialchars($language, ENT_QUOTES, 'UTF-8') . '"';
         $html .= ' data-callback="bbfTurnstileCallback"';
         $html .= ' data-error-callback="bbfTurnstileError"';
         $html .= '></div>';

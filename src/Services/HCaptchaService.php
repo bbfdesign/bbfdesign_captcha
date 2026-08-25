@@ -59,7 +59,9 @@ class HCaptchaService
 
     public function getScriptTag(): string
     {
-        return '<script src="' . self::SCRIPT_URL . '?hl=de" async defer></script>';
+        return '<script src="' . self::SCRIPT_URL . '?hl='
+             . htmlspecialchars(CaptchaLocaleService::currentLanguage(), ENT_QUOTES, 'UTF-8')
+             . '" async defer></script>';
     }
 
     /**

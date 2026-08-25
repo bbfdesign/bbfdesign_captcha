@@ -81,14 +81,18 @@ class RecaptchaService
     {
         $siteKey = $this->settings->get('recaptcha_site_key');
         $version = $this->getVersion();
+        $language = CaptchaLocaleService::currentLanguage();
 
         if ($version === 'v3') {
             return '<script src="' . self::SCRIPT_URL_V3
                  . htmlspecialchars($siteKey, ENT_QUOTES, 'UTF-8')
+                 . '&hl=' . htmlspecialchars($language, ENT_QUOTES, 'UTF-8')
                  . '" async defer></script>';
         }
 
-        return '<script src="' . self::SCRIPT_URL_V2 . '?hl=de" async defer></script>';
+        return '<script src="' . self::SCRIPT_URL_V2 . '?hl='
+             . htmlspecialchars($language, ENT_QUOTES, 'UTF-8')
+             . '" async defer></script>';
     }
 
     /**

@@ -184,6 +184,11 @@ class AltchaService
      */
     public function renderWidget(string $challengeUrl): string
     {
+        $stringsJson = json_encode(
+            CaptchaLocaleService::altchaStrings(),
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES
+        ) ?: '{}';
+
         $html  = '<div class="bbf-captcha-widget bbf-captcha-altcha">';
         $html .= '<altcha-widget'
                 . ' challengeurl="' . htmlspecialchars($challengeUrl, ENT_QUOTES, 'UTF-8') . '"'
@@ -197,7 +202,7 @@ class AltchaService
                 // bis zum Absenden ist die Lösung da. Keine Expiry-Prüfung (nur
                 // HMAC) → keine Staleness-Gefahr.
                 . ' auto="onfocus"'
-                . ' language="de"'
+                . ' strings="' . htmlspecialchars($stringsJson, ENT_QUOTES, 'UTF-8') . '"'
                 . ' hidefooter'
                 . '></altcha-widget>';
         $html .= '</div>';

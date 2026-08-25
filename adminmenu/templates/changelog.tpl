@@ -2,6 +2,13 @@
 
 <div class="bbf-card">
     <div style="color: var(--bbf-body-text); line-height: 1.7;">
+        <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.67</h3>
+        <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">25.08.2026 &mdash; CAPTCHA-Sprache folgt Browser und Shop-Kontext</p>
+        <ul style="padding-left: 20px; margin-bottom: 24px;">
+            <li><span class="bbf-badge bbf-badge-warning" style="margin-right: 6px;">Fix</span> ALTCHA bekommt explizite deutsche/englische Widget-Strings statt eines von der lokalen Bundle-Version ignorierten `language`-Attributs.</li>
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">UX</span> Browser-Sprache gewinnt, JTL-Sprache ist Fallback; externe CAPTCHA-Anbieter und Consent-Nachlade-URLs nutzen dieselbe Locale.</li>
+        </ul>
+
         <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.66</h3>
         <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">21.08.2026 &mdash; Cockpit-Review-Vertrag final abgestimmt</p>
         <ul style="padding-left: 20px; margin-bottom: 24px;">

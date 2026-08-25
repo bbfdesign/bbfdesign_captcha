@@ -3,6 +3,19 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.67 – 2026-08-25
+
+### Fix: CAPTCHA-Sprache folgt Browser und Shop-Kontext
+
+- Neue zentrale CAPTCHA-Locale-Ermittlung: Browser-Sprache aus
+  `Accept-Language` gewinnt, JTL-Frontend-Sprache ist Fallback, Deutsch bleibt
+  sicherer Default.
+- ALTCHA erhält jetzt explizite `strings` statt eines wirkungslosen
+  `language`-Attributs; deutschsprachige Browser sehen dadurch
+  „Ich bin kein Roboter" und „Verifiziert".
+- Turnstile, Friendly Captcha, reCAPTCHA und hCaptcha verwenden dieselbe Locale
+  auch in den Consent-Nachlade-URLs.
+
 ## 1.0.66 – 2026-08-21
 
 ### Fix: Cockpit-Review-Vertrag final abgestimmt

@@ -6,6 +6,7 @@ namespace Plugin\bbfdesign_captcha\src\Hooks;
 
 use JTL\Plugin\PluginInterface;
 use Plugin\bbfdesign_captcha\src\Models\Setting;
+use Plugin\bbfdesign_captcha\src\Services\CaptchaLocaleService;
 use Plugin\bbfdesign_captcha\src\Services\CustomCssSanitizer;
 
 /**
@@ -135,15 +136,15 @@ class IncludeAssets
                 'script'  => 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit',
             ];
         }
-        $shopLang = $_SESSION['cISOSprache'] ?? 'ger';
-        $hl       = $shopLang === 'eng' ? 'en' : 'de';
+        $shopLang = CaptchaLocaleService::currentJtlLanguageKey();
+        $hl       = rawurlencode(CaptchaLocaleService::currentLanguage());
         if ($this->settings->getBool('recaptcha_enabled') && !empty($this->settings->get('recaptcha_site_key'))) {
             $version = $this->settings->get('recaptcha_version', 'v3');
             $siteKey = rawurlencode((string)$this->settings->get('recaptcha_site_key'));
             $consentConfig['recaptcha'] = [
                 'consent' => 'bbfdesign_captcha_recaptcha',
                 'script'  => $version === 'v3'
-                    ? 'https://www.google.com/recaptcha/api.js?render=' . $siteKey
+                    ? 'https://www.google.com/recaptcha/api.js?render=' . $siteKey . '&hl=' . $hl
                     : 'https://www.google.com/recaptcha/api.js?hl=' . $hl,
             ];
         }

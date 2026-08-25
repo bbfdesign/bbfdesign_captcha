@@ -46,12 +46,13 @@ class FriendlyCaptchaService
         }
 
         $siteKey = $this->settings->get('friendly_captcha_site_key');
+        $language = CaptchaLocaleService::currentLanguage();
 
         $html  = '<div class="bbf-captcha-widget bbf-captcha-friendly"';
         $html .= ' data-bbf-consent="bbfdesign_captcha_friendly_captcha">';
         $html .= '<div class="frc-captcha"'
                 . ' data-sitekey="' . htmlspecialchars($siteKey, ENT_QUOTES, 'UTF-8') . '"'
-                . ' data-lang="de"'
+                . ' data-lang="' . htmlspecialchars($language, ENT_QUOTES, 'UTF-8') . '"'
                 . '></div>';
         $html .= '</div>';
 
