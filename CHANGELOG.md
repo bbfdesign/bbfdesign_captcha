@@ -3,6 +3,15 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.68 – 2026-09-03
+
+### QA: CAPTCHA-Locale dauerhaft abgesichert
+
+- Die Entwicklungssteuerung prüft jetzt Deutsch-/Englisch-Auflösung,
+  `Accept-Language`-Priorisierung und JTL-Sprachfallback.
+- Das Gate verhindert Regressionen auf harte `de`-Parameter oder ein ALTCHA-Widget
+  ohne explizite `strings`.
+
 ## 1.0.67 – 2026-08-25
 
 ### Fix: CAPTCHA-Sprache folgt Browser und Shop-Kontext

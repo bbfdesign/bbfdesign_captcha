@@ -16,7 +16,7 @@ Usage:
   tools/development-control.sh [--local|--smoke|--release|--status]
 
 Modes:
-  --local    Lokale Entwicklungssteuerung: Versionsabgleich, PHP-Lint, Secret-Scan, Asset-/Template-Sanity.
+  --local    Lokale Entwicklungssteuerung: Versionsabgleich, PHP-Lint, Locale-Sanity, Secret-Scan, Asset-/Template-Sanity.
   --smoke    Live-Smoke gegen die konfigurierte Shop-URL (BBF_CAPTCHA_SMOKE_URL).
   --release  Push auf den Forgejo-Remote nach grünem lokalen Gate. Nur mit sauberem Commit.
   --status   Kurzer Repo-/Versionsstatus.

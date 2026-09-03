@@ -2,6 +2,13 @@
 
 <div class="bbf-card">
     <div style="color: var(--bbf-body-text); line-height: 1.7;">
+        <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.68</h3>
+        <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">03.09.2026 &mdash; CAPTCHA-Locale dauerhaft abgesichert</p>
+        <ul style="padding-left: 20px; margin-bottom: 24px;">
+            <li><span class="bbf-badge bbf-badge-info" style="margin-right: 6px;">QA</span> Die Entwicklungssteuerung pr&uuml;ft jetzt Deutsch-/Englisch-Aufl&ouml;sung, `Accept-Language`-Priorisierung und JTL-Sprachfallback.</li>
+            <li><span class="bbf-badge bbf-badge-warning" style="margin-right: 6px;">Fix-Schutz</span> Das Gate verhindert harte `de`-Regressionen und ALTCHA-Markup ohne explizite `strings`.</li>
+        </ul>
+
         <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.67</h3>
         <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">25.08.2026 &mdash; CAPTCHA-Sprache folgt Browser und Shop-Kontext</p>
         <ul style="padding-left: 20px; margin-bottom: 24px;">

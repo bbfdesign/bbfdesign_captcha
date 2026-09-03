@@ -24,7 +24,7 @@ Usage:
   tools/dev-cycle.sh [--expected-version X.Y.Z] [--push] [--smoke]
 
 Standard:
-  Lokale Checks: Versionsabgleich, PHP-Lint, Secret-Scan, Asset-/Template-Sanity.
+  Lokale Checks: Versionsabgleich, PHP-Lint, Locale-Sanity, Secret-Scan, Asset-/Template-Sanity.
   Keine Git-Aktion.
 
 Optionen:
@@ -84,6 +84,68 @@ php_lint() {
   done < <(find Bootstrap.php src Migrations -name '*.php' -type f 2>/dev/null)
   [[ "$errors" == "0" ]] || fail "PHP-Lint fehlgeschlagen."
   ok "PHP-Lint (Bootstrap.php + src/ + Migrations/)"
+}
+
+captcha_locale_sanity() {
+  php <<'PHP'
+<?php
+declare(strict_types=1);
+
+require 'src/Services/CaptchaLocaleService.php';
+
+use Plugin\bbfdesign_captcha\src\Services\CaptchaLocaleService;
+
+$_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'de-DE,de;q=0.9,en;q=0.7';
+if (CaptchaLocaleService::currentLanguage() !== 'de') {
+    fwrite(STDERR, "Accept-Language de-DE wurde nicht zu de aufgeloest.\n");
+    exit(1);
+}
+$strings = CaptchaLocaleService::altchaStrings();
+if (($strings['label'] ?? '') !== 'Ich bin kein Roboter' || ($strings['verified'] ?? '') !== 'Verifiziert') {
+    fwrite(STDERR, "ALTCHA liefert fuer de-DE keine deutschen Widget-Strings.\n");
+    exit(1);
+}
+
+$_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'en-US,en;q=0.8,de;q=0.4';
+if (CaptchaLocaleService::currentLanguage() !== 'en') {
+    fwrite(STDERR, "Accept-Language en-US wurde nicht zu en aufgeloest.\n");
+    exit(1);
+}
+$strings = CaptchaLocaleService::altchaStrings();
+if (($strings['label'] ?? '') !== "I'm not a robot" || ($strings['verified'] ?? '') !== 'Verified') {
+    fwrite(STDERR, "ALTCHA liefert fuer en-US keine englischen Widget-Strings.\n");
+    exit(1);
+}
+
+$_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'en-US;q=0.4,de-DE;q=0.9';
+if (CaptchaLocaleService::currentLanguage() !== 'de') {
+    fwrite(STDERR, "Accept-Language q-Priorisierung waehlte nicht de.\n");
+    exit(1);
+}
+
+unset($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+$_SESSION['cISOSprache'] = 'eng';
+if (CaptchaLocaleService::currentLanguage() !== 'en') {
+    fwrite(STDERR, "JTL-Sprachfallback eng wurde nicht zu en aufgeloest.\n");
+    exit(1);
+}
+PHP
+
+  if grep -Eq 'language="de"|data-language="de"|data-lang="de"|hl=de' \
+      src/Services/AltchaService.php \
+      src/Services/TurnstileService.php \
+      src/Services/FriendlyCaptchaService.php \
+      src/Services/RecaptchaService.php \
+      src/Services/HCaptchaService.php \
+      src/Hooks/IncludeAssets.php; then
+    fail "CAPTCHA-Locale-Sanity: harter deutscher Widget-/Script-Parameter gefunden."
+  fi
+
+  if ! grep -Fq 'strings="' src/Services/AltchaService.php; then
+    fail "CAPTCHA-Locale-Sanity: ALTCHA muss explizite strings erhalten."
+  fi
+
+  ok "CAPTCHA-Locale-Sanity"
 }
 
 # Kernschärfung dieses Plugins: Provider-Secrets (reCAPTCHA/hCaptcha/Turnstile/
@@ -212,6 +274,9 @@ verify_versions
 
 section "PHP-Lint"
 php_lint
+
+section "CAPTCHA-Locale-Sanity"
+captcha_locale_sanity
 
 section "Secret-Scan"
 secret_scan
