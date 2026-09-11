@@ -2,6 +2,14 @@
 
 <div class="bbf-card">
     <div style="color: var(--bbf-body-text); line-height: 1.7;">
+        <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.72</h3>
+        <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">11.09.2026 &mdash; Signierter Cockpit-Remote-Review</p>
+        <ul style="padding-left: 20px; margin-bottom: 24px;">
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">Neu</span> Review-Telemetrie meldet eine lokale Detail-Referenz, wenn das Review-Opt-in aktiv ist.</li>
+            <li><span class="bbf-badge bbf-badge-warning" style="margin-right: 6px;">Security</span> Der neue Review-Preview-Endpoint akzeptiert nur Cockpit-HMAC plus kurzlebiges Token.</li>
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">DSGVO</span> Antwortet nur mit erneut redigierter Vorschau, Gr&uuml;nden, Score und Formular-/Zeitkontext; kein Rohpayload.</li>
+        </ul>
+
         <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.71</h3>
         <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">11.09.2026 &mdash; Login/Admin-Firewall im Monitor-Modus</p>
         <ul style="padding-left: 20px; margin-bottom: 24px;">

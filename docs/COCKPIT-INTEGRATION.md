@@ -62,6 +62,19 @@
 - Fail-open: Fehler in Policy, Counter oder Persistenz dürfen keinen Login
   blockieren.
 
+### 4. Signierter Remote-Review (umgesetzt – v1.0.72)
+- Wenn `cockpit_review_enabled=1` aktiv ist und aus dem lokalen Log eine
+  redigierte Vorschau erzeugt werden kann, meldet Ingest zusätzlich
+  `reviewDetailAvailable=true`, `reviewDetailRef=<lokale spam_log.id>` und
+  `reviewDetailPath=/bbfdesign-captcha/api/v1/review-preview/{id}`.
+- `POST /bbfdesign-captcha/api/v1/review-preview/{id}` akzeptiert ausschließlich
+  Cockpit-HMAC (`rawBody + "|" + X-Signed-At`) plus kurzlebiges Review-Token aus
+  dem Cockpit.
+- Der Endpoint antwortet nur bei aktivem Cockpit + Review-Opt-in und nur für
+  `blocked`/`logged`-Ereignisse.
+- Antwortinhalt: Formular, Zeitpunkt, Score, Aktion, Gründe und erneut redigierte
+  Vorschau. Keine Klar-IP, keine volle E-Mail, kein User-Agent, kein Rohpayload.
+
 ## Settings (Default AUS)
 | Key | Default | Zweck |
 |---|---|---|

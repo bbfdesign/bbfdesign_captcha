@@ -3,6 +3,20 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.72 – 2026-09-11
+
+### Neu: Signierter Cockpit-Remote-Review
+
+- Review-Telemetrie meldet bei aktivem Opt-in zusätzlich
+  `reviewDetailAvailable`, `reviewDetailRef` und den lokalen
+  `reviewDetailPath`, damit das Cockpit Details gezielt abrufen kann.
+- Neuer Endpoint `/bbfdesign-captcha/api/v1/review-preview/{id}`: nur per
+  Cockpit-HMAC und kurzlebigem Review-Token erreichbar.
+- Die Antwort enthält ausschließlich erneut redigierte Vorschau, Gründe, Score
+  und Formular-/Zeitkontext; keine Klar-IP, keine volle E-Mail und kein Rohpayload.
+- Der Endpoint bleibt vollständig aus, wenn Cockpit oder Review-Opt-in nicht
+  aktiviert sind.
+
 ## 1.0.71 – 2026-09-11
 
 ### Neu: Login/Admin-Firewall im Monitor-Modus

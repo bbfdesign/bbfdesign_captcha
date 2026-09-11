@@ -12,6 +12,7 @@ use Plugin\bbfdesign_captcha\src\Services\CaptchaService;
 use Plugin\bbfdesign_captcha\src\Services\AltchaService;
 use Plugin\bbfdesign_captcha\src\Services\SpamLogService;
 use Plugin\bbfdesign_captcha\src\Services\IPService;
+use Plugin\bbfdesign_captcha\src\Services\CockpitReviewRedactor;
 use Plugin\bbfdesign_captcha\src\Helpers\PluginHelper;
 
 /**
@@ -85,6 +86,17 @@ class CaptchaAPIController
             // (Spam-Wellen-Alarm + gedrosselte Bereinigung) über denselben Einstieg.
             $result = \Plugin\bbfdesign_captcha\src\Cron\CleanupCron::run();
             $this->sendJson(['status' => 'ok', 'result' => $result, 'timestamp' => time()]);
+            return;
+        }
+
+        // Cockpit Remote-Review: serverseitig signiert, ohne API-Key, nur wenn
+        // Cockpit + Review-Opt-in aktiv sind. Antwort bleibt redigiert.
+        if (str_starts_with($endpoint, 'review-preview/')) {
+            if ($method !== 'POST') {
+                $this->sendError('Method not allowed', 405);
+                return;
+            }
+            $this->handleReviewPreview(substr($endpoint, strlen('review-preview/')));
             return;
         }
 
@@ -325,7 +337,155 @@ class CaptchaAPIController
         ]);
     }
 
+    private function handleReviewPreview(string $localRef): void
+    {
+        $localRef = trim($localRef);
+        if (!preg_match('/^\d{1,20}$/', $localRef)) {
+            $this->sendError('Invalid review reference', 400);
+            return;
+        }
+        if (!$this->settings->getBool('cockpit_enabled') || !$this->settings->getBool('cockpit_review_enabled')) {
+            $this->sendError('Review preview disabled', 403);
+            return;
+        }
+
+        $secret = $this->settings->get('cockpit_secret');
+        if ($secret === '') {
+            $this->sendError('Review preview not configured', 403);
+            return;
+        }
+
+        $rawBody = file_get_contents('php://input');
+        $rawBody = is_string($rawBody) ? $rawBody : '';
+        if (!$this->verifyCockpitSignature($rawBody, $secret)) {
+            $this->sendError('Forbidden', 403);
+            return;
+        }
+
+        $input = json_decode($rawBody, true);
+        if (!is_array($input) || !$this->verifyReviewToken($input, $secret, $localRef)) {
+            $this->sendError('Invalid review token', 403);
+            return;
+        }
+
+        $row = $this->db->queryPrepared(
+            "SELECT `id`, `form_type`, `detection_method`, `spam_score`, `action_taken`, `request_data`, `created_at`
+             FROM `bbf_captcha_spam_log`
+             WHERE `id` = :id AND `action_taken` IN ('blocked', 'logged')
+             LIMIT 1",
+            ['id' => (int)$localRef],
+            1
+        );
+        if ($row === null) {
+            $this->sendError('Review entry not found', 404);
+            return;
+        }
+
+        $requestData = (string)($row->request_data ?? '');
+        $review = $requestData !== ''
+            ? (new CockpitReviewRedactor())->reviewPayloadFromRequestDataJson($requestData, 300)
+            : null;
+        $reasons = $this->reasonsFromRequestData($requestData);
+        if ($reasons === [] && !empty($row->detection_method)) {
+            $reasons[] = (string)$row->detection_method;
+        }
+
+        $this->sendJson([
+            'id'            => (string)$row->id,
+            'occurredAt'    => $this->toIso((string)($row->created_at ?? '')),
+            'formType'      => (string)($row->form_type ?? ''),
+            'score'         => (int)($row->spam_score ?? 0),
+            'action'        => strtoupper((string)($row->action_taken ?? 'logged')),
+            'reasons'       => array_slice($reasons, 0, 20),
+            'reviewSnippet' => is_array($review) ? $review['snippet'] : null,
+            'reviewMeta'    => is_array($review) ? $review['meta'] : ['redacted' => true, 'source' => 'plugin'],
+        ]);
+    }
+
     // ─── Helpers ─────────────────────────────────────────────
+
+    private function verifyCockpitSignature(string $rawBody, string $secret): bool
+    {
+        $signedAt = (string)($_SERVER['HTTP_X_SIGNED_AT'] ?? '');
+        $sig      = (string)($_SERVER['HTTP_X_SIGNATURE'] ?? '');
+        if ($signedAt === '' || $sig === '' || !ctype_digit($signedAt)) {
+            return false;
+        }
+        $ts = (int)$signedAt;
+        if (abs(time() - $ts) > 300) {
+            return false;
+        }
+        $expected = hash_hmac('sha256', $rawBody . '|' . $signedAt, $secret);
+        return hash_equals($expected, $sig);
+    }
+
+    /**
+     * @param array<string,mixed> $input
+     */
+    private function verifyReviewToken(array $input, string $secret, string $localRef): bool
+    {
+        $token = $input['token'] ?? null;
+        if (!is_string($token) || !str_contains($token, '.')) {
+            return false;
+        }
+        [$payload64, $sig] = explode('.', $token, 2);
+        if ($payload64 === '' || $sig === '') {
+            return false;
+        }
+        $expected = hash_hmac('sha256', $payload64, $secret);
+        if (!hash_equals($expected, $sig)) {
+            return false;
+        }
+        $json = $this->base64UrlDecode($payload64);
+        if ($json === null) {
+            return false;
+        }
+        $payload = json_decode($json, true);
+        if (!is_array($payload)) {
+            return false;
+        }
+        $now = time();
+        return ($payload['v'] ?? null) === 1
+            && ($payload['aud'] ?? null) === 'captcha-cockpit-review-detail'
+            && ($payload['scope'] ?? null) === 'redacted-preview'
+            && (string)($payload['localRef'] ?? '') === $localRef
+            && (string)($input['localRef'] ?? '') === $localRef
+            && isset($payload['iat'], $payload['exp'])
+            && (int)$payload['iat'] <= $now + 60
+            && (int)$payload['exp'] >= $now;
+    }
+
+    private function base64UrlDecode(string $input): ?string
+    {
+        $padded = strtr($input, '-_', '+/');
+        $pad = strlen($padded) % 4;
+        if ($pad > 0) {
+            $padded .= str_repeat('=', 4 - $pad);
+        }
+        $decoded = base64_decode($padded, true);
+        return is_string($decoded) ? $decoded : null;
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    private function reasonsFromRequestData(string $requestDataJson): array
+    {
+        $data = json_decode($requestDataJson, true);
+        if (!is_array($data) || !isset($data['_bbf_reason']) || !is_string($data['_bbf_reason'])) {
+            return [];
+        }
+        return array_values(array_filter(array_map(
+            static fn (string $reason): string => mb_substr(trim($reason), 0, 300),
+            explode(';', $data['_bbf_reason'])
+        )));
+    }
+
+    private function toIso(string $value): string
+    {
+        $ts = strtotime($value);
+        return date(DATE_ATOM, $ts !== false ? $ts : time());
+    }
 
     private function authenticate(): ?object
     {

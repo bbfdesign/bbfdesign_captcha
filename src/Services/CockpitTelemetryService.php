@@ -103,7 +103,7 @@ class CockpitTelemetryService
         $cursor = $this->settings->getInt('cockpit_cursor_id', 0);
         $rows   = $this->db->queryPrepared(
             'SELECT `id`, `ip_address`, `form_type`, `detection_method`, `spam_score`,
-                    `action_taken`, `user_agent`, `request_data`, `reason`, `created_at`
+                    `action_taken`, `user_agent`, `request_data`, `created_at`
              FROM `bbf_captcha_spam_log`
              WHERE `id` > :cursor
              ORDER BY `id` ASC
@@ -144,7 +144,10 @@ class CockpitTelemetryService
     private function mapEvent(object $row, string $pepper, bool $shareIpPrefix): array
     {
         $ip      = (string)($row->ip_address ?? '');
-        $reasons = array_values(array_filter(array_map('trim', explode(';', (string)($row->reason ?? '')))));
+        $reasons = $this->reasonsFromRequestData((string)($row->request_data ?? ''));
+        if ($reasons === [] && !empty($row->detection_method)) {
+            $reasons[] = (string)$row->detection_method;
+        }
 
         [$contentFp, $contentShape, $emailDomain] = $this->deriveContent((string)($row->request_data ?? ''));
 
@@ -167,8 +170,11 @@ class CockpitTelemetryService
         if ($this->shouldSendReviewSnippet((string)$event['action'])) {
             $review = (new CockpitReviewRedactor())->reviewPayloadFromRequestDataJson((string)($row->request_data ?? ''));
             if ($review !== null) {
-                $event['reviewSnippet'] = $review['snippet'];
-                $event['reviewMeta']    = $review['meta'];
+                $event['reviewSnippet']         = $review['snippet'];
+                $event['reviewMeta']            = $review['meta'];
+                $event['reviewDetailAvailable'] = true;
+                $event['reviewDetailRef']       = (string)($row->id ?? '');
+                $event['reviewDetailPath']      = '/bbfdesign-captcha/api/v1/review-preview/{id}';
             }
         }
 
@@ -237,6 +243,21 @@ class CockpitTelemetryService
         $fp = hash('sha256', mb_strtolower(preg_replace('/\s+/u', ' ', $combined) ?? $combined, 'UTF-8'));
 
         return [$fp, $shape, $emailDomain];
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    private function reasonsFromRequestData(string $requestDataJson): array
+    {
+        $data = json_decode($requestDataJson, true);
+        if (!is_array($data) || !isset($data['_bbf_reason']) || !is_string($data['_bbf_reason'])) {
+            return [];
+        }
+        return array_values(array_filter(array_map(
+            static fn (string $reason): string => mb_substr(trim($reason), 0, 300),
+            explode(';', $data['_bbf_reason'])
+        )));
     }
 
     private function caseTransitions(string $text): int
