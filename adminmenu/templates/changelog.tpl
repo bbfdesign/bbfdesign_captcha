@@ -2,6 +2,13 @@
 
 <div class="bbf-card">
     <div style="color: var(--bbf-body-text); line-height: 1.7;">
+        <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.69</h3>
+        <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">11.09.2026 &mdash; Cockpit-Firewall-Policy</p>
+        <ul style="padding-left: 20px; margin-bottom: 24px;">
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">Neu</span> Das Plugin zieht den signierten Cockpit-Firewall-Policy-Snapshot und ersetzt den lokalen Cache vollst&auml;ndig.</li>
+            <li><span class="bbf-badge bbf-badge-warning" style="margin-right: 6px;">Schutz</span> Cockpit-ALLOW schl&auml;gt zentrale Blocks, WATCH bleibt weich, BLOCK wirkt im bestehenden zentralen Sperrpfad.</li>
+        </ul>
+
         <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.68</h3>
         <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">03.09.2026 &mdash; CAPTCHA-Locale dauerhaft abgesichert</p>
         <ul style="padding-left: 20px; margin-bottom: 24px;">

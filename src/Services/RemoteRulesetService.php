@@ -66,6 +66,11 @@ class RemoteRulesetService
         } catch (\Throwable $e) {
             $this->logDebug('pullBlocklist: ' . $e->getMessage());
         }
+        try {
+            $this->pullFirewallPolicy();
+        } catch (\Throwable $e) {
+            $this->logDebug('pullFirewallPolicy: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -100,6 +105,39 @@ class RemoteRulesetService
             return false;
         }
         $this->settings->set('cockpit_blocklist_cache', $body, 'cockpit');
+        return true;
+    }
+
+    /**
+     * Zieht den signierten Full-Snapshot der Cockpit-Firewall-Policy. `replace:true`
+     * bedeutet: der lokale Cache ist exakt diese Antwort; entfernte Cockpit-
+     * Reputationen verschwinden beim nächsten Pull automatisch.
+     */
+    public function pullFirewallPolicy(): bool
+    {
+        $endpoint = rtrim($this->settings->get('cockpit_endpoint'), '/');
+        $secret   = $this->settings->get('cockpit_secret');
+        if ($endpoint === '' || $secret === '') {
+            return false;
+        }
+
+        $rs   = self::cached($this->settings);
+        $path = (isset($rs['firewallPolicyUrl']) && is_string($rs['firewallPolicyUrl']) && $rs['firewallPolicyUrl'] !== '')
+            ? $rs['firewallPolicyUrl'] : '/api/v1/firewall-policy';
+        if ($path === '' || $path[0] !== '/') {
+            $path = '/' . $path;
+        }
+
+        $body = $this->fetchSigned($endpoint . $path, $secret);
+        if ($body === null) {
+            return false;
+        }
+        $policy = json_decode($body, true);
+        if (!is_array($policy) || ($policy['schemaVersion'] ?? null) !== 1 || ($policy['replace'] ?? null) !== true) {
+            $this->logDebug('firewall-policy JSON ungültig – verworfen.');
+            return false;
+        }
+        $this->settings->set('cockpit_firewall_policy_cache', $body, 'cockpit');
         return true;
     }
 
@@ -279,6 +317,57 @@ class RemoteRulesetService
         }
         $data = json_decode($raw, true);
         return is_array($data) ? $data : [];
+    }
+
+    /**
+     * Signierte Cockpit-Firewall-Policy. Nur bei aktiver Integration.
+     *
+     * @return array<string,mixed>
+     */
+    public static function firewallPolicy(Setting $settings): array
+    {
+        if (!$settings->getBool('cockpit_enabled')) {
+            return [];
+        }
+        $raw = $settings->get('cockpit_firewall_policy_cache');
+        if ($raw === '') {
+            return [];
+        }
+        $data = json_decode($raw, true);
+        return is_array($data) ? $data : [];
+    }
+
+    /**
+     * Liefert ALLOW/WATCH/BLOCK für die lokale IP, wenn die signierte Policy einen
+     * passenden ipHash enthält. Fail-safe: bei fehlendem Pepper/Cache/null kein Block.
+     */
+    public static function firewallReputationState(Setting $settings, string $clientIp): ?string
+    {
+        if ($clientIp === '') {
+            return null;
+        }
+        $pepper = $settings->get('cockpit_pepper');
+        if ($pepper === '') {
+            return null;
+        }
+        $policy = self::firewallPolicy($settings);
+        $rep = $policy['reputation'] ?? null;
+        if (!is_array($rep)) {
+            return null;
+        }
+        $hash = hash_hmac('sha256', $clientIp, $pepper);
+        foreach (['allow' => 'ALLOW', 'watch' => 'WATCH', 'block' => 'BLOCK'] as $bucket => $state) {
+            $entries = $rep[$bucket] ?? [];
+            if (!is_array($entries)) {
+                continue;
+            }
+            foreach ($entries as $entry) {
+                if (is_array($entry) && isset($entry['ipHash']) && hash_equals((string)$entry['ipHash'], $hash)) {
+                    return $state;
+                }
+            }
+        }
+        return null;
     }
 
     /**

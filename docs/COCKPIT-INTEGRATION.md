@@ -35,7 +35,11 @@
   `blockedEmailDomains` + `phrases` → `AISpamService::checkRulesetLists` (Phrase ≤ 60).
 - **fail-safe:** Cockpit nicht erreichbar / Signatur ungültig → letztes gültiges
   Ruleset bzw. Defaults bleiben aktiv. Greift nur bei aktiver Cockpit-Integration.
-- `ipBlocklist` → `IPEntry`: **offen** (Folge-Inkrement).
+- `ipBlocklistUrl` wird signiert gezogen und als zentrale Blocklist gecacht.
+- `firewallPolicyUrl` wird signiert gezogen und als Full-Snapshot gecacht:
+  `ALLOW` übersteuert zentrale Blocks, `BLOCK` wirkt als Sperrgrund, `WATCH`
+  blockiert nicht hart. Der Cache wird vollständig ersetzt, damit entfernte
+  Cockpit-Reputationen lokal verschwinden.
 - Damit wirken neue zentrale Erkenntnisse **ohne Plugin-Update**.
 
 ## Settings (Default AUS)
@@ -49,6 +53,7 @@
 | `cockpit_pepper` | auto | serverseitiger HMAC-Pepper für `ipHash` |
 | `cockpit_cursor_id` | `0` | zuletzt gesendete spam_log-id |
 | `cockpit_ruleset_version` | `0` | zuletzt angewandte Ruleset-Version (Inkr. 2) |
+| `cockpit_firewall_policy_cache` | auto | signierter Policy-Full-Snapshot aus dem Cockpit |
 
 Backend-Karte „Zentrale Erkennung (Cockpit)" unter Einstellungen; `cockpit_secret`
 wird wie das ForgePush-/LLM-Secret aus `settingsJson` gefiltert (kein Frontend-Leak).

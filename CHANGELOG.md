@@ -3,6 +3,19 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.69 – 2026-09-11
+
+### Neu: Cockpit-Firewall-Policy
+
+- Das Plugin zieht zusätzlich zur Blocklist den signierten Full-Snapshot
+  `/api/v1/firewall-policy`, wenn das Cockpit diesen im Ruleset anbietet.
+- `ALLOW`-Reputation aus dem Cockpit übersteuert lokale zentrale Blocks und
+  schützt echte Kunden vor False Positives.
+- `BLOCK`-Reputation wirkt im bestehenden zentralen Blocklist-Pfad als
+  Sperrgrund; `WATCH` bleibt weich und blockiert nicht hart.
+- Die Policy wird vollständig ersetzt gecacht, damit im Cockpit entfernte
+  Quellen beim nächsten Pull auch lokal verschwinden.
+
 ## 1.0.68 – 2026-09-03
 
 ### QA: CAPTCHA-Locale dauerhaft abgesichert

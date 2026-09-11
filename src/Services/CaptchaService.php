@@ -255,6 +255,14 @@ class CaptchaService
      */
     private function centralBlocklistReason(string $clientIp, ?string $email): ?string
     {
+        $policyState = RemoteRulesetService::firewallReputationState($this->settings, $clientIp);
+        if ($policyState === 'ALLOW') {
+            return null;
+        }
+        if ($policyState === 'BLOCK') {
+            return 'Cockpit-Firewall-Policy (Quelle gesperrt)';
+        }
+
         $bl = RemoteRulesetService::blocklist($this->settings);
         if ($bl === []) {
             return null;
