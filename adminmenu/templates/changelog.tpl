@@ -2,6 +2,14 @@
 
 <div class="bbf-card">
     <div style="color: var(--bbf-body-text); line-height: 1.7;">
+        <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.71</h3>
+        <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">11.09.2026 &mdash; Login/Admin-Firewall im Monitor-Modus</p>
+        <ul style="padding-left: 20px; margin-bottom: 24px;">
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">Neu</span> Login-, Passwort-Reset-, WordPress-Admin- und JTL-Admin-Wiederholungen werden lokal gez&auml;hlt und als Cockpit-Firewall-Signal sichtbar.</li>
+            <li><span class="bbf-badge bbf-badge-warning" style="margin-right: 6px;">Schutz</span> Backend-Schalter f&uuml;r Aus, Monitor und Scharf; Standard bleibt Monitor, harte Sperren brauchen explizite Aktivierung.</li>
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">Fail-open</span> Policy-/Persistenzfehler blockieren keine echten Logins.</li>
+        </ul>
+
         <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.70</h3>
         <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">11.09.2026 &mdash; Cockpit-WATCH f&uuml;r Login/Admin</p>
         <ul style="padding-left: 20px; margin-bottom: 24px;">

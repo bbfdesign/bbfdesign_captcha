@@ -3,6 +3,20 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.71 – 2026-09-11
+
+### Neu: Login/Admin-Firewall im Monitor-Modus
+
+- Neue Cockpit-gesteuerte Auth-Firewall für Login, Passwort-Reset, WordPress-
+  Admin- und JTL-Admin-Flächen: Wiederholungen werden lokal gezählt und als
+  nachvollziehbares Signal geloggt.
+- Der Modus ist im Backend steuerbar (`Aus`, `Monitor`, `Scharf`). Standard ist
+  `Monitor`, damit echte Nutzer nicht versehentlich ausgesperrt werden.
+- Im Modus `Scharf` setzt das Plugin nach dem Grenzwert eine temporäre IP-Sperre;
+  Cockpit-Policy-Werte werden nur innerhalb sicherer Grenzen übernommen.
+- Alles bleibt fail-open: Policy-/Persistenzfehler blockieren keine echten
+  Logins.
+
 ## 1.0.70 – 2026-09-11
 
 ### Verbessert: Cockpit-WATCH für Login/Admin

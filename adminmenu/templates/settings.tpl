@@ -263,6 +263,36 @@
                 <span class="bbf-toggle-slider"></span>
             </label>
         </div>
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">
+                Login/Admin-Firewall
+                <div class="bbf-form-help">Z&auml;hlt Login-, Passwort-Reset-, WordPress-Admin- und JTL-Admin-Wiederholungen lokal und nutzt Cockpit-WATCH als Zusatzsignal. <strong>Monitor</strong> protokolliert nur; <strong>Scharf</strong> setzt nach dem Grenzwert eine tempor&auml;re IP-Sperre. Default: Monitor.</div>
+            </label>
+            <select class="bbf-input bbf-select" style="max-width: 180px;" {literal}x-model="s.cockpit_auth_firewall_mode"{/literal}>
+                <option value="off">Aus</option>
+                <option value="monitor">Monitor</option>
+                <option value="enforce">Scharf</option>
+            </select>
+        </div>
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">
+                Login/Admin-Grenzwert
+                <div class="bbf-form-help">Maximale Versuche pro IP und Schutzfenster. Cockpit-Policy kann die Werte zentral innerhalb sicherer Grenzen vorgeben.</div>
+            </label>
+            <div style="display:flex; gap: 8px; flex-wrap: wrap; align-items:center;">
+                <input type="number" class="bbf-input" style="max-width: 90px;" min="3" max="100" {literal}x-model="s.cockpit_auth_firewall_max_attempts"{/literal}>
+                <span class="bbf-form-help" style="margin:0;">Versuche in</span>
+                <input type="number" class="bbf-input" style="max-width: 100px;" min="60" max="3600" step="60" {literal}x-model="s.cockpit_auth_firewall_window_seconds"{/literal}>
+                <span class="bbf-form-help" style="margin:0;">Sekunden</span>
+            </div>
+        </div>
+        <div class="bbf-form-grid" style="margin-bottom: var(--bbf-spacing-md);">
+            <label class="bbf-form-label">
+                Login/Admin-Sperrdauer
+                <div class="bbf-form-help">Nur im Modus <strong>Scharf</strong>: Dauer der tempor&auml;ren IP-Sperre nach &Uuml;berschreitung.</div>
+            </label>
+            <input type="number" class="bbf-input" style="max-width: 120px;" min="60" max="86400" step="60" {literal}x-model="s.cockpit_auth_firewall_lockout_seconds"{/literal}>
+        </div>
 
         {* CAP-08: AVV-/Datenschutz-Bestätigung – Pflicht zum Aktivieren. Beim
            nicht verbundenen Shop steht sie oben in Schritt 2, hier nur danach. *}
@@ -437,6 +467,10 @@ if (typeof Alpine !== 'undefined' && Alpine.data) {
                 cockpit_secret: '',
                 cockpit_share_ip_prefix: sv.cockpit_share_ip_prefix === '1',
                 cockpit_review_enabled: sv.cockpit_review_enabled === '1',
+                cockpit_auth_firewall_mode: sv.cockpit_auth_firewall_mode || 'monitor',
+                cockpit_auth_firewall_max_attempts: sv.cockpit_auth_firewall_max_attempts || 8,
+                cockpit_auth_firewall_window_seconds: sv.cockpit_auth_firewall_window_seconds || 300,
+                cockpit_auth_firewall_lockout_seconds: sv.cockpit_auth_firewall_lockout_seconds || 900,
                 cockpit_avv_confirmed: false,
                 altcha_hmac_key: ''
             },

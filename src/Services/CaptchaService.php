@@ -34,6 +34,7 @@ class CaptchaService
     private ?AISpamService $aiSpam = null;
     private ?RateLimitService $rateLimit = null;
     private ?BotDetectorService $botDetector = null;
+    private ?AuthFirewallService $authFirewall = null;
 
     public function __construct(PluginInterface $plugin, ?DbInterface $db = null, ?Setting $settings = null)
     {
@@ -441,20 +442,29 @@ class CaptchaService
             }
         }
 
-        // Cockpit-WATCH ist ein weiches Signal: bei Login/Admin erhöhen wir die
-        // Vorsicht, aber erzwingen keinen harten Block außerhalb der bestehenden
-        // Formular-Konfiguration.
+        // Cockpit-Auth-Firewall: Login/Admin lokal zaehlen und Policy-WATCH als
+        // weiches Signal nutzen. Default bleibt Monitor; harte Sperren brauchen
+        // ein explizites Plugin-Setting und bleiben fail-open bei Fehlern.
         if ($this->settings->getBool('cockpit_enabled') && $this->isLoginSurface($formType)) {
             try {
-                if ($this->centralPolicyState($clientIp) === 'WATCH') {
-                    $totalScore += 25;
-                    $reasons[]   = 'Cockpit-Firewall-Policy: Quelle unter Beobachtung';
+                $policyState = $this->centralPolicyState($clientIp);
+                $authResult  = $this->getAuthFirewall()->inspect($clientIp, $formType, $policyState);
+                if ($authResult['score'] > 0) {
+                    $totalScore += $authResult['score'];
+                    if ($authResult['reason'] !== '') {
+                        $reasons[] = $authResult['reason'];
+                    }
                     if (empty($detectionMethod)) {
-                        $detectionMethod = 'cockpit_policy_watch';
+                        $detectionMethod = 'auth_firewall';
                     }
                 }
+                if ($authResult['shouldBlock']) {
+                    $reason = $authResult['reason'] !== '' ? $authResult['reason'] : 'Auth-Firewall: Login/Admin temporaer gesperrt';
+                    $this->logSpam($clientIp, $formType, 'auth_firewall', max(100, $totalScore), 'blocked', $postData, $reason);
+                    return new ValidationResult(false, max(100, $totalScore), $reason);
+                }
             } catch (\Throwable) {
-                // fail-open: Policy-Fehler dürfen Login nicht blockieren
+                // fail-open: Auth-Firewall-Fehler duerfen Login nicht blockieren
             }
         }
 
@@ -798,6 +808,14 @@ class CaptchaService
             $this->botDetector = new BotDetectorService($this->settings);
         }
         return $this->botDetector;
+    }
+
+    private function getAuthFirewall(): AuthFirewallService
+    {
+        if ($this->authFirewall === null) {
+            $this->authFirewall = new AuthFirewallService($this->db, $this->settings);
+        }
+        return $this->authFirewall;
     }
 
     /**

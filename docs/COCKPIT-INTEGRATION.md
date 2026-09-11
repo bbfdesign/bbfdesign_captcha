@@ -24,7 +24,7 @@
   vorgerückt (Retry beim nächsten Lauf). Läuft gedrosselt über den nativen Cron.
 - Gated: nur wenn `cockpit_enabled` + `cockpit_endpoint` + `cockpit_secret` gesetzt.
 
-### 2. `RemoteRulesetService` (umgesetzt, Inkrement 2 – v1.0.49)
+### 2. `RemoteRulesetService` (umgesetzt, Inkrement 2 – v1.0.49, Firewall-Policy v1.0.69)
 - `GET {endpoint}/api/v1/ruleset?since=<v>`; Integrität per HMAC verifiziert
   (Header `X-Ruleset-Signature` über den Rohbody, Shop-Secret); lokal gecacht;
   gedrosselt (stündlich) im Boot-/Cron-Pfad.
@@ -46,6 +46,22 @@
   verschärft.
 - Damit wirken neue zentrale Erkenntnisse **ohne Plugin-Update**.
 
+### 3. `AuthFirewallService` (umgesetzt – v1.0.71)
+- Zählt Login-, Passwort-Reset-, WordPress-Admin- und JTL-Admin-Versuche lokal
+  in `bbf_captcha_rate_limits` mit getrennten `authfw:*`-Keys.
+- Standardmodus ist `monitor`: Wiederholungsmuster und Cockpit-WATCH werden
+  gescored und ab Schwelle als Log sichtbar, blockieren aber echte Logins nicht.
+- Modus `enforce` ist ein bewusstes Betreiber-Setting im Backend. Erst dann setzt
+  das Plugin nach Grenzwertüberschreitung eine temporäre IP-Sperre via
+  `IPEntry::autoBlock`.
+- Grenzwerte aus der signierten Cockpit-Firewall-Policy werden innerhalb harter
+  Sicherheitsklammern übernommen:
+  - Versuche: 3..100
+  - Zeitfenster: 60..3600 Sekunden
+  - Sperrdauer: 60..86400 Sekunden
+- Fail-open: Fehler in Policy, Counter oder Persistenz dürfen keinen Login
+  blockieren.
+
 ## Settings (Default AUS)
 | Key | Default | Zweck |
 |---|---|---|
@@ -54,6 +70,10 @@
 | `cockpit_secret` | `''` | Shared-Secret (write-only, nie ins Frontend) |
 | `cockpit_share_ip_prefix` | `0` | opt-in: zusätzlich anonymisiertes /24-/48-Prefix senden |
 | `cockpit_review_enabled` | `0` | opt-in: redigierte Review-Vorschau für Quarantäne-Listen senden |
+| `cockpit_auth_firewall_mode` | `monitor` | Login/Admin-Firewall: `off`, `monitor`, `enforce` |
+| `cockpit_auth_firewall_max_attempts` | `8` | lokaler Fallback-Grenzwert für Login/Admin-Versuche |
+| `cockpit_auth_firewall_window_seconds` | `300` | lokales Fallback-Zeitfenster für Login/Admin-Firewall |
+| `cockpit_auth_firewall_lockout_seconds` | `900` | lokale Fallback-Sperrdauer im Modus `enforce` |
 | `cockpit_pepper` | auto | serverseitiger HMAC-Pepper für `ipHash` |
 | `cockpit_cursor_id` | `0` | zuletzt gesendete spam_log-id |
 | `cockpit_ruleset_version` | `0` | zuletzt angewandte Ruleset-Version (Inkr. 2) |
@@ -77,3 +97,7 @@ Der Review-Modus ist separat opt-in: Dedizierte Namens-, E-Mail-, Telefon-,
 Adress-, Token- und Passwortfelder werden nicht übernommen; typische PII-Muster
 werden maskiert. Details und Cockpit-Anforderungen siehe
 `docs/cockpit-review-workflow-2026-08-21.md`.
+
+Die Login/Admin-Firewall überträgt keine zusätzlichen Klartextdaten ans Cockpit.
+Die Wiederholungszählung bleibt lokal im Shop; zentral wirken nur pseudonyme
+Policy-Buckets (`ALLOW`, `WATCH`, `BLOCK`) und bereits bestehende Telemetrie.
