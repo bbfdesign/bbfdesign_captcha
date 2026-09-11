@@ -3,6 +3,15 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.70 – 2026-09-11
+
+### Verbessert: Cockpit-WATCH für Login/Admin
+
+- `WATCH`-Reputation aus der Cockpit-Firewall-Policy wirkt bei Login/Admin als
+  weiches Risikosignal mit zusätzlichem Score und nachvollziehbarem Log-Grund.
+- Kontakt-/Lead-Formulare werden dadurch nicht verschärft.
+- Policy-Fehler bleiben fail-open und können echte Nutzer nicht aussperren.
+
 ## 1.0.69 – 2026-09-11
 
 ### Neu: Cockpit-Firewall-Policy

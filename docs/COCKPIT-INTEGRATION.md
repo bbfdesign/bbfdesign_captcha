@@ -40,6 +40,10 @@
   `ALLOW` übersteuert zentrale Blocks, `BLOCK` wirkt als Sperrgrund, `WATCH`
   blockiert nicht hart. Der Cache wird vollständig ersetzt, damit entfernte
   Cockpit-Reputationen lokal verschwinden.
+- Bei Login-/Admin-Flächen (`login`, `password_reset`, `wp_login`, `wp_admin`,
+  `jtl_admin`) erhöht `WATCH` den lokalen Score weich und erzeugt einen
+  nachvollziehbaren Log-Grund. Kontakt-/Lead-Formulare werden dadurch nicht
+  verschärft.
 - Damit wirken neue zentrale Erkenntnisse **ohne Plugin-Update**.
 
 ## Settings (Default AUS)

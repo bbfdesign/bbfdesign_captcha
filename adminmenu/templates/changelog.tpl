@@ -2,6 +2,13 @@
 
 <div class="bbf-card">
     <div style="color: var(--bbf-body-text); line-height: 1.7;">
+        <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.70</h3>
+        <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">11.09.2026 &mdash; Cockpit-WATCH f&uuml;r Login/Admin</p>
+        <ul style="padding-left: 20px; margin-bottom: 24px;">
+            <li><span class="bbf-badge bbf-badge-warning" style="margin-right: 6px;">Schutz</span> WATCH-Reputation aus dem Cockpit erh&ouml;ht bei Login/Admin weich den Score und macht Angriffe im Log sichtbar.</li>
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">Fail-open</span> Kontakt-/Lead-Formulare werden dadurch nicht versch&auml;rft; Policy-Fehler blockieren keine echten Nutzer.</li>
+        </ul>
+
         <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.69</h3>
         <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">11.09.2026 &mdash; Cockpit-Firewall-Policy</p>
         <ul style="padding-left: 20px; margin-bottom: 24px;">

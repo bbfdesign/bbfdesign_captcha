@@ -303,6 +303,16 @@ class CaptchaService
         return null;
     }
 
+    private function centralPolicyState(string $clientIp): ?string
+    {
+        return RemoteRulesetService::firewallReputationState($this->settings, $clientIp);
+    }
+
+    private function isLoginSurface(string $formType): bool
+    {
+        return in_array($formType, ['login', 'password_reset', 'wp_login', 'wp_admin', 'jtl_admin'], true);
+    }
+
     /** IPv4/IPv6 CIDR-Containment (binär, ohne Annahmen). */
     private function ipInCidr(string $ip, string $cidr): bool
     {
@@ -428,6 +438,23 @@ class CaptchaService
                 }
             } catch (\Throwable $e) {
                 // fail-safe: zentrale Blocklist darf bei Fehler nichts blockieren
+            }
+        }
+
+        // Cockpit-WATCH ist ein weiches Signal: bei Login/Admin erhöhen wir die
+        // Vorsicht, aber erzwingen keinen harten Block außerhalb der bestehenden
+        // Formular-Konfiguration.
+        if ($this->settings->getBool('cockpit_enabled') && $this->isLoginSurface($formType)) {
+            try {
+                if ($this->centralPolicyState($clientIp) === 'WATCH') {
+                    $totalScore += 25;
+                    $reasons[]   = 'Cockpit-Firewall-Policy: Quelle unter Beobachtung';
+                    if (empty($detectionMethod)) {
+                        $detectionMethod = 'cockpit_policy_watch';
+                    }
+                }
+            } catch (\Throwable) {
+                // fail-open: Policy-Fehler dürfen Login nicht blockieren
             }
         }
 
