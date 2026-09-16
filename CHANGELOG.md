@@ -3,6 +3,19 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.73 – 2026-09-16
+
+### Performance: Frontend-Assets nur bei sichtbarem CAPTCHA
+
+- Die Frontend-Assets werden nicht mehr auf jeder Seite mit irgendeinem Formular
+  ausgeliefert. Honeypot und Timing laufen weiter ohne JavaScript; CSS, App-JS
+  und das größere `altcha.min.js` werden nur noch bei sichtbarem oder vorgemerktem
+  CAPTCHA-Widget geladen.
+- Der theme-unabhängige ALTCHA-Injektionspfad bleibt funktionsfähig: vorgemerkte
+  Widgets erzwingen weiterhin das Laden der benötigten Assets.
+- Die Entwicklungssteuerung prüft künftig Plain-Form-Seiten, sichtbare Widgets,
+  vorgemerkte ALTCHA-Widgets und Gzip-Größenbudgets der Frontend-Dateien.
+
 ## 1.0.72 – 2026-09-11
 
 ### Neu: Signierter Cockpit-Remote-Review

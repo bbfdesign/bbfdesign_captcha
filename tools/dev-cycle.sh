@@ -24,7 +24,7 @@ Usage:
   tools/dev-cycle.sh [--expected-version X.Y.Z] [--push] [--smoke]
 
 Standard:
-  Lokale Checks: Versionsabgleich, PHP-Lint, Locale-Sanity, Secret-Scan, Asset-/Template-Sanity.
+  Lokale Checks: Versionsabgleich, PHP-Lint, Locale-Sanity, Frontend-Asset-Performance, Secret-Scan, Asset-/Template-Sanity.
   Keine Git-Aktion.
 
 Optionen:
@@ -146,6 +146,54 @@ PHP
   fi
 
   ok "CAPTCHA-Locale-Sanity"
+}
+
+frontend_asset_performance_sanity() {
+  php <<'PHP'
+<?php
+declare(strict_types=1);
+
+require 'src/Hooks/SmartyOutputFilter.php';
+require 'src/Hooks/IncludeAssets.php';
+
+use Plugin\bbfdesign_captcha\src\Hooks\IncludeAssets;
+use Plugin\bbfdesign_captcha\src\Hooks\SmartyOutputFilter;
+
+$ref = new ReflectionClass(IncludeAssets::class);
+$hook = $ref->newInstanceWithoutConstructor();
+$contains = $ref->getMethod('containsCaptchaWidget');
+
+SmartyOutputFilter::$pendingAltchaWidgets = [];
+$plainForm = '<html><head></head><body><form method="post"><input name="q"></form></body></html>';
+if ($contains->invoke($hook, $plainForm) !== false) {
+    fwrite(STDERR, "Plain form page would load CAPTCHA frontend assets.\n");
+    exit(1);
+}
+
+$visibleWidget = '<html><head></head><body><form><div class="bbf-captcha-widget"></div></form></body></html>';
+if ($contains->invoke($hook, $visibleWidget) !== true) {
+    fwrite(STDERR, "Visible CAPTCHA widget would not load frontend assets.\n");
+    exit(1);
+}
+
+SmartyOutputFilter::$pendingAltchaWidgets = ['contact' => '<altcha-widget></altcha-widget>'];
+if ($contains->invoke($hook, $plainForm) !== true) {
+    fwrite(STDERR, "Pending theme-independent ALTCHA widget would not load frontend assets.\n");
+    exit(1);
+}
+SmartyOutputFilter::$pendingAltchaWidgets = [];
+PHP
+
+  local altcha_gzip app_gzip css_gzip
+  altcha_gzip="$(gzip -c frontend/js/vendor/altcha.min.js | wc -c | tr -d '[:space:]')"
+  app_gzip="$(gzip -c frontend/js/bbfdesign-captcha.js | wc -c | tr -d '[:space:]')"
+  css_gzip="$(gzip -c frontend/css/bbfdesign-captcha.css | wc -c | tr -d '[:space:]')"
+
+  (( altcha_gzip <= 26000 )) || fail "ALTCHA-Gzip-Groesse zu hoch: ${altcha_gzip} Bytes."
+  (( app_gzip <= 4000 )) || fail "Frontend-JS-Gzip-Groesse zu hoch: ${app_gzip} Bytes."
+  (( css_gzip <= 2500 )) || fail "Frontend-CSS-Gzip-Groesse zu hoch: ${css_gzip} Bytes."
+
+  ok "Frontend-Asset-Performance"
 }
 
 # Kernschärfung dieses Plugins: Provider-Secrets (reCAPTCHA/hCaptcha/Turnstile/
@@ -277,6 +325,9 @@ php_lint
 
 section "CAPTCHA-Locale-Sanity"
 captcha_locale_sanity
+
+section "Frontend-Asset-Performance"
+frontend_asset_performance_sanity
 
 section "Secret-Scan"
 secret_scan

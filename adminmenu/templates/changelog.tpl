@@ -2,6 +2,14 @@
 
 <div class="bbf-card">
     <div style="color: var(--bbf-body-text); line-height: 1.7;">
+        <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.73</h3>
+        <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">16.09.2026 &mdash; Frontend-Assets nur bei sichtbarem CAPTCHA</p>
+        <ul style="padding-left: 20px; margin-bottom: 24px;">
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">Performance</span> CSS, App-JS und `altcha.min.js` werden nicht mehr auf reinen Formularseiten ohne CAPTCHA-Widget ausgeliefert.</li>
+            <li><span class="bbf-badge bbf-badge-warning" style="margin-right: 6px;">Schutz</span> Vorgemerkte theme-unabh&auml;ngige ALTCHA-Widgets laden weiterhin die ben&ouml;tigten Assets.</li>
+            <li><span class="bbf-badge bbf-badge-info" style="margin-right: 6px;">QA</span> Neues Gate pr&uuml;ft Plain-Form-Seiten, sichtbare Widgets, vorgemerkte Widgets und Gzip-Gr&ouml;&szlig;enbudgets.</li>
+        </ul>
+
         <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.72</h3>
         <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">11.09.2026 &mdash; Signierter Cockpit-Remote-Review</p>
         <ul style="padding-left: 20px; margin-bottom: 24px;">

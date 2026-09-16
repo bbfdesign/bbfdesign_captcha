@@ -38,8 +38,12 @@ class IncludeAssets
             return $html;
         }
 
-        // Prüfe ob die Seite ein <form> enthält
-        if (stripos($html, '<form') === false) {
+        // Honeypot und Timing sind reine Hidden Fields und benötigen kein
+        // Frontend-JavaScript. Die Assets nur ausliefern, wenn auf der Seite
+        // wirklich ein sichtbares Captcha-Widget gerendert wurde. Praktisch jede
+        // Shopseite enthält Such-/Warenkorbformulare; die frühere Form-Prüfung
+        // lud deshalb ALTCHA samt CSS auf jeder einzelnen Seite.
+        if (!$this->containsCaptchaWidget($html)) {
             return $html;
         }
 
@@ -68,8 +72,7 @@ class IncludeAssets
         if (!$this->settings->getBool('global_enabled')) {
             return;
         }
-        $forms = $doc->find('form');
-        if ($forms->count() === 0) {
+        if (!$this->documentContainsCaptchaWidget($doc)) {
             return;
         }
         $assets = $this->buildAssets();
@@ -80,8 +83,28 @@ class IncludeAssets
         if ($head->count() > 0) {
             $head->append($assets);
         } else {
-            $forms->eq(0)->before($assets);
+            $doc->find('body')->eq(0)->prepend($assets);
         }
+    }
+
+    private function containsCaptchaWidget(string $html): bool
+    {
+        if (!empty(SmartyOutputFilter::$pendingAltchaWidgets)) {
+            return true;
+        }
+
+        return stripos($html, '<altcha-widget') !== false
+            || stripos($html, 'bbf-captcha-widget') !== false
+            || stripos($html, 'data-bbf-captcha') !== false;
+    }
+
+    private function documentContainsCaptchaWidget(object $doc): bool
+    {
+        if (!empty(SmartyOutputFilter::$pendingAltchaWidgets)) {
+            return true;
+        }
+
+        return $doc->find('altcha-widget, .bbf-captcha-widget, [data-bbf-captcha]')->count() > 0;
     }
 
     /**
