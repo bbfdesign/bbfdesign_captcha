@@ -17,6 +17,7 @@ SMOKE_URL="${BBF_CAPTCHA_SMOKE_URL:-}"
 EXPECTED_ORIGIN="${BBF_CAPTCHA_ORIGIN_URL:-forgejo-bbfdesign:biggitboss/bbfdesign_captcha.git}"
 REF_REMOTE="${BBF_CAPTCHA_REF_REMOTE:-origin}"
 REF_BRANCH="${BBF_CAPTCHA_REF_BRANCH:-main}"
+SHOP58_PATH="${BBF_CAPTCHA_SHOP58_PATH:-/Users/bjornalexanderbiner/Downloads/shop-v5-8-0 2}"
 
 usage() {
   cat <<'USAGE'
@@ -24,7 +25,7 @@ Usage:
   tools/dev-cycle.sh [--expected-version X.Y.Z] [--push] [--smoke]
 
 Standard:
-  Lokale Checks: Versionsabgleich, PHP-Lint, Locale-Sanity, Frontend-Asset-Performance, Secret-Scan, Asset-/Template-Sanity.
+  Lokale Checks: Versionsabgleich, PHP-Lint, Locale-Sanity, Frontend-Asset-Performance, JTL-5.8-Kompatibilität, Secret-Scan, Asset-/Template-Sanity.
   Keine Git-Aktion.
 
 Optionen:
@@ -37,6 +38,7 @@ Env:
   BBF_CAPTCHA_REF_BRANCH    Standard: main
   BBF_CAPTCHA_ORIGIN_URL    Standard: Forgejo-Remote (SSH-Alias forgejo-bbfdesign)
   BBF_CAPTCHA_SMOKE_URL     Shop-URL einer Seite mit geschütztem Formular (z. B. Kontakt/Login)
+  BBF_CAPTCHA_SHOP58_PATH   Lokaler JTL-Shop-5.8-Quellcode für Hook-Kompatibilitätsgate
 USAGE
 }
 
@@ -196,6 +198,84 @@ PHP
   ok "Frontend-Asset-Performance"
 }
 
+jtl_shop58_compat_sanity() {
+  if [[ ! -d "$SHOP58_PATH" ]]; then
+    printf 'SKIP: JTL-Shop-5.8-Kompatibilität — Quelle nicht gefunden: %s\n' "$SHOP58_PATH"
+    return 0
+  fi
+
+  SHOP58_PATH="$SHOP58_PATH" php <<'PHP'
+<?php
+declare(strict_types=1);
+
+$root = getenv('SHOP58_PATH') ?: '';
+$files = [
+    'hooks' => $root . '/includes/hooks_inc.php',
+    'smarty' => $root . '/includes/src/Smarty/JTLSmarty.php',
+    'contact' => $root . '/includes/src/Router/Controller/ContactController.php',
+    'registration' => $root . '/includes/src/Router/Controller/RegistrationController.php',
+    'review' => $root . '/includes/src/Router/Controller/ReviewController.php',
+];
+
+foreach ($files as $label => $file) {
+    if (!is_file($file)) {
+        fwrite(STDERR, "JTL-5.8-Datei fehlt ({$label}): {$file}\n");
+        exit(1);
+    }
+}
+
+$hooks = file_get_contents($files['hooks']) ?: '';
+$expectedHooks = [
+    'HOOK_SMARTY_OUTPUTFILTER' => 140,
+    'HOOK_KONTAKT_PAGE' => 29,
+    'HOOK_KONTAKT_PAGE_PLAUSI' => 30,
+    'HOOK_REGISTRIEREN_PAGE' => 40,
+    'HOOK_REGISTRIEREN_PAGE_REGISTRIEREN_PLAUSI' => 41,
+    'HOOK_NEWSLETTER_PAGE' => 36,
+    'HOOK_BEWERTUNG_INC_SPEICHERBEWERTUNG' => 78,
+    'HOOK_BESTELLVORGANG_PAGE' => 19,
+];
+
+foreach ($expectedHooks as $name => $value) {
+    $pattern = '/const\s+' . preg_quote($name, '/') . '\s*=\s*' . $value . '\s*;/';
+    if (!preg_match($pattern, $hooks)) {
+        fwrite(STDERR, "JTL-5.8-Hook fehlt oder hat unerwarteten Wert: {$name}={$value}\n");
+        exit(1);
+    }
+}
+
+$smarty = file_get_contents($files['smarty']) ?: '';
+foreach (['HOOK_SMARTY_OUTPUTFILTER', 'newDocumentHTML', "'document' => \$doc"] as $needle) {
+    if (!str_contains($smarty, $needle)) {
+        fwrite(STDERR, "JTL-5.8-Smarty-Vertrag fehlt: {$needle}\n");
+        exit(1);
+    }
+}
+
+$contact = file_get_contents($files['contact']) ?: '';
+foreach (['HOOK_KONTAKT_PAGE', 'HOOK_KONTAKT_PAGE_PLAUSI', 'Form::honeypotWasFilledOut($_POST)', 'Form::editMessage()'] as $needle) {
+    if (!str_contains($contact, $needle)) {
+        fwrite(STDERR, "JTL-5.8-Kontaktvertrag fehlt: {$needle}\n");
+        exit(1);
+    }
+}
+
+$registration = file_get_contents($files['registration']) ?: '';
+if (!str_contains($registration, 'HOOK_REGISTRIEREN_PAGE_REGISTRIEREN_PLAUSI')) {
+    fwrite(STDERR, "JTL-5.8-Registrierungsvertrag fehlt.\n");
+    exit(1);
+}
+
+$review = file_get_contents($files['review']) ?: '';
+if (!str_contains($review, 'HOOK_BEWERTUNG_INC_SPEICHERBEWERTUNG')) {
+    fwrite(STDERR, "JTL-5.8-Bewertungsvertrag fehlt.\n");
+    exit(1);
+}
+PHP
+
+  ok "JTL-Shop-5.8-Kompatibilität"
+}
+
 # Kernschärfung dieses Plugins: Provider-Secrets (reCAPTCHA/hCaptcha/Turnstile/
 # Friendly/Altcha) und LLM-/API-Schlüssel dürfen niemals in browserseitig
 # ausgelieferten Dateien landen. Sitekeys sind öffentlich und daher erlaubt.
@@ -328,6 +408,9 @@ captcha_locale_sanity
 
 section "Frontend-Asset-Performance"
 frontend_asset_performance_sanity
+
+section "JTL-Shop-5.8-Kompatibilität"
+jtl_shop58_compat_sanity
 
 section "Secret-Scan"
 secret_scan

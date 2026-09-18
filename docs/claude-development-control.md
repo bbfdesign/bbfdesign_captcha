@@ -189,9 +189,11 @@ Diese Punkte sind für den Autopilot abschließend entschieden:
    Akzent für Status/Badges erhalten. Volle Übernahme der `--bbf-ui-*`-Token-
    Architektur.
 2. **MinShopVersion = 5.5.0** (korrigiert am 2026-06-09 von 5.2.0). Gegen echten
-   5.7.1-Quellcode verifiziert kompatibel; PHP-8.0-Syntax → abwärtskompatibel bis
-   JTL 5.5. 5.2.0 war falsch (PHP 7.4 fehlen `str_contains` & Hook 400). Primäres
-   Testziel **5.7.1**. Details: `docs/compat/compatibility-jtl-5.x.md`.
+   5.8.0-Quellcode verifiziert kompatibel; 5.7.x bleibt über denselben Hook-/
+   SDK-Vertrag unterstützt. PHP-8.0-Syntax → abwärtskompatibel bis JTL 5.5.
+   5.2.0 war falsch (PHP 7.4 fehlen `str_contains` & Hook 400). Primäres
+   Testziel **5.8.0**, 5.7 darf nicht gebrochen werden. Details:
+   `docs/compat/compatibility-jtl-5.x.md`.
 3. **Phase-4-Anbieter-Reihenfolge:** zuerst Produktberater (`bbf_productadvisor`),
    dann AI Concierge, dann Suche. Alle guarded via Feature-Detection, nie harte
    Abhängigkeit.

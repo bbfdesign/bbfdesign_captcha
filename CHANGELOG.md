@@ -3,6 +3,20 @@
 Alle nennenswerten Änderungen an BBF Captcha. Format an [Keep a Changelog]
 angelehnt; Versionierung nach SemVer (Pflicht-Gate der Entwicklungssteuerung).
 
+## 1.0.74 – 2026-09-18
+
+### Kompatibilität: JTL Shop 5.8.0 geprüft
+
+- Die Plugin-Verträge wurden gegen den lokalen JTL-Shop-5.8.0-Quellstand
+  (`/Users/bjornalexanderbiner/Downloads/shop-v5-8-0 2`) geprüft: Smarty-
+  Outputfilter mit phpQuery-Dokument, Kontakt-Plausibilisierung, Registrierung,
+  Newsletter, Bewertung und Checkout-Hook bleiben kompatibel.
+- JTL Shop 5.7 bleibt unterstützt; `MinShopVersion` bleibt bewusst bei 5.5.0,
+  weil keine PHP- oder Hook-Anhebung nötig ist.
+- Die Entwicklungssteuerung enthält jetzt ein skip-sicheres JTL-5.8-Gate über
+  `BBF_CAPTCHA_SHOP58_PATH`, damit künftige Änderungen den Shop-5.8-Vertrag
+  automatisch mitprüfen.
+
 ## 1.0.73 – 2026-09-16
 
 ### Performance: Frontend-Assets nur bei sichtbarem CAPTCHA

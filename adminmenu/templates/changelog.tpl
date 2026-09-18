@@ -2,6 +2,14 @@
 
 <div class="bbf-card">
     <div style="color: var(--bbf-body-text); line-height: 1.7;">
+        <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.74</h3>
+        <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">18.09.2026 &mdash; JTL Shop 5.8.0 kompatibel</p>
+        <ul style="padding-left: 20px; margin-bottom: 24px;">
+            <li><span class="bbf-badge bbf-badge-success" style="margin-right: 6px;">Kompatibilit&auml;t</span> Hook-Vertr&auml;ge f&uuml;r Smarty-Outputfilter, Kontakt, Registrierung, Newsletter, Bewertung und Checkout gegen JTL Shop 5.8.0 gepr&uuml;ft.</li>
+            <li><span class="bbf-badge bbf-badge-warning" style="margin-right: 6px;">Stabilit&auml;t</span> JTL Shop 5.7 bleibt unterst&uuml;tzt; die Mindestversion bleibt unver&auml;ndert bei 5.5.0.</li>
+            <li><span class="bbf-badge bbf-badge-info" style="margin-right: 6px;">QA</span> Die Entwicklungssteuerung enth&auml;lt jetzt ein JTL-5.8-Kompatibilit&auml;tsgate mit optionalem Quellpfad.</li>
+        </ul>
+
         <h3 style="color: var(--bbf-primary); font-size: 18px; margin-bottom: 8px;">Version 1.0.73</h3>
         <p style="color: var(--bbf-muted); font-size: 13px; margin-bottom: 12px;">16.09.2026 &mdash; Frontend-Assets nur bei sichtbarem CAPTCHA</p>
         <ul style="padding-left: 20px; margin-bottom: 24px;">
